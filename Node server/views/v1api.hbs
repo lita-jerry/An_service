@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>v1 api test tool</title>
+</head>
+<body>
+
+  微信小程序登录Code: <input type="text" name="code" id="code"> <br/>
+  昵称: <input type="text" name="nickname" id="nickname"> <br/>
+  头像URL: <input type="text" name="avatarurl" id="avatarurl"> <br/>
+  登录Session: <input type="text" name="session" id="session"> <br/>
+  <br/>
+  行程订单编号: <input type="text" name="trip_ordernumber" id="trip_ordernumber"> <br/>
+  行程目的地: <input type="text" name="trip_destination" id="trip_destination"> <br/>
+  行程交通工具: <input type="text" name="trip_tool" id="trip_tool"> <br/>
+  行程当前状态: <input type="text" name="trip_state" id="trip_state"> <br/>
+
+  requireURL: <br/>
+  <a id="requireURL"></a> <br/>
+  <br/>
+  response: <br/>
+  <span id="response"></span> <br/>
+  <br/>
+  
+  用户相关: <br/>
+  <button id="v1_wxmp_regist">微信小程序用户注册</button>
+  <button id="v1_wxmp_login">微信小程序用户登录</button> <br/>
+  <button id="v1_wxmp_info_update">微信小程序用户信息同步</button> <br/>
+  <br/>
+
+  行程API接口: <br/>
+  <button id="v1_trip_unfinished">查询我未完成的行程</button> <br/>
+  <button id="v1_trip_create">创建行程</button>
+  <button id="v1_trip_cancel">取消行程</button>
+  <button id="v1_trip_start">开始行程</button>
+  <button id="v1_trip_stop">结束行程</button>
+  <button id="v1_trip_sos_start">发出求救</button>
+  <button id="v1_trip_sos_stop">解除求救</button> <br/>
+  <button id="v1_trip_info_get">获取行程信息</button>
+  <button id="v1_trip_info_update">修改行程信息</button> <br/>
+  <button id="v1_trip_location_all">获取行程轨迹</button> <br/>
+  <br/>
+
+  行程Socket接口: <br/>
+  <button id="v1_trip_socket_connect">连接</button>
+  <button id="v1_trip_socket_leave">断开</button>
+  <button id="v1_trip_socket_join">接入行程订单</button> <br/>
+  <button id="v1_trip_socket_upload_location">上报位置</button>
+  <button id="v1_trip_socket_change_state">改变状态</button>
+
+  <script src="/js/jquery.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+
+    //var hostURL = "http://localhost:8081"
+    var hostURL = ""
+
+    // ---------Socket连接-----------
+    var socket;
+
+    // Get
+    var getCode = function() {
+      return $('#code')[0].value;
+    };
+
+    var getNickname = function() {
+      return $('#nickname')[0].value;
+    };
+
+    var getAvatarURL = function() {
+      return $('#avatarurl')[0].value;
+    };
+
+    var getSession = function() {
+      return $('#session')[0].value;
+    };
+
+    var getOrdernumber = function() {
+      return $('#trip_ordernumber')[0].value;
+    }
+
+    var getTripDestination = function() {
+      return $('#trip_destination')[0].value;
+    }
+
+    var getTripTool = function() {
+      return $('#trip_tool')[0].value;
+    }
+
+    var getTripState = function() {
+      return $('#trip_state')[0].value;
+    }
+
+
+    // Set
+    var setResponse = function(value) {
+      $('#response').text(value);
+    }
+
+    var setSession = function(value) {
+      $('#session').val(value);
+    }
+
+    var setTripOrdernumber = function(value) {
+      $('#trip_ordernumber').val(value);
+    }
+
+    var setTripDestination = function(value) {
+      $('#trip_destination').val(value);
+    }
+
+    var setTripTool = function(value) {
+      $('#trip_tool').val(value);
+    }
+
+    var setTripState = function(value) {
+      $('#trip_state').val(value);
+    }
+
+    var setRequireURL = function(url) {
+      document.getElementById("requireURL").href= url;
+      document.getElementById("requireURL").target = "_blank";
+      $('#requireURL').text(url);
+    };
+
+    $(function () {
+      
+    });
+
+    // 微信小程序用户注册
+    $('#v1_wxmp_regist').click(function () {
+      var url = hostURL+"/v1/u/wxmp/regist?code="+getCode()+"&nickname="+getNickname()+"&avatarurl"+getAvatarURL();
+      setRequireURL(url);
+      $.get("/v1/u/wxmp/regist", {'code': getCode(), 'nickname': getNickname(), 'avatarurl': getAvatarURL()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setSession(response["session"]);
+        }
+      });
+    });
+
+    // 微信小程序用户登录
+    $('#v1_wxmp_login').click(function () {
+      var url = hostURL+"/v1/u/wxmp/login?code="+getCode();
+      setRequireURL(url);
+      $.get("/v1/u/wxmp/login", {'code': getCode()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setSession(response["session"]);
+        }
+      });
+    });
+
+    // 微信小程序用户信息同步
+    $('#v1_wxmp_info_update').click(function () {
+      var url = hostURL+"/v1/u/wxmp/info/update?session="+getSession()+"&nickname="+getNickname()+"&avatarurl="+getAvatarURL();
+      setRequireURL(url);
+      $.get("/v1/u/wxmp/info/update", {'session': getSession(), "nickname": getNickname(), "avatarurl": getAvatarURL()}, function(result){
+        setResponse(result);
+      });
+    });
+
+    // 查询我未完成的订单
+    $('#v1_trip_unfinished').click(function () {
+      var url = hostURL+"/v1/t/unfinished?session="+getSession();
+      setRequireURL(url);
+      $.get("/v1/t/unfinished", {'session': getSession()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripOrdernumber(response["ordernumber"]);
+        }
+      });
+    });
+
+    // 创建行程
+    $('#v1_trip_create').click(function () {
+      var url = hostURL+"/v1/t/create?session="+getSession();
+      setRequireURL(url);
+      $.get("/v1/t/create", {'session': getSession()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripOrdernumber(response["ordernumber"]);
+          setTripDestination("");
+          setTripTool("");
+          setTripState("0")
+        }
+      });
+    });
+
+    // 取消行程
+    $('#v1_trip_cancel').click(function () {
+      var url = hostURL+"/v1/t/cancel?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/cancel", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripState("4")
+        }
+      });
+    });
+
+    // 开始行程
+    $('#v1_trip_start').click(function () {
+      var url = hostURL+"/v1/t/start?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/start", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripState("1")
+        }
+      });
+    });
+
+    // 结束行程
+    $('#v1_trip_stop').click(function () {
+      var url = hostURL+"/v1/t/stop?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/stop", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripState("2")
+        }
+      });
+    });
+
+    // 发出求救
+    $('#v1_trip_sos_start').click(function () {
+      var url = hostURL+"/v1/t/sos/start?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/sos/start", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripState("3")
+        }
+      });
+    });
+    
+    // 解除求救
+    $('#v1_trip_sos_stop').click(function () {
+      var url = hostURL+"/v1/t/sos/stop?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/sos/stop", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripState("1")
+        }
+      });
+    });
+
+    // 获取行程信息
+    $('#v1_trip_info_get').click(function () {
+      var url = hostURL+"/v1/t/info/get?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/info/get", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripDestination(response["info"]["destination"]);
+          setTripTool(response["info"]["tool"]);
+          setTripState(response["info"]["state"]);
+        }
+      });
+    });
+
+    // 更新行程信息
+    $('#v1_trip_info_update').click(function () {
+      var url = hostURL+"/v1/t/info/update?session="+getSession()+"&ordernumber="+getOrdernumber()+"&destination="+getTripDestination()+"&tool="+getTripTool();
+      setRequireURL(url);
+      $.get("/v1/t/info/update", {'session': getSession(), ordernumber: getOrdernumber(), destination: getTripDestination(), tool: getTripTool()}, function(result){
+        setResponse(result);
+        var response = JSON.parse(result);
+        if (response["code"] === 0) {
+          setTripDestination(getTripDestination());
+          setTripTool(getTripTool());
+        }
+      });
+    });
+
+    // 获取行程轨迹
+    $('#v1_trip_location_all').click(function () {
+      var url = hostURL+"/v1/t/location/all?session="+getSession()+"&ordernumber="+getOrdernumber();
+      setRequireURL(url);
+      $.get("/v1/t/location/all", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+        setResponse(result);
+        //var response = JSON.parse(result);
+        //if (response["code"] === 0) {
+          //setTripDestination(getTripDestination());
+          //setTripTool(getTripTool());
+        //}
+      });
+    });
+    
+    $('#v1_trip_socket_connect').click(function () {
+      if (socket) {return};
+      // ---------创建Socket连接-----------
+      socket = io('/v1/t/s');
+
+      // Socket连接
+      socket.on('connect', function () {
+        console.log('Socket连接成功');
+      });
+
+      // Socket断开连接
+      socket.on('disconnect', function () {
+        console.log('Socket断开连接');
+      });
+      
+      // 监听消息
+      socket.on('sys', function (msg) {
+        console.log('收到Socket SYS消息: '+msg);
+      });
+      
+      socket.on('user joined', function (data) {
+        console.log('收到Socket user joined消息: \n ' + JSON.stringify(data));
+      });
+      
+      socket.on('user left', function (data) {
+        console.log('收到Socket user left消息: \n' + JSON.stringify(data));
+      });
+
+      socket.on('upload location', function (data) {
+        console.log('收到Socket upload location消息: \n' + JSON.stringify(data));
+      });
+
+      socket.on('change state', function (data) {
+        console.log('收到Socket change state消息: \n' + JSON.stringify(data));
+      });
+    });
+
+    $('#v1_trip_socket_join').click(function () {
+      if (socket) {
+        socket.emit('join', getOrdernumber(), getSession(), (err, msg) => {
+          if (err) {
+            console.log('加入房间失败: ', err, msg);
+          } else {
+            console.log('加入房间成功');
+          }
+        });
+      }
+    });
+
+    $('#v1_trip_socket_leave').click(function () {
+      if (socket) {
+        socket.emit('leave');
+        socket = null;
+      }
+    });
+
+    $('#v1_trip_socket_upload_location').click(function () {
+      if (socket) {
+        socket.emit('upload location', getSession(), '123', '456', (err, msg) => {
+          if (err) {
+            console.log('更新位置失败: ',err, msg);
+          } else {
+            console.log('更新位置成功');
+          }
+        });
+      }
+    });
+
+    $('#v1_trip_socket_change_state').click(function () {
+      if (socket) {
+        socket.emit('change state', getSession(), getTripState(), (err, msg) => {
+          if (err) {
+            console.log('更改状态失败: ',err, msg);
+          } else {
+            console.log('更改状态成功');
+          }
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
