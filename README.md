@@ -36,7 +36,7 @@ APP端计划采用Weex框架实现安卓与iOS端；后端采用Flask支撑，�
 愿小仙女明珠安息，天堂没有痛苦。
 
 2018年07月17日:
-- 1，后端实现方案修改为Node.js
-- 2，前端实现方案修改为Taro
+- 1，后端实现方案修改为[Node.js](https://github.com/nodejs/node)
+- 2，前端实现方案修改为[Taro](https://github.com/NervJS/taro)
 - 3，位置上传改为自动
 - 4，前端初步使用微信小程序
