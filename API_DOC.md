@@ -83,15 +83,35 @@ trip 行程订单列表
 | 字段名  |  注释  |  类型  |  Key  |  Null  |
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 |  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
-|  type  |  行程类型: <br>1, 默认;  |  int(11)  |    |  NO  |
 |  order_number  |  订单编号  |  char(32)  |  UNI  |  NO  |
 |  user_id  |  创建人的用户id  |  int(11)  |    |  NO  |
-|  destination  |  目的地  |  char(32)  |    |  YES  |
-|  tool  |  出行工具  |  char(32)  |    |  YES  |
-|  state  |  当前状态: <br>0, 已创建,还未开始行程; <br>1, 行程已开始,目前安全; <br>2, 已结束行程; <br>3, 发生危险; <br>4, 取消行程;  |  int(11)  |    |  No  |
-|  created_time  |  发生时间  |  timestamp  |    |  NO  |
-|  last_updated_info_time  |  最后更新行程订单信息的时间  |  datetime  |    |  NO  |
-|  last_upload_location_time  |  最后上传行程位置的时间  |  datetime  |    |  NO  |
+|  state  |  当前状态: <br>0, 已创建,还未开始行程(作废,将不会出现此种情况); <br>1, 行程正在进行; <br>2, 行程已经结束; <br>3, 失联(断线中);  |  int(11)  |    |  No  |
+|  created_time  |  行程创建时间  |  timestamp  |    |  NO  |
+|  last_updated_time  |  最后更新时间  |  datetime  |    |  NO  |
+<br>
+
+trip_logs 行程日志
+
+| 字段名  |  注释  |  类型  |  Key  |  Null  |
+| ------------ | ------------ | ------------ | ------------ | ------------ |
+|  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
+|  order_number  |  订单编号  |  char(32)  |    |  NO  |
+|  event_type  |  事件类型: <br>1, Socket连接事件；<br>2, Socket断开事件；<br>3, 求救事件；  |  INTEGER  |    |  NO  |
+|  operation  |  操作内容  |  char(255)  |    |  No  |
+|  remark  |  备注  |  char(255)  |    |  YES  |
+|  created_time  |  日志产生时间  |  timestamp  |    |  NO  |
+<br>
+
+trip_polyline 行程轨迹
+
+| 字段名  |  注释  |  类型  |  Key  |  Null  |
+| ------------ | ------------ | ------------ | ------------ | ------------ |
+|  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
+|  order_number  |  订单编号  |  char(32)  |    |  NO  |
+|  longitude  |  经度  |  char(255)  |    |  NO  |
+|  latitude  |  纬度  |  char(255)  |    |  No  |
+|  remark  |  备注  |  char(255)  |    |  YES  |
+|  created_time  |  日志产生时间  |  timestamp  |    |  NO  |
 <br>
 
 ### 用户相关接口
