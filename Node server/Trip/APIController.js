@@ -24,7 +24,7 @@ var create = function(session, callback) {
         },
         function(userid, _callback){
             // 查询是否有未完成的订单
-            TripModel.getUnfinishedOrder(userid, (err, ordernumber) => {
+            TripModel.getUnfinished(userid, (err, ordernumber) => {
                 if (err) {
                     _callback(9002, err);
                 } else if (ordernumber) {
@@ -36,7 +36,7 @@ var create = function(session, callback) {
         },
         function(userid, _callback){
             // 创建订单
-            TripModel.createTripOrder(userid, (err, ordernumber) => {
+            TripModel.createTrip(userid, (err, ordernumber) => {
                 if (err) {
                     _callback(9004, err);
                 } else {
@@ -77,7 +77,7 @@ var getUnfinished = function(session, callback) {
         },
         function(userid, _callback){
             // 查询是否有未完成的订单
-            TripModel.getUnfinishedOrder(userid, (err, ordernumber) => {
+            TripModel.getUnfinished(userid, (err, ordernumber) => {
                 if (err) {
                     _callback(9001, err)
                 } else {
@@ -98,88 +98,26 @@ var getUnfinished = function(session, callback) {
 }
 
 /**
- * 取消行程订单(仅在未开始前)
+ * Socket断开连接
  * @param {String} session 用户登录session
  * @param {String} ordernumber 订单编号
- * @param {(err: {code: Number, msg: String})} callback 回调函数
  */
-var cancel = function(session, ordernumber, callback) {
-
-    var async = require("async");
-
-    async.waterfall([
-        function(_callback){
-            // 获取用户id
-            UserModel.getUseridWithSession(session, (err, userid) => {
-                if (err) {
-                    _callback(9001, err)
-                } else {
-                    _callback(null, userid);
-                }
-            });
-        },
-        function(userid, _callback){
-            // 取消订单
-            TripModel.cancelTripOrder(ordernumber, userid, (err) => {
-                _callback(err ? 9002 : null, err ? err : null);
-            });
-        }
-    ], function (err, result) {
-        if (callback) {
-            if (err) {
-                callback({code: err, msg: result});
-            } else {
-                callback(null);
-            }
-        }
-    });
-}
+var socketDisconnect = function(session, ordernumber) {}
 
 /**
- * 开始行程订单(仅在未开始前)
+ * Socket重新连接
  * @param {String} session 用户登录session
  * @param {String} ordernumber 订单编号
- * @param {(err: {code: Number, msg: String})} callback 回调函数
  */
-var start = function(session, ordernumber, callback) {
-
-    var async = require("async");
-
-    async.waterfall([
-        function(_callback){
-            // 获取用户id
-            UserModel.getUseridWithSession(session, (err, userid) => {
-                if (err) {
-                    _callback(9001, err)
-                } else {
-                    _callback(null, userid);
-                }
-            });
-        },
-        function(userid, _callback){
-            // 开始订单
-            TripModel.startTripOrder(ordernumber, userid, (err) => {
-                _callback(err ? 9002 : null, err ? err : null);
-            });
-        }
-    ], function (err, result) {
-        if (callback) {
-            if (err) {
-                callback({code: err, msg: result});
-            } else {
-                callback(null);
-            }
-        }
-    });
-}
+var socketReconnect = function(session, ordernumber) {}
 
 /**
- * 结束行程订单
+ * 结束行程
  * @param {String} session 用户登录session
  * @param {String} ordernumber 订单编号
  * @param {(err: {code: Number, msg: String})} callback 回调函数
  */
-var stop = function(session, ordernumber, callback) {
+var end = function(session, ordernumber, callback) {
 
     var async = require("async");
 
@@ -195,9 +133,27 @@ var stop = function(session, ordernumber, callback) {
             });
         },
         function(userid, _callback){
+            // 查询订单信息
+            TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else if (data.userid !== userid) {
+                    _callback(9003, '无权限操作');
+                } else if (data.state === 2) {
+                    _callback(9005, '无效操作,该行程已经结束');
+                } else {
+                    _callback(null, data.state);
+                }
+            });
+        },
+        function(currentState, _callback){
             // 结束订单
-            TripModel.stopTripOrder(ordernumber, userid, (err) => {
-                _callback(err ? 9002 : null, err ? err : null);
+            TripModel.setTripState(ordernumber, 2, 'state: '+currentState+' to 2', '', (err) => {
+                if (err) {
+                    _callback(9006, err);
+                } else {
+                    _callback(null, null);
+                }
             });
         }
     ], function (err, result) {
@@ -217,7 +173,7 @@ var stop = function(session, ordernumber, callback) {
  * @param {String} ordernumber 订单编号
  * @param {(err: {code: Number, msg: String})} callback 回调函数
  */
-var startSOS = function(session, ordernumber, callback) {
+var SOS = function(session, ordernumber, callback) {
 
     var async = require("async");
 
@@ -233,47 +189,27 @@ var startSOS = function(session, ordernumber, callback) {
             });
         },
         function(userid, _callback){
+            // 查询订单信息
+            TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else if (data.userid !== userid) {
+                    _callback(9003, '无权限操作');
+                } else if (data.state === 2) {
+                    _callback(9005, '无效操作,该行程已经结束');
+                } else {
+                    _callback(null, data.state);
+                }
+            });
+        },
+        function(currentState, _callback){
             // 发出求救
-            TripModel.startSOS(ordernumber, userid, (err) => {
-                _callback(err ? 9002 : null, err ? err : null);
-            });
-        }
-    ], function (err, result) {
-        if (callback) {
-            if (err) {
-                callback({code: err, msg: result});
-            } else {
-                callback(null);
-            }
-        }
-    });
-}
-
-/**
- * 解除求救
- * @param {String} session 用户登录session
- * @param {String} ordernumber 订单编号
- * @param {(err: {code: Number, msg: String})} callback 回调函数
- */
-var stopSOS = function(session, ordernumber, callback) {
-
-    var async = require("async");
-
-    async.waterfall([
-        function(_callback){
-            // 获取用户id
-            UserModel.getUseridWithSession(session, (err, userid) => {
+            TripModel.addTripLog(ordernumber, 3, 'state: '+currentState+' SOS', '', (err) => {
                 if (err) {
-                    _callback(9001, err)
+                    _callback(9006, err);
                 } else {
-                    _callback(null, userid);
+                    _callback(null, null);
                 }
-            });
-        },
-        function(userid, _callback){
-            // 解除求救
-            TripModel.stopSOS(ordernumber, userid, (err) => {
-                _callback(err ? 9002 : null, err ? err : null);
             });
         }
     ], function (err, result) {
@@ -471,10 +407,11 @@ var getTripLocationLocus = function(session, ordernumber, callback) {
 
 exports.create = create;
 exports.getUnfinished = getUnfinished;
-exports.cancel = cancel;
-exports.start = start;
-exports.stop = stop;
-exports.startSOS = startSOS;
+exports.socketDisconnect = socketDisconnect;
+exports.socketReconnect = socketReconnect;
+exports.end = end;
+exports.SOS = SOS;
+
 exports.stopSOS = stopSOS;
 exports.getTripInfo = getTripInfo;
 exports.updateTripInfo = updateTripInfo;

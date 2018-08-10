@@ -50,7 +50,7 @@ module.exports = class Model {
     /**
      * 添加行程日志
      * @param {String} ordernumber 行程订单编号
-     * @param {String} eventtype 事件类型
+     * @param {Number} eventtype 事件类型
      * @param {String} operation 操作内容
      * @param {String} remark 备注
      * @param {(err: String,)} callback 回调函数,成功返回null,如出错则返回err
