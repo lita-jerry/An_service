@@ -10,15 +10,15 @@ module.exports = class Model {
     // ———————————————— 增 ———————————————— //
 
     /**
-     * 创建行程订单
+     * 创建行程,完成即开始,state=1
      * @param {String} userid 用户id
      * @param {(err: String, ordernumber: String)} callback 回调函数
      */
-    static createTripOrder (userid, callback) {
+    static createTrip (userid, callback) {
 
         var ordernumber = Util.makeTripOrderNumber();
 
-        SQL.execute('INSERT INTO trip (order_number, user_id, state, type) VALUES(?,?,0,1)',
+        SQL.execute('INSERT INTO trip (order_number, user_id, state) VALUES(?,?,1)',
                     [ordernumber, userid],
             function(err, result) {
                 if (callback) {
@@ -29,361 +29,82 @@ module.exports = class Model {
     }
 
     /**
-     * 添加行程位置日志
-     * @param {String} ordernumber 订单编号
+     * 添加行程位置坐标
+     * @param {String} ordernumber 行程订单编号
      * @param {String} longitude 经度
      * @param {String} latitude 纬度
-     * @param {(err: String,)} callback 回调函数
+     * @param {String} remark 备注
+     * @param {(err: String,)} callback 回调函数,成功返回null,如出错则返回err
      */
-    static addTripLocationLog (ordernumber, longitude, latitude, callback) {
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-            connection.beginTransaction(function(err) {
-                if (err) { callback('database error: start transaction.'); }
-                connection.query('INSERT INTO trip_location_upload_log (order_number, longitude, latitude) VALUES(?,?,?)', 
-                                [ordernumber, longitude, latitude], 
-                                function (error, results, fields) {
-                if (error) {
-                    return connection.rollback(function() {
-                        connection.release();
-                        callback('database error: insert trip location upload log.');
-                    });
+    static addTripLocationPoint (ordernumber, longitude, latitude, remark, callback) {
+        SQL.execute('INSERT INTO trip_polyline (order_number, longitude, latitude, remark) VALUES(?,?,?,?)',
+                    [ordernumber, longitude, latitude, remark],
+            function(err, result) {
+                if (callback) {
+                    callback(err);
                 }
-                
-                connection.query('UPDATE trip SET last_upload_location_time = NOW()', 
-                                [], 
-                                function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: update trip last upload location time.');
-                        });
-                    } else if (results['changedRows'] === 0) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: 没有此行程.');
-                        });
-                    }
+            }
+        );
+    }
 
-                    connection.commit(function(err) {
-                    if (err) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: connection.commit');
-                        });
-                    }
-
-                    connection.release();
-                    callback(null);
-                    });
-                });
-                });
-            });
-        });
+    /**
+     * 添加行程日志
+     * @param {String} ordernumber 行程订单编号
+     * @param {String} eventtype 事件类型
+     * @param {String} operation 操作内容
+     * @param {String} remark 备注
+     * @param {(err: String,)} callback 回调函数,成功返回null,如出错则返回err
+     */
+    static addTripLog (ordernumber, eventtype, operation, remark, callback) {
+        SQL.execute('INSERT INTO trip_logs (order_number, event_type, operation, remark) VALUES(?,?,?,?)',
+                    [ordernumber, eventtype, operation, remark],
+            function(err, result) {
+                if (callback) {
+                    callback(err);
+                }
+            }
+        );
     }
 
     // ———————————————— 删 ———————————————— //
     // ———————————————— 改 ———————————————— //
 
     /**
-     * 取消行程订单 state = 0 - 4
-     * @param {String} ordernumber 订单编号
-     * @param {String} session 用户登录session
-     * @param {(err: String)} callback 回调函数
+     * 设置行程状态
+     * @param {String} ordernumber 行程订单编号
+     * @param {Number} state 将要更改的状态
+     * @param {String} operation 操作内容
+     * @param {String} remark 备注
+     * @param {(err: String,)} callback 回调函数,成功返回null,如出错则返回err
      */
-    static cancelTripOrder (ordernumber, userid, callback) {
+    static setTripState (ordernumber, state, operation, remark, callback) {
 
         DBPool.getConnection(function(err, connection) {
             if (err || !connection) {  return callback('database error: pool get connection.'); }
 
             connection.beginTransaction(function(err) {
                 if (err) { callback('database error: start transaction.'); }
-                connection.query('UPDATE trip SET state = 4 WHERE order_number = ? AND user_id = ? AND state = 0', 
-                                [ordernumber, userid], 
+                connection.query('UPDATE trip SET state = ? WHERE order_number = ?', 
+                                [state, ordernumber], 
                                 function (error, results, fields) {
                     if (error) {
                         return connection.rollback(function() {
                                 connection.release();
                                 callback('database error: update state.');
                             });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'state: 0 to 4';
-                    } else {
+                    } else if (results['changedRows'] <= 0) {
                         connection.release();
                         callback('No find trip order.');
                         return;
                     }
                     
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,1,?,?)', 
-                                    [ordernumber, operation, ''], 
+                    connection.query('INSERT INTO trip_logs (order_number, event_type, operation, remark) VALUES(?,1,?,?)', 
+                                    [ordernumber, operation, remark], 
                                     function (error, results, fields) {
                         if (error) {
                             return connection.rollback(function() {
                                 connection.release();
-                                callback('database error: write log.');
-                            });
-                        }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    connection.release();
-                                    callback('database error: connection.commit');
-                                });
-                            }
-                            connection.release();
-                            callback(null);
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    /**
-     * 开始行程订单 state = 0 - 1
-     * @param {String} ordernumber 订单编号
-     * @param {String} userid 用户id
-     * @param {(err: String)} callback 回调函数
-     */
-    static startTripOrder (ordernumber, userid, callback) {
-
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-
-            connection.beginTransaction(function(err) {
-                if (err) { callback('database error: start transaction.'); }
-                connection.query('UPDATE trip SET state = 1 WHERE order_number = ? AND user_id = ? AND state = 0', 
-                                [ordernumber, userid], 
-                                function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: update state.');
-                            });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'state: 0 to 1';
-                    } else {
-                            connection.release();
-                            callback('No find trip order.');
-                            return;
-                    }
-                    
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,1,?,?)', 
-                                    [ordernumber, operation, ''], 
-                                    function (error, results, fields) {
-                        if (error) {
-                            return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: write log.');
-                            });
-                        }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    connection.release();
-                                    callback('database error: connection.commit');
-                                });
-                            }
-                            connection.release();
-                            callback(null);
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    /**
-     * 结束行程订单 state = 1 | 3 - 2
-     * @param {String} ordernumber 订单编号
-     * @param {String} userid 用户id
-     * @param {(err: String)} callback 回调函数
-     */
-    static stopTripOrder (ordernumber, userid, callback) {
-
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-
-            connection.beginTransaction(function(err) {
-                if (err) { callback('database error: start transaction.'); }
-                connection.query('UPDATE trip SET state = 2 WHERE order_number = ? AND user_id = ? AND (state = 1 OR state = 3)', 
-                                [ordernumber, userid], 
-                                function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: update state.');
-                            });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'state: 1 | 3 to 2';
-                    } else {
-                        connection.release();
-                        callback('No find trip order.');
-                        return;
-                    }
-                    
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,1,?,?)', 
-                                    [ordernumber, operation, ''], 
-                                    function (error, results, fields) {
-                        if (error) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: write log.');
-                        });
-                        }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    connection.release();
-                                    callback('database error: connection.commit');
-                                });
-                            }
-                            connection.release();
-                            callback(null);
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    /**
-     * 发出求救 state = 1 - 3
-     * @param {String} ordernumber 订单编号
-     * @param {String} userid 用户id
-     * @param {(err: String)} callback 回调函数
-     */
-    static startSOS (ordernumber, userid, callback) {
-
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-
-            connection.beginTransaction(function(err) {
-                if (err) { callback('database error: start transaction.'); }
-                connection.query('UPDATE trip SET state = 3 WHERE order_number = ? AND user_id = ? AND state = 1', 
-                                [ordernumber, userid], 
-                                function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: update state.');
-                            });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'state: 1 to 3';
-                    } else {
-                        connection.release();
-                        callback('No find trip order.');
-                        return;
-                    }
-                    
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,1,?,?)', 
-                                    [ordernumber, operation, ''], 
-                                    function (error, results, fields) {
-                        if (error) {
-                            return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: write log.');
-                            });
-                        }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    connection.release();
-                                    callback('database error: connection.commit');
-                                });
-                            }
-                            connection.release();
-                            callback(null);
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    /**
-     * 解除求救 state = 3 - 1
-     * @param {String} ordernumber 订单编号
-     * @param {String} userid 用户id
-     * @param {(err: String)} callback 回调函数
-     */
-    static stopSOS (ordernumber, userid, callback) {
-
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-
-            connection.beginTransaction(function(err) {
-                    if (err) { callback('database error: start transaction.'); }
-                    connection.query('UPDATE trip SET state = 1 WHERE order_number = ? AND user_id = ? AND state = 3', 
-                                    [ordernumber, userid], 
-                                    function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: update state.');
-                            });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'state: 3 to 1';
-                    } else {
-                        connection.release();
-                        callback('No find trip order.');
-                        return;
-                    }
-                    
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,1,?,?)', [ordernumber, operation, ''], function (error, results, fields) {
-                        if (error) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: write log.');
-                        });
-                        }
-                        connection.commit(function(err) {
-                            if (err) {
-                                return connection.rollback(function() {
-                                    connection.release();
-                                    callback('database error: connection.commit');
-                                });
-                            }
-                            connection.release();
-                            callback(null);
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    /**
-     * 更新行程信息
-     * @param {String} ordernumber 订单编号
-     * @param {String} destination 目的地
-     * @param {String} tool 交通工具
-     * @param {(err: String)} callback 回调函数
-     */
-    static updateTripInfo (ordernumber, destination, tool, callback) {
-
-        DBPool.getConnection(function(err, connection) {
-            if (err || !connection) {  return callback('database error: pool get connection.'); }
-            connection.beginTransaction(function(err) {
-                    if (err) { callback('database error: start transaction.'); }
-                    connection.query('UPDATE trip SET destination = ?, tool = ? WHERE order_number = ? AND state = 0', [destination, tool, ordernumber], function (error, results, fields) {
-                    if (error) {
-                        return connection.rollback(function() {
-                            connection.release();
-                            callback('database error: update state.');
-                        });
-                    } else if (results['changedRows'] > 0) {
-                        var operation = 'destination:' + destination + ' & tool:' + tool;
-                    } else {
-                        connection.release();
-                        callback('No change.');
-                        return;
-                    }
-                    connection.query('INSERT INTO trip_info_update_log (order_number, type, operation, remark) VALUES(?,2,?,?)', [ordernumber, operation, ''], function (error, results, fields) {
-                        if (error) {
-                            return connection.rollback(function() {
-                                connection.release();
-                                callback('database error: write log.');
+                                callback('database error: add trip log.');
                             });
                         }
                         connection.commit(function(err) {
@@ -405,11 +126,11 @@ module.exports = class Model {
     // ———————————————— 查 ———————————————— //
 
     /**
-     * 获取当前未完成的订单
+     * 获取未完成的行程
      * @param {String} userid 用户id
      * @param {(err: String, ordernumber: String)} callback 事件回调
      */
-    static getUnfinishedOrder (userid, callback) {
+    static getUnfinished (userid, callback) {
         SQL.execute(
             'SELECT order_number FROM trip WHERE user_id = ? AND (state = 1 OR state = 3)',
             [userid],
@@ -430,7 +151,7 @@ module.exports = class Model {
     /**
      * 获取行程信息
      * @param {String} ordernumber 订单编号
-     * @param {(err: String, userid: String, state: String, type: String, destination: String, tool: String, created_time: String)} callback 回调函数
+     * @param {(err: String,  data: {userid: String, state: Number, created_time: String})} callback 回调函数
      */
     static getTripInfo (ordernumber, callback) {
         SQL.execute(
@@ -444,9 +165,6 @@ module.exports = class Model {
                         callback(null, 
                             result[0]['user_id'], 
                             result[0]['state'], 
-                            result[0]['type'], 
-                            result[0]['destination'], 
-                            result[0]['tool'], 
                             result[0]['created_time']);
                     } else {
                         callback('无此行程订单');
@@ -457,20 +175,28 @@ module.exports = class Model {
     }
 
     /**
-     * 获取行程订单的所属用户id
-     * @param {String} ordernumber 订单编号
-     * @param {(err: String, userid: String)} callback 回调函数
+     * 获取行程日志
+     * @param {String} ordernumber 行程订单编号
+     * @param {(err: String, data: [{event_type: Number, operation: String, remark: String, created_time: String}])} callback 回调函数
      */
-    static getUseridOfTripOrdernumber (ordernumber, callback) {
+    static getTripLogs (ordernumber, callback) {
         SQL.execute(
-            'SELECT * FROM trip WHERE order_number=?',
+            'SELECT * FROM trip_logs WHERE order_number=? ORDER BY created_time',
             [ordernumber],
             function(err, result) {
                 if (callback) {
-                    if (err === null && result.length > 0) {
-                        callback(null, result[0]['user_id']);
+                    if (err) {
+                        callback('查询错误', null);
                     } else {
-                        callback('未找到对应行程', null);
+                        var callbackValue = result.map((currentValue, index, arr) => {
+                            return {
+                                event_type: currentValue['event_type'],
+                                operation: currentValue['operation'],
+                                remark: currentValue['remark'],
+                                created_time: currentValue['created_time']
+                            }
+                        });
+                        callback(null, JSON.stringify(callbackValue));
                     }
                 }
             }
@@ -478,30 +204,32 @@ module.exports = class Model {
     }
 
     /**
-     * 获取位置轨迹
-     * @param {String} ordernumber 订单编号
-     * @param {(err: String, result: String)} callback 回调函数
+     * 获取行程路线
+     * @param {String} ordernumber 行程订单编号
+     * @param {(err: String, data: [{longitude: String, latitude: String, remark: String, created_time: String}])} callback 回调函数
      */
-    static getTripLocationLocus (ordernumber, callback) {
+    static getTripPolyline (ordernumber, callback) {
         SQL.execute(
-            'SELECT * FROM trip_location_upload_log WHERE order_number=? ORDER BY created_time',
+            'SELECT * FROM trip_polyline WHERE order_number=? ORDER BY created_time',
             [ordernumber],
             function(err, result) {
                 if (callback) {
-                    if (err === null && result.length > 0) {
-                        var callbackValue = result.map((currentValue, index, arr) => {
-                                return {
-                                    time: currentValue['created_time'],
-                                    longitude: currentValue['longitude'],
-                                    latitude: currentValue['latitude']
-                                }
-                            });
-                        callback(null, JSON.stringify(callbackValue));
+                    if (err) {
+                        callback('查询错误', null);
                     } else {
-                        callback('未查询到该行程信息', null);
+                        var callbackValue = result.map((currentValue, index, arr) => {
+                            return {
+                                longitude: currentValue['longitude'],
+                                latitude: currentValue['latitude'],
+                                remark: currentValue['remark'],
+                                created_time: currentValue['created_time']
+                            }
+                        });
+                        callback(null, JSON.stringify(callbackValue));
                     }
                 }
             }
         );
     }
+
 }
