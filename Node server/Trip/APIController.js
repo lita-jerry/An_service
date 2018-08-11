@@ -224,7 +224,7 @@ var SOS = function(session, ordernumber, callback) {
 }
 
 /**
- * 获取订单信息
+ * 获取行程信息
  * @param {String} session 用户登录session
  * @param {String} ordernumber 订单编号
  * @param {(err: {code: Number, msg: String}, result: String)} callback 回调函数
@@ -245,15 +245,16 @@ var getTripInfo = function(session, ordernumber, callback) {
             });
         },
         function(userid, _callback){
-            // 获取订单信息
-            TripModel.getTripInfo(ordernumber, (err, userid, state, type, destination, tool, created_time) => {
-                _callback(err ? 9002 : null , err ? err : JSON.stringify({
-                    type: type,
-                    destination: destination,
-                    tool: tool,
-                    state: state,
-                    created_time: created_time
-                }));
+            // 获取行程信息
+            TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else {
+                    _callback(null, JSON.stringify({
+                        state: data.state,
+                        screated_time: data.created_time
+                    }))
+                }
             });
         }
     ], function (err, result) {
@@ -268,14 +269,12 @@ var getTripInfo = function(session, ordernumber, callback) {
 }
 
 /**
- * 更新行程信息
- * @param {String} session 用户登录session
- * @param {String} ordernumber 订单编号
- * @param {String} destination 目的地
- * @param {String} tool 搭乘工具
- * @param {(err: {code: Number, msg: String})} callback 回调函数
+ * 获取行程路线
+ * @param {String} session 
+ * @param {String} ordernumber 
+ * @param {(err: {code: Number, msg: String}, result: String)} callback 回调函数
  */
-var updateTripInfo = function(session, ordernumber, destination, tool, callback) {
+var getTripPolyline = function(session, ordernumber, callback) {
 
     var async = require("async");
 
@@ -291,27 +290,91 @@ var updateTripInfo = function(session, ordernumber, destination, tool, callback)
             });
         },
         function(userid, _callback){
-            // 获取订单所属用户id
-            TripModel.getUseridOfTripOrdernumber(ordernumber, (err, _userid) => {
-                if (userid === _userid) {
-                    _callback(null);
+           // 查询订单信息
+           TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else if (data.userid !== userid) {
+                    _callback(9003, '无权限操作');
+                } else if (data.state === 2) {
+                    _callback(9005, '无效操作,该行程已经结束');
                 } else {
-                    _callback(9002, '无权限操作');
+                    _callback(null, null);
                 }
             });
         },
         function(_callback){
-            // 修改订单信息
-            TripModel.updateTripInfo(ordernumber, destination, tool, (err) => {
-                _callback(err ? 9003 : null, err ? err : null);
+            // 获取路线
+            TripModel.getTripPolyline(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9006, err);
+                } else {
+                    _callback(null, data);
+                }
             });
         }
     ], function (err, result) {
         if (callback) {
             if (err) {
-                callback({code: err, msg: result});
+                callback({code: err, msg: result}, null);
             } else {
-                callback(null);
+                callback(null, result);
+            }
+        }
+    });
+}
+
+/**
+ * 获取行程日志
+ * @param {String} session 
+ * @param {String} ordernumber 
+ * @param {(err: {code: Number, msg: String}, result: String)} callback 回调函数
+ */
+var getTripLogs = function(session, ordernumber, callback) {
+
+    var async = require("async");
+
+    async.waterfall([
+        function(_callback){
+            // 获取用户id
+            UserModel.getUseridWithSession(session, (err, userid) => {
+                if (err) {
+                    _callback(9001, err)
+                } else {
+                    _callback(null, userid);
+                }
+            });
+        },
+        function(userid, _callback){
+           // 查询订单信息
+           TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else if (data.userid !== userid) {
+                    _callback(9003, '无权限操作');
+                } else if (data.state === 2) {
+                    _callback(9005, '无效操作,该行程已经结束');
+                } else {
+                    _callback(null, null);
+                }
+            });
+        },
+        function(_callback){
+            // 获取日志
+            TripModel.getTripLogs(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9006, err);
+                } else {
+                    _callback(null, data);
+                }
+            });
+        }
+    ], function (err, result) {
+        if (callback) {
+            if (err) {
+                callback({code: err, msg: result}, null);
+            } else {
+                callback(null, result);
             }
         }
     });
@@ -323,9 +386,10 @@ var updateTripInfo = function(session, ordernumber, destination, tool, callback)
  * @param {String} ordernumber 订单编号
  * @param {String} longitude 经度
  * @param {String} latitude 纬度
+ * @param {String} remark 备注
  * @param {(err: {code: Number, msg: String})} callback 回调函数
  */
-var uploadTripLocation = function(session, ordernumber, longitude, latitude, callback) {
+var uploadTripLocation = function(session, ordernumber, longitude, latitude, remark, callback) {
 
     var async = require("async");
 
@@ -341,19 +405,27 @@ var uploadTripLocation = function(session, ordernumber, longitude, latitude, cal
             });
         },
         function(userid, _callback){
-            // 获取订单所属用户id
-            TripModel.getUseridOfTripOrdernumber(ordernumber, (err, _userid) => {
-                if (userid === _userid) {
-                    _callback(null);
+           // 查询订单信息
+           TripModel.getTripInfo(ordernumber, (err, data) => {
+                if (err) {
+                    _callback(9002, err);
+                } else if (data.userid !== userid) {
+                    _callback(9003, '无权限操作');
+                } else if (data.state === 2) {
+                    _callback(9005, '无效操作,该行程已经结束');
                 } else {
-                    _callback(9002, '无权限操作');
+                    _callback(null, null);
                 }
             });
         },
         function(_callback){
-            // 添加位置log
-            TripModel.addTripLocationLog(ordernumber, longitude, latitude, (err) => {
-                _callback(err ? 9003 : null, err ? err : null);
+            // 添加位置
+            TripModel.addTripLocationPoint(ordernumber, longitude, latitude, remark, (err) => {
+                if (err) {
+                    _callback(9006, err);
+                } else {
+                    _callback(null, null);
+                }
             });
         }
     ], function (err, result) {
@@ -361,49 +433,12 @@ var uploadTripLocation = function(session, ordernumber, longitude, latitude, cal
             if (err) {
                 callback({code: err, msg: result});
             } else {
-                callback(null);
+                callback(null, null);
             }
         }
     });
 }
 
-/**
- * 获取行程位置轨迹
- * @param {String} session 用户登录session
- * @param {String} ordernumber 订单编号
- * @param {(err: {code: Number, msg: String}, result: String)} callback 回调函数
- */
-var getTripLocationLocus = function(session, ordernumber, callback) {
-
-    var async = require("async");
-
-    async.waterfall([
-        function(_callback){
-            // 获取用户id
-            UserModel.getUseridWithSession(session, (err, userid) => {
-                if (err) {
-                    _callback(9001, err)
-                } else {
-                    _callback(null, userid);
-                }
-            });
-        },
-        function(userid, _callback){
-            // 获取行程轨迹
-            TripModel.getTripLocationLocus(ordernumber, (err, result) => {
-                _callback(err ? 9005 : null, err ? err : result);
-            });
-        }
-    ], function (err, result) {
-        if (callback) {
-            if (err) {
-                callback({code: err, msg: result}, null);
-            } else {
-                callback(null, result);
-            }
-        }
-    });
-}
 
 exports.create = create;
 exports.getUnfinished = getUnfinished;
@@ -411,9 +446,6 @@ exports.socketDisconnect = socketDisconnect;
 exports.socketReconnect = socketReconnect;
 exports.end = end;
 exports.SOS = SOS;
-
-exports.stopSOS = stopSOS;
-exports.getTripInfo = getTripInfo;
-exports.updateTripInfo = updateTripInfo;
+exports.getTripPolyline = getTripPolyline;
+exports.getTripLogs = getTripLogs;
 exports.uploadTripLocation = uploadTripLocation;
-exports.getTripLocationLocus = getTripLocationLocus;
