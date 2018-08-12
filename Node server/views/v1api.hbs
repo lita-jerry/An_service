@@ -12,8 +12,6 @@
   登录Session: <input type="text" name="session" id="session"> <br/>
   <br/>
   行程订单编号: <input type="text" name="trip_ordernumber" id="trip_ordernumber"> <br/>
-  行程目的地: <input type="text" name="trip_destination" id="trip_destination"> <br/>
-  行程交通工具: <input type="text" name="trip_tool" id="trip_tool"> <br/>
   行程当前状态: <input type="text" name="trip_state" id="trip_state"> <br/>
 
   requireURL: <br/>
@@ -32,22 +30,18 @@
   行程API接口: <br/>
   <button id="v1_trip_unfinished">查询我未完成的行程</button> <br/>
   <button id="v1_trip_create">创建行程</button>
-  <button id="v1_trip_cancel">取消行程</button>
-  <button id="v1_trip_start">开始行程</button>
-  <button id="v1_trip_stop">结束行程</button>
-  <button id="v1_trip_sos_start">发出求救</button>
-  <button id="v1_trip_sos_stop">解除求救</button> <br/>
-  <button id="v1_trip_info_get">获取行程信息</button>
-  <button id="v1_trip_info_update">修改行程信息</button> <br/>
-  <button id="v1_trip_location_all">获取行程轨迹</button> <br/>
+  <button id="v1_trip_end">结束行程</button>
+  <button id="v1_trip_sos">发出求救</button>
+  <button id="v1_trip_info">获取行程信息</button>
+  <button id="v1_trip_polyline">获取行程轨迹</button>
+  <button id="v1_trip_logs">获取行程日志</button> <br/>
   <br/>
 
   行程Socket接口: <br/>
   <button id="v1_trip_socket_connect">连接</button>
   <button id="v1_trip_socket_leave">断开</button>
-  <button id="v1_trip_socket_join">接入行程订单</button> <br/>
+  <button id="v1_trip_socket_join">接入行程</button> <br/>
   <button id="v1_trip_socket_upload_location">上报位置</button>
-  <button id="v1_trip_socket_change_state">改变状态</button>
 
   <script src="/js/jquery.js"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -80,14 +74,6 @@
       return $('#trip_ordernumber')[0].value;
     }
 
-    var getTripDestination = function() {
-      return $('#trip_destination')[0].value;
-    }
-
-    var getTripTool = function() {
-      return $('#trip_tool')[0].value;
-    }
-
     var getTripState = function() {
       return $('#trip_state')[0].value;
     }
@@ -104,14 +90,6 @@
 
     var setTripOrdernumber = function(value) {
       $('#trip_ordernumber').val(value);
-    }
-
-    var setTripDestination = function(value) {
-      $('#trip_destination').val(value);
-    }
-
-    var setTripTool = function(value) {
-      $('#trip_tool').val(value);
     }
 
     var setTripState = function(value) {
@@ -187,42 +165,16 @@
           setTripOrdernumber(response["ordernumber"]);
           setTripDestination("");
           setTripTool("");
-          setTripState("0")
-        }
-      });
-    });
-
-    // 取消行程
-    $('#v1_trip_cancel').click(function () {
-      var url = hostURL+"/v1/t/cancel?session="+getSession()+"&ordernumber="+getOrdernumber();
-      setRequireURL(url);
-      $.get("/v1/t/cancel", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
-        setResponse(result);
-        var response = JSON.parse(result);
-        if (response["code"] === 0) {
-          setTripState("4")
-        }
-      });
-    });
-
-    // 开始行程
-    $('#v1_trip_start').click(function () {
-      var url = hostURL+"/v1/t/start?session="+getSession()+"&ordernumber="+getOrdernumber();
-      setRequireURL(url);
-      $.get("/v1/t/start", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
-        setResponse(result);
-        var response = JSON.parse(result);
-        if (response["code"] === 0) {
           setTripState("1")
         }
       });
     });
 
     // 结束行程
-    $('#v1_trip_stop').click(function () {
-      var url = hostURL+"/v1/t/stop?session="+getSession()+"&ordernumber="+getOrdernumber();
+    $('#v1_trip_end').click(function () {
+      var url = hostURL+"/v1/t/end?session="+getSession()+"&ordernumber="+getOrdernumber();
       setRequireURL(url);
-      $.get("/v1/t/stop", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+      $.get("/v1/t/end", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
         setResponse(result);
         var response = JSON.parse(result);
         if (response["code"] === 0) {
@@ -232,65 +184,50 @@
     });
 
     // 发出求救
-    $('#v1_trip_sos_start').click(function () {
-      var url = hostURL+"/v1/t/sos/start?session="+getSession()+"&ordernumber="+getOrdernumber();
+    $('#v1_trip_sos').click(function () {
+      var url = hostURL+"/v1/t/sos?session="+getSession()+"&ordernumber="+getOrdernumber();
       setRequireURL(url);
-      $.get("/v1/t/sos/start", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+      $.get("/v1/t/sos", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
         setResponse(result);
         var response = JSON.parse(result);
         if (response["code"] === 0) {
-          setTripState("3")
-        }
-      });
-    });
-    
-    // 解除求救
-    $('#v1_trip_sos_stop').click(function () {
-      var url = hostURL+"/v1/t/sos/stop?session="+getSession()+"&ordernumber="+getOrdernumber();
-      setRequireURL(url);
-      $.get("/v1/t/sos/stop", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
-        setResponse(result);
-        var response = JSON.parse(result);
-        if (response["code"] === 0) {
-          setTripState("1")
+          console.log('已经发出求救信号')
         }
       });
     });
 
     // 获取行程信息
-    $('#v1_trip_info_get').click(function () {
-      var url = hostURL+"/v1/t/info/get?session="+getSession()+"&ordernumber="+getOrdernumber();
+    $('#v1_trip_info').click(function () {
+      var url = hostURL+"/v1/t/info?session="+getSession()+"&ordernumber="+getOrdernumber();
       setRequireURL(url);
-      $.get("/v1/t/info/get", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+      $.get("/v1/t/info", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
         setResponse(result);
         var response = JSON.parse(result);
         if (response["code"] === 0) {
-          setTripDestination(response["info"]["destination"]);
-          setTripTool(response["info"]["tool"]);
           setTripState(response["info"]["state"]);
         }
       });
     });
 
-    // 更新行程信息
-    $('#v1_trip_info_update').click(function () {
-      var url = hostURL+"/v1/t/info/update?session="+getSession()+"&ordernumber="+getOrdernumber()+"&destination="+getTripDestination()+"&tool="+getTripTool();
+    // 获取行程轨迹
+    $('#v1_trip_polyline').click(function () {
+      var url = hostURL+"/v1/t/polyline?session="+getSession()+"&ordernumber="+getOrdernumber();
       setRequireURL(url);
-      $.get("/v1/t/info/update", {'session': getSession(), ordernumber: getOrdernumber(), destination: getTripDestination(), tool: getTripTool()}, function(result){
+      $.get("/v1/t/polyline", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
         setResponse(result);
-        var response = JSON.parse(result);
-        if (response["code"] === 0) {
-          setTripDestination(getTripDestination());
-          setTripTool(getTripTool());
-        }
+        //var response = JSON.parse(result);
+        //if (response["code"] === 0) {
+          //setTripDestination(getTripDestination());
+          //setTripTool(getTripTool());
+        //}
       });
     });
 
-    // 获取行程轨迹
-    $('#v1_trip_location_all').click(function () {
-      var url = hostURL+"/v1/t/location/all?session="+getSession()+"&ordernumber="+getOrdernumber();
+    // 获取行程日志
+    $('#v1_trip_logs').click(function () {
+      var url = hostURL+"/v1/t/logs?session="+getSession()+"&ordernumber="+getOrdernumber();
       setRequireURL(url);
-      $.get("/v1/t/location/all", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
+      $.get("/v1/t/logs", {'session': getSession(), ordernumber: getOrdernumber()}, function(result){
         setResponse(result);
         //var response = JSON.parse(result);
         //if (response["code"] === 0) {
