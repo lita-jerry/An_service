@@ -100,14 +100,6 @@ router.get('/info', function(req, res, next) {
 
     if (sessionCheck && ordernumberCheck) {
         require('./APIController').getTripInfo(session, ordernumber, (err, result) => {
-            var response = { 
-                code: err ? err.code : 0, 
-                msg : err ? err.msg : '查询成功', 
-                info: err ? null : JSON.parse(result)
-            };
-            res.send(JSON.stringify(response));
-        });
-        require('./APIController').getTripInfo(session, ordernumber, (err, result) => {
             if (err) {
                 res.send(JSON.stringify({code: err.code, msg: err.msg}));
             } else {
@@ -157,7 +149,8 @@ router.get('/logs', function(req, res, next) {
             if (err) {
                 res.send(JSON.stringify({code: err.code, msg: err.msg, polyline: null}));
             } else {
-                res.send(JSON.stringify({code: 0, msg: '行程日志获取成功', polyline: JSON.parse(result)}));
+                console.log(JSON.parse(result));
+                res.send(JSON.stringify({code: 0, msg: '行程日志获取成功', logs: JSON.parse(result)}));
             }
         });
     } else {

@@ -163,9 +163,11 @@ module.exports = class Model {
                         callback(err);
                     } else if (result.length > 0) {
                         callback(null, 
-                            result[0]['user_id'], 
-                            result[0]['state'], 
-                            result[0]['created_time']);
+                            {
+                                userid: result[0]['user_id'], 
+                                state: result[0]['state'], 
+                                created_time: result[0]['created_time']
+                            });
                     } else {
                         callback('无此行程订单');
                     }
@@ -196,7 +198,7 @@ module.exports = class Model {
                                 created_time: currentValue['created_time']
                             }
                         });
-                        callback(null, JSON.stringify(callbackValue));
+                        callback(null, callbackValue);
                     }
                 }
             }
@@ -225,7 +227,7 @@ module.exports = class Model {
                                 created_time: currentValue['created_time']
                             }
                         });
-                        callback(null, JSON.stringify(callbackValue));
+                        callback(null, callbackValue);
                     }
                 }
             }

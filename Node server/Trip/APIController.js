@@ -253,7 +253,7 @@ var getTripInfo = function(session, ordernumber, callback) {
                     _callback(null, JSON.stringify({
                         state: data.state,
                         screated_time: data.created_time
-                    }))
+                    }));
                 }
             });
         }
@@ -299,7 +299,7 @@ var getTripPolyline = function(session, ordernumber, callback) {
                 } else if (data.state === 2) {
                     _callback(9005, '无效操作,该行程已经结束');
                 } else {
-                    _callback(null, null);
+                    _callback(null);
                 }
             });
         },
@@ -309,7 +309,7 @@ var getTripPolyline = function(session, ordernumber, callback) {
                 if (err) {
                     _callback(9006, err);
                 } else {
-                    _callback(null, data);
+                    _callback(null, JSON.stringify(data));
                 }
             });
         }
@@ -355,7 +355,7 @@ var getTripLogs = function(session, ordernumber, callback) {
                 } else if (data.state === 2) {
                     _callback(9005, '无效操作,该行程已经结束');
                 } else {
-                    _callback(null, null);
+                    _callback(null);
                 }
             });
         },
@@ -365,7 +365,7 @@ var getTripLogs = function(session, ordernumber, callback) {
                 if (err) {
                     _callback(9006, err);
                 } else {
-                    _callback(null, data);
+                    _callback(null, JSON.stringify(data));
                 }
             });
         }
@@ -446,6 +446,7 @@ exports.socketDisconnect = socketDisconnect;
 exports.socketReconnect = socketReconnect;
 exports.end = end;
 exports.SOS = SOS;
+exports.getTripInfo = getTripInfo;
 exports.getTripPolyline = getTripPolyline;
 exports.getTripLogs = getTripLogs;
 exports.uploadTripLocation = uploadTripLocation;
