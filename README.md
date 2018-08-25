@@ -40,3 +40,7 @@ APP端计划采用Weex框架实现安卓与iOS端；后端采用Flask支撑，�
 - 2，前端实现方案修改为[Taro](https://github.com/NervJS/taro)
 - 3，位置上传改为自动
 - 4，前端初步使用微信小程序
+
+2018年08月25日:
+- 1，因为Socket.io的局限性，后端修改为[Pomelo框架](https://github.com/NetEase/pomelo)框架，改为WSS协议
+- 2，原Node.js中Controller中文件仍可以复用
