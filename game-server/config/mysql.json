@@ -1,0 +1,23 @@
+{
+    "development":
+      {
+        "connectionLimit" : 100,
+        "connectTimeout"  : 10000,
+        "acquireTimeout"  : 10000,
+        "host"            : "localhost",
+        "user"            : "root",
+        "password"        : "password",
+        "port"            : "3306",
+        "database"        : "an"
+      },
+      "production":{
+        "connectionLimit" : 100,
+        "connectTimeout"  : 10000,
+        "acquireTimeout"  : 10000,
+        "host"            : "localhost",
+        "user"            : "root",
+        "password"        : "password",
+        "port"            : "3306",
+        "database"        : "an"
+      }
+  }
