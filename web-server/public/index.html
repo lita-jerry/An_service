@@ -26,10 +26,13 @@
           port: port,
           log: true
         }, function() {
-        pomelo.request("connector.entryHandler.entry", "hello pomelo", function(data) {
-            alert(data.msg);
-          });
+            console.log('pomelo client 初始化成功')
         });
+      }
+      function show2() {
+        pomelo.request("connector.entryHandler.entry", "hello pomelo", function(data) {
+              console.log(data);
+          });
       }
     </script>
   </head>
@@ -51,6 +54,7 @@
       </div>
       <div class="g-button">
         <input id="test" type="button" value="Test Game Server" onclick="show()"/>
+        <input id="test" type="button" value="Test Game Server" onclick="show2()"/>
       </div>
     </div>
   </body>

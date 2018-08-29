@@ -33,12 +33,13 @@ user 用户表
 
 | 字段名  |  注释  |  类型  |  Key  |  Null  |
 | ------------ | ------------ | ------------ | ------------ | ------------ |
-|  id  |  用户id  |  int(10) unsigned  |  PRI  |  NO  |
-|  nick_name  |  昵称  |  char(32)  |    |  YES  |
-|  avatar_url  |  用户头像url  |  char(64)  |    |  YES  |
-|  mobile  |  手机号  |  char(16)  |    |  YES  |
-|  created_time  |  发生时间  |  timestamp  |    |  NO  |
-|  last_updated_time  |  最后更新时间  |  datetime  |    |  NO  |
+|  id  |  用户id  |  INTEGER unsigned  |  PRI  |  NO  |
+|  nick_name  |  昵称  |  CHAR(64)  |    |  YES  |
+|  avatar_url  |  用户头像url  |  CHAR(255)  |    |  YES  |
+|  type  |  用户类型: <br>1=临时(未绑定第三方登录)用户; <br>2=已绑定第三方登录用户;  |  INTEGER  |    |  NO  |
+|  state  |  用户状态: <br>1=正常; <br>2=作废(临时用户迁移后); <br>3=封禁;  |  INTEGER  |    |  NO  |
+|  created_time  |  发生时间  |  TIMESTAMP  |    |  NO  |
+|  last_updated_time  |  最后更新时间  |  DATETIME  |    |  NO  |
 <br>
 
 user_bind 用户第三方绑定表
@@ -59,7 +60,7 @@ user_online_state 用户在线状态表
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 |  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
 |  user_id  |  用户id  |  int(11)  |  UNI  |  NO  |
-|  type  |  登录类型: <br>1, 手机验证码; <br>2, 微信小程序  |  int(11)  |    |  NO  |
+|  type  |  登录类型: <br>1, 临时用户; <br>2, 微信小程序  |  int(11)  |    |  NO  |
 |  client_session  |  与客户端会话  |  char(32)  |  UNI  |  NO  |
 |  server_session  |  与第三方服务端会话  |  char(64)  |    |  YES  |
 |  created_time  |  发生时间  |  timestamp  |    |  NO  |
