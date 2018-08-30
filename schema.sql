@@ -48,7 +48,7 @@ CREATE TABLE `user_online_state` (
   `platform` INTEGER NOT NULL,
   `state` INTEGER NOT NULL,
   `client_token` CHAR(32) UNIQUE NOT NULL,
-  `server_session` CHAR(64),
+  `session_key` CHAR(64),
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)

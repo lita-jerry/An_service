@@ -19,6 +19,30 @@ module.exports = function(app) {
    * @return {Void}
    */
   Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
+    var self = this;
+
+    if (!msg.code) {
+      next(null, {code: 200, error: true, msg: '参数错误:缺少code参数'});
+    }
+
+    async.waterfall([
+      function (_cb) {
+        // 获取openid与session_key
+        userUtil.weappJScode2Session(msg.code, function(_err, _openid, _sessionKey){
+          if (_err) {
+            _cb(_err);
+          } else {
+            _cb(null, _openid, _sessionKey);
+          }
+        });
+      },
+      function(_openid, _sessionKey, _cb) {
+        // 查询openid对应的userid
+      }],
+      function (_err, _userid, _token) {
+        
+      });
+    
     next(null, {code: 200, msg: 'game server is ok.'});
   };
 
@@ -109,16 +133,19 @@ module.exports = function(app) {
     }
     
     // 注册新用户
-    this.app.rpc.user.userRemote.setUser(session, null, '昵称', 'www.baidu.com', 1, 1, function(){});
-
-    // app.rpc.user.userRemote.setUser(null, '昵称', 'www.baidu.com', 1, 1, function(){});
-
-    // self.app.rpc.user.userRemote.doTempLogin(session, '临时用户', null, 1, 1, function(err, uid, token){
-    //   if (err) {
-    //     next(null, {code: 200, error: true, msg: 'temp login error:'+err});
-    //   } else {
-    //     session.bind(uid);
-    //     next(null, {code: 200, msg: 'temp login success.', token: token});
-    //   }
-    // });
+    self.app.rpc.user.userRemote.setUser(session, null, '临时用户', null, 1, 1, function(err, uid){
+      if (err) {
+        next(null, {code: 200, error: true, msg: err});
+      } else {
+        // 登录
+        var token = userUtil.makeOnlineSession();
+        self.app.rpc.user.userRemote.setUserOnlineState(session, uid, 1, 1, token, null, function(_err){
+          if (_err) {
+            next(null, {code: 200, error: true, msg: _err});
+          } else {
+            next(null, {code: 200, error: false, msg: '临时用户登录成功', data: {token: token}});
+          }
+        });
+      }
+    });
   };

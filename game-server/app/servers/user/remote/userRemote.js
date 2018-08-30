@@ -13,51 +13,6 @@ var UserRemote = function(app) {
 };
 
 /**
- * 创建用户
- *
- * @param {String} username 用户昵称
- * @param {String} avatar 头像url
- * @param {Number} type 类型 1:临时; 2:正式;
- * @param {Number} state 状态 1:正常; 2:作废(过渡第三方); 3:封禁
- *
- */
-UserRemote.prototype.doTempLogin = function(username, avatar, type, state, cb) {
-	async.waterfall([
-		function (_cb) {
-			mysql.execute(
-				'INSERT INTO user (nick_name, avatar_url, type, state) VALUES(?,?,?, ?)',
-				[username, avatar, type, state],
-				function(_err, _result) {
-					if (_err) {
-						_cb('创建临时用户失败', null);
-					}
-					_cb(null, _result['insertId']);
-				});
-		},
-		function (_userid, _cb) {
-			var _token = userUtil.makeOnlineSession();
-			mysql.execute(
-				'INSERT INTO user_online_state SET user_id=?,type=1, state=1, client_session=? ON DUPLICATE KEY UPDATE type=1,client_session=?',
-				[_userid, _token, _token],
-				function (_err, _result) {
-					if (!_err && !!_result['insertId']) {
-						_cb(null, _userid, _token);
-					} else {
-						_cb('登录失败', null, null);
-					}
-				}
-			);
-		}
-	], function (_err, _userid, _token) {
-		if (_err) {
-			cb(_err, null, null);
-		} else {
-			cb(null, _userid, _token)
-		}
-	});
-};
-
-/**
  * 设置用户信息
  * 
  * @param {String} userid 用户id,如果为null则添加新用户
@@ -83,12 +38,18 @@ UserRemote.prototype.setUser = function(userid, nickname, avatar, type, state, c
 		executeParams = [nickname, avatar, type, state, userid];
 	} else {
 		// 添加用户信息
-		executeSQL = 'INSERT INTO user nick_name=?, avatar_url=?, type=?, state=?';
+		executeSQL = 'INSERT INTO user SET nick_name=?, avatar_url=?, type=?, state=?';
 		executeParams = [nickname, avatar, type, state];
 	}
-	console.log('到这里了', executeSQL, executeParams);
+	
 	mysql.execute(executeSQL, executeParams, function(err, result){
-		console.log(err, result);
+		if (err) {
+			cb(err, null);
+		} else if (result['affectedRows'] < 1) {
+			cb('SQL语句执行未生效', null);
+		} else {
+			cb(null, !!userid ? userid : result['insertId']);
+		}
 	});
 }
 
