@@ -45,8 +45,9 @@ DELIMITER ;
 CREATE TABLE `user_online_state` (
   `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INTEGER UNIQUE NOT NULL,
-  `type` INTEGER NOT NULL,
-  `client_session` CHAR(32) UNIQUE NOT NULL,
+  `platform` INTEGER NOT NULL,
+  `state` INTEGER NOT NULL,
+  `client_token` CHAR(32) UNIQUE NOT NULL,
   `server_session` CHAR(64),
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),

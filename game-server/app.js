@@ -1,6 +1,7 @@
 
 var fs = require('fs');
 var pomelo = require('pomelo');
+var mysql = require('./app/util/MySQL')
 // var dispatcher = require('./app/util/dispatcher');
 
 // route definition for user server

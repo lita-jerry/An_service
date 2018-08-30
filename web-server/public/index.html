@@ -34,6 +34,11 @@
               console.log(data);
           });
       }
+      function show3() {
+        pomelo.request("connector.entryHandler.entry", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
+              console.log(data);
+          });
+      }
     </script>
   </head>
   <body>
@@ -55,6 +60,7 @@
       <div class="g-button">
         <input id="test" type="button" value="Test Game Server" onclick="show()"/>
         <input id="test" type="button" value="Test Game Server" onclick="show2()"/>
+        <input id="test" type="button" value="Test Game Server" onclick="show3()"/>
       </div>
     </div>
   </body>

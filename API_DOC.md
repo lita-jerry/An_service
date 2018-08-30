@@ -60,9 +60,10 @@ user_online_state 用户在线状态表
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 |  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
 |  user_id  |  用户id  |  int(11)  |  UNI  |  NO  |
-|  type  |  登录类型: <br>1, 临时用户; <br>2, 微信小程序  |  int(11)  |    |  NO  |
-|  client_session  |  与客户端会话  |  char(32)  |  UNI  |  NO  |
-|  server_session  |  与第三方服务端会话  |  char(64)  |    |  YES  |
+|  platform  |  登录平台: <br>1, 微信小程序  |  INTEGER  |    |  NO  |
+|  state  |  状态: <br>1, 生效中; <br>2, 过期  |  INTEGER  |    |  NO  |
+|  client_token  |  客户端token  |  char(32)  |  UNI  |  NO  |
+|  session_key  |  与第三方服务端会话  |  char(64)  |    |  YES  |
 |  created_time  |  发生时间  |  timestamp  |    |  NO  |
 |  last_updated_time  |  最后更新时间  |  datetime  |    |  NO  |
 <br>
