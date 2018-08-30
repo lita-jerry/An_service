@@ -86,8 +86,8 @@ UserRemote.prototype.setUser = function(userid, nickname, avatar, type, state, c
 		executeSQL = 'INSERT INTO user nick_name=?, avatar_url=?, type=?, state=?';
 		executeParams = [nickname, avatar, type, state];
 	}
-
-	sql.execute(executeSQL, executeParams, function(err, result){
+	console.log('到这里了', executeSQL, executeParams);
+	mysql.execute(executeSQL, executeParams, function(err, result){
 		console.log(err, result);
 	});
 }

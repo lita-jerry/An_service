@@ -86,20 +86,12 @@ module.exports = function(app) {
         });
         // 恢复登录 ---- end
     } else {
-      // 下发临时登录Token
-      self.app.rpc.user.userRemote.doTempLogin(session, '临时用户', null, 1, 1, function(err, uid, token){
-        if (err) {
-          next(null, {code: 200, error: true, msg: 'temp login error:'+err});
-        } else {
-          session.bind(uid);
-          next(null, {code: 200, msg: 'temp login success.', token: token});
-        }
-      });
+      next(null, {code: 200, error: true, msg: '参数错误:缺少token参数'});
     }
   };
 
   /**
-   * 临时登录,Token不会过期
+   * 临时登录,新建用户并下发Token,Token不会过期
    * 
    * @param  {Object}   msg     request message
    * @param  {Object}   session current session object
@@ -116,13 +108,17 @@ module.exports = function(app) {
       return;
     }
     
-    // 下发临时登录Token
-    self.app.rpc.user.userRemote.doTempLogin(session, '临时用户', null, 1, 1, function(err, uid, token){
-      if (err) {
-        next(null, {code: 200, error: true, msg: 'temp login error:'+err});
-      } else {
-        session.bind(uid);
-        next(null, {code: 200, msg: 'temp login success.', token: token});
-      }
-    });
+    // 注册新用户
+    this.app.rpc.user.userRemote.setUser(session, null, '昵称', 'www.baidu.com', 1, 1, function(){});
+
+    // app.rpc.user.userRemote.setUser(null, '昵称', 'www.baidu.com', 1, 1, function(){});
+
+    // self.app.rpc.user.userRemote.doTempLogin(session, '临时用户', null, 1, 1, function(err, uid, token){
+    //   if (err) {
+    //     next(null, {code: 200, error: true, msg: 'temp login error:'+err});
+    //   } else {
+    //     session.bind(uid);
+    //     next(null, {code: 200, msg: 'temp login success.', token: token});
+    //   }
+    // });
   };
