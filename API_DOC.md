@@ -48,7 +48,7 @@ user_bind 用户第三方绑定表
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 |  id  |  记录id  |  int(10) unsigned  |  PRI  |  NO  |
 |  user_id  |  用户id  |  int(11)  |    |  NO  |
-|  type  |  绑定类型: <br>1, 微信小程序  |  int(11)  |    |  NO  |
+|  platform  |  绑定平台: <br>1, 微信小程序  |  int(11)  |    |  NO  |
 |  open_id  |  所在平台的用户id  |  char(32)  |    |  NO  |
 |  created_time  |  发生时间  |  timestamp  |    |  NO  |
 |  last_updated_time  |  最后更新时间  |  datetime  |    |  NO  |

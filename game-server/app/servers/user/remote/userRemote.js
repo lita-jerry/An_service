@@ -12,6 +12,8 @@ var UserRemote = function(app) {
 	this.app = app;
 };
 
+// 用户信息 ------ Start ------
+
 /**
  * 设置用户信息
  * 
@@ -92,6 +94,10 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
 	)
 };
 
+// 用户信息 ------ End ------
+
+// 用户登录 ------ Start ------
+
 /**
  * 设置用户登录状态
  * 
@@ -119,3 +125,44 @@ UserRemote.prototype.setUserOnlineState = function(userid, platform, state, toke
 		}
 	);
 };
+
+// 用户登录 ------ End ------
+
+// 用户在线状态 ------ Start ------
+
+/**
+ * 根据第三方openid获取用户id
+ * 
+ * @param {Number} platform 平台 1:小程序
+ * @param {String} openid 开放平台唯一id
+ */
+UserRemote.prototype.getUseridByOpenid = function(platform, openid, cb) {
+}
+
+/**
+ * 用户绑定第三方平台
+ * 
+ * @param {String} userid 用户id
+ * @param {Number} platform 平台 1:小程序
+ * @param {String} openid 开放平台唯一id
+ */
+UserRemote.prototype.bindingPlatformForUser = function(userid, platform, openid, cb) {
+	mysql.execute(
+		'INSERT INTO user_bind SET user_id=?,platform=?, open_id=?',
+		[userid, platform, openid],
+		function (_err, _result) {
+
+			var err = null;
+
+			if (_err) {
+				err = _err;
+			} else if (!_result['insertId']) {
+				err = 'database error: bindingPlatformForUser result insertId == null';
+			}
+
+			cb(err);
+		}
+	);
+}
+
+// 用户在线状态 ------ End ------

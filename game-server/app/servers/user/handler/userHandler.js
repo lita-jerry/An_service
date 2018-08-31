@@ -38,6 +38,9 @@ module.exports = function(app) {
       },
       function(_openid, _sessionKey, _cb) {
         // 查询openid对应的userid
+        // 绑定第三方平台
+        // 进行数据迁移
+        // 用户登录
       }],
       function (_err, _userid, _token) {
         
