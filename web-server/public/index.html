@@ -30,12 +30,12 @@
         });
       }
       function show2() {
-        pomelo.request("user.userHandler.tempLogin", null, function(data) {
+        pomelo.request("user.userHandler.loginByOtherPlatform", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
               console.log(data);
           });
       }
       function show3() {
-        pomelo.request("connector.entryHandler.entry", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
+        pomelo.request("user.userHandler.relogin", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
               console.log(data);
           });
       }
@@ -58,9 +58,9 @@
         <a href="https://github.com/NetEase/pomelo">https://github.com/NetEase/pomelo</a>
       </div>
       <div class="g-button">
-        <input id="test" type="button" value="Test Game Server" onclick="show()"/>
-        <input id="test" type="button" value="Test Game Server" onclick="show2()"/>
-        <input id="test" type="button" value="Test Game Server" onclick="show3()"/>
+        <input id="test" type="button" value="Pomelo 初始化" onclick="show()"/>
+        <input id="test" type="button" value="第三方登录" onclick="show2()"/>
+        <input id="test" type="button" value="恢复登录" onclick="show3()"/>
       </div>
     </div>
   </body>

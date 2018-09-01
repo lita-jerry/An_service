@@ -21,7 +21,7 @@ var UserRemote = function(app) {
  * @param {String} nickname 用户昵称
  * @param {String} avatar 用户头像url
  * @param {Number} state 状态 1:正常; 2:作废(过渡第三方); 3:封禁
- * @param {Function} cb 回调函数 err:错误信息,如果为null表示执行成功
+ * @param {Function} cb 回调函数 err, userid
  */
 UserRemote.prototype.setUser = function(userid, nickname, avatar, state, cb) {
 	
@@ -57,6 +57,7 @@ UserRemote.prototype.setUser = function(userid, nickname, avatar, state, cb) {
  * 根据用户id获取用户信息
  * 
  * @param {String} userid 用户id
+ * @param {Function} cb 回调函数 err, hasData, nickName, avatar, state, createdTime, lastUpdatedTime
  */
 UserRemote.prototype.getUserByUserid = function(userid, cb) {
 	mysql.execute(
@@ -64,9 +65,9 @@ UserRemote.prototype.getUserByUserid = function(userid, cb) {
 		[userid],
 		function (_err, _result) {
 			if (_err) {
-				cb(_err);
+				cb(_err, false);
 			} else if (_result.length < 1) {
-				cb('无此用户');
+				cb(null, false); // 无数据
 			} else {
 				var nickName = _result[0]['nick_name'];
 				var avatar = _result[0]['avatar_url'];
@@ -74,7 +75,7 @@ UserRemote.prototype.getUserByUserid = function(userid, cb) {
 				var createdTime = _result[0]['created_time'];
 				var lastUpdatedTime = _result[0]['last_updated_time'];
 				
-				cb(null, nickName, avatar, state, createdTime, lastUpdatedTime);
+				cb(null, true, nickName, avatar, state, createdTime, lastUpdatedTime);
 			}
 		}
 	);
@@ -84,6 +85,7 @@ UserRemote.prototype.getUserByUserid = function(userid, cb) {
  * 根据登录Token获取用户登录信息
  *
  * @param {String} token 登录Token
+ * @param {Function} cb 回调函数 err, hasData, uid, platform, state, sessionKey, createdTime, lastUpdatedTime
  *
  */
 UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
@@ -93,28 +95,20 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
 		[token],
 		function (_err, _result) {
 
-			var err = null;
-			var uid = null;
-			var platform = null;
-			var state = null;
-			var sessionKey = null;
-			var createdTime = null;
-			var lastUpdatedTime = null;
-
 			if (_err) {
-				err = _err;
+				cb(_err, false);
 			} else if (_result.length < 1) {
-				err = 'Token无效';
+				cb(null, false); // 无数据
 			} else {
-				uid = _result[0]['user_id'];
-				platform = _result[0]['platform'];
-				state = _result[0]['state'];
-				sessionKey = _result[0]['server_session'];
-				createdTime = _result[0]['created_time'];
-				lastUpdatedTime = _result[0]['last_updated_time'];
-			}
+				var uid = _result[0]['user_id'];
+				var platform = _result[0]['platform'];
+				var state = _result[0]['state'];
+				var sessionKey = _result[0]['server_session'];
+				var createdTime = _result[0]['created_time'];
+				var lastUpdatedTime = _result[0]['last_updated_time'];
 
-			cb(err, uid, platform, state, sessionKey, createdTime, lastUpdatedTime);
+				cb(null, true, uid, platform, state, sessionKey, createdTime, lastUpdatedTime);
+			}
 		}
 	)
 };
@@ -131,6 +125,7 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
  * @param {Number} state 状态 1:生效中; 2:过期
  * @param {String} client 客户端Token
  * @param {String} server 第三方服务器Session key
+ * @param {Function} cb err
  */
 UserRemote.prototype.setUserOnlineState = function(userid, platform, state, token, sessionKey, cb) {
 	mysql.execute(
@@ -160,8 +155,23 @@ UserRemote.prototype.setUserOnlineState = function(userid, platform, state, toke
  * 
  * @param {Number} platform 平台 1:小程序
  * @param {String} openid 开放平台唯一id
+ * @param {Function} cb 回调函数 err, hasData, userid
  */
 UserRemote.prototype.getUseridByOpenid = function(platform, openid, cb) {
+	mysql.execute(
+		'SELECT * FROM user_bind WHERE platform=? AND open_id=?',
+		[platform, openid],
+		function (_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length < 1) {
+				cb(null, false); // 无数据
+			} else {
+				var userid = _result[0]['user_id'];
+				cb(null, true, userid);
+			}
+		}
+	);
 }
 
 /**
@@ -170,6 +180,7 @@ UserRemote.prototype.getUseridByOpenid = function(platform, openid, cb) {
  * @param {String} userid 用户id
  * @param {Number} platform 平台 1:小程序
  * @param {String} openid 开放平台唯一id
+ * @param {Function} cb err
  */
 UserRemote.prototype.bindingPlatformForUser = function(userid, platform, openid, cb) {
 	mysql.execute(

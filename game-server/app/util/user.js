@@ -28,6 +28,10 @@ var makeOnlineSession = function() {
  * @param {(err: String, openid: String, session_key: String)} callback 
  */
 var weappJScode2Session = function(code, callback) {
+
+    // 测试
+    callback(null, 'oljeP4nTPoS-njCTO1wTgznkfG_U', '123123');
+    return;
     
     var config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../config/weapp.json'))).development;
 

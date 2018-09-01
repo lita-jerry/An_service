@@ -21,11 +21,6 @@ module.exports = function(app) {
   Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
     var self = this;
 
-    if (!msg.code) {
-      next(null, {code: 200, error: true, msg: '参数错误:缺少code参数'});
-      return;
-    }
-
     // 检查当前用户
     if (!!session.uid) {
       console.log('用户', session.uid, '已经登录, 无需再次登录')
@@ -33,10 +28,28 @@ module.exports = function(app) {
       return;
     }
 
+    // 检查参数
+    if (!msg.code) {
+      next(null, {code: 200, error: true, msg: '参数错误:缺少code参数'});
+      return;
+    }
+    if (!msg.nickName) {
+      next(null, {code: 200, error: true, msg: '参数错误:缺少nickName参数'});
+      return;
+    }
+    if (!msg.avatarURL) {
+      next(null, {code: 200, error: true, msg: '参数错误:缺少avatarURL参数'});
+      return;
+    }
+
+    var code = msg.code;
+    var nickName = msg.nickName;
+    var avatarURL = msg.avatarURL;
+
     async.waterfall([
       function (_cb) {
         // 获取openid与session_key
-        userUtil.weappJScode2Session(msg.code, function(_err, _openid, _sessionKey){
+        userUtil.weappJScode2Session(code, function(_err, _openid, _sessionKey){
           if (_err) {
             _cb(_err);
           } else {
@@ -46,15 +59,78 @@ module.exports = function(app) {
       },
       function(_openid, _sessionKey, _cb) {
         // 查询openid对应的userid
-        // 如果没有对应的userid,则创建新用户
+        self.app.rpc.user.userRemote.getUseridByOpenid(session, 1, _openid, function(_err, _hadData, _userid){
+          if (_err) {
+            _cb(_err);
+          } else if (_hadData) {
+            _cb(null, _userid, _openid, _sessionKey);
+          } else {
+            _cb(null, null, _openid, _sessionKey); // 未绑定
+          }
+        });
+      },
+      function(_userid, _openid, _sessionKey, _cb) {
+        // 如果没有对应的userid,则创建新用户,否则直接跳到下一个处理函数
+        if (!_userid) {
+          self.app.rpc.user.userRemote.setUser(session, null, nickName, avatarURL, 1, function(_err, _userid){
+            if (_err) {
+              _cb(_err);
+            } else {
+              // 需要绑定
+              _cb(null, true, _userid, _openid, _sessionKey);
+            }
+          });
+        } else {
+          // 已经绑定了
+          _cb(null, false, _userid, _openid, _sessionKey);
+        }
+      },
+      function(_needBinding, _userid, _openid, _sessionKey, _cb) {
         // 用户绑定第三方
+        if (_needBinding) {
+          self.app.rpc.user.userRemote.bindingPlatformForUser(session, _userid, 1, _openid, function(_err){
+            if (_err) {
+              _cb(_err);
+            } else {
+              _cb(null, _userid, _sessionKey);
+            }
+          });
+        } else {
+          // 不需要绑定
+          _cb(null, _userid, _sessionKey);
+        }
+      },
+      function(_userid, _sessionKey, _cb) {
         // 用户登录
+        var token = userUtil.makeOnlineSession();
+        // 此处的platform设置为1,今后多平台需要改成 platform 变量
+        self.app.rpc.user.userRemote.setUserOnlineState(session, _userid, 1, 1, token, _sessionKey, function(_err){
+          if (_err) {
+            _cb(_err);
+          } else {
+            _cb(null, _userid, token);
+          }
+        });
+      },
+      function(_userid, token, _cb){
+        // 断开已经登录此号的Session, 绑定uid到新的Session
+        var sessionService = self.app.get('sessionService');
+        // duplicate log in
+        console.log(_userid, sessionService);
+        console.log(sessionService.getByUid(_userid));
+        if( !! sessionService.getByUid(_userid)) {
+          sessionService.getByUid(_userid).unbind();
+        }
+        session.bind(_userid);
+        _cb(null, token);
       }],
-      function (_err, _userid, _token) {
-        
+      function (_err, _token) {
+        if (!!_err) {
+          next(null, {code: 200, error: true, msg: _err});
+        } else {
+          next(null, {code: 200, error: false, msg: '第三方登录成功', data: {token: _token}});
+        }
       });
-    
-    next(null, {code: 200, msg: 'game server is ok.'});
   };
 
   /**
@@ -75,16 +151,19 @@ module.exports = function(app) {
       return;
     }
 
+    // 参数检查
     if (!msg.token) {
       next(null, {code: 200, error: true, msg: '参数错误:缺少token参数'});
       return;
     }
 
+    var token = msg.token;
+
     // 恢复登录 ---- start
     async.waterfall([
       function (_cb) {
         // 校验Token
-        self.app.rpc.user.userRemote.getUseridByToken(session, msg.token, function(_err, _uid, _platform, _state) {
+        self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
           if (_err) {
             _cb(_err);
           } else {
@@ -98,20 +177,20 @@ module.exports = function(app) {
       },
       function (_uid ,_cb) {
         // 生成新Token
-        var token = userUtil.makeOnlineSession();
+        var _token = userUtil.makeOnlineSession();
         // 此处的platform设置为1,今后多平台需要改成 platform 变量
-        self.app.rpc.user.setUserOnlineState(session, _uid, 1, 1, token, null, function(_err){
+        self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, _token, null, function(_err){
           if (_err) {
             _cb(_err);
           } else {
-            _cb(null, _uid, token);
+            _cb(null, _uid, _token);
           }
         });
       },
       function (_uid, _token, _cb) {
         // 断开已经登录此号的Session, 绑定uid到新的Session
         var sessionService = self.app.get('sessionService');
-        //duplicate log in
+        // duplicate log in
         if( !! sessionService.getByUid(uid)) {
           sessionService.getByUid(uid).unbind();
         }
