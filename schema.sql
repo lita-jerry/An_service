@@ -11,7 +11,6 @@ CREATE TABLE `user` (
   `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `nick_name` CHAR(64),
   `avatar_url`  CHAR(255),
-  `type` INTEGER NOT NULL,
   `state` INTEGER NOT NULL,
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),

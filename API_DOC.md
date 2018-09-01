@@ -36,8 +36,7 @@ user 用户表
 |  id  |  用户id  |  INTEGER unsigned  |  PRI  |  NO  |
 |  nick_name  |  昵称  |  CHAR(64)  |    |  YES  |
 |  avatar_url  |  用户头像url  |  CHAR(255)  |    |  YES  |
-|  type  |  用户类型: <br>1=临时(未绑定第三方登录)用户; <br>2=已绑定第三方登录用户;  |  INTEGER  |    |  NO  |
-|  state  |  用户状态: <br>1=正常; <br>2=作废(临时用户迁移后); <br>3=封禁;  |  INTEGER  |    |  NO  |
+|  state  |  用户状态: <br>1=正常; <br>3=封禁;  |  INTEGER  |    |  NO  |
 |  created_time  |  发生时间  |  TIMESTAMP  |    |  NO  |
 |  last_updated_time  |  最后更新时间  |  DATETIME  |    |  NO  |
 <br>

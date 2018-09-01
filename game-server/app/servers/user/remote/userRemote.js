@@ -20,11 +20,10 @@ var UserRemote = function(app) {
  * @param {String} userid 用户id,如果为null则添加新用户
  * @param {String} nickname 用户昵称
  * @param {String} avatar 用户头像url
- * @param {Number} type 类型 1:临时; 2:正式;
  * @param {Number} state 状态 1:正常; 2:作废(过渡第三方); 3:封禁
  * @param {Function} cb 回调函数 err:错误信息,如果为null表示执行成功
  */
-UserRemote.prototype.setUser = function(userid, nickname, avatar, type, state, cb) {
+UserRemote.prototype.setUser = function(userid, nickname, avatar, state, cb) {
 	
 	var executeSQL = '';
 	var executeParams = [];
@@ -34,14 +33,13 @@ UserRemote.prototype.setUser = function(userid, nickname, avatar, type, state, c
 		executeSQL = 'UPDATE user SET '+
 									'nick_name=IFNULL(?,nick_name), '+
 									'avatar_url=IFNULL(?,avatar_url), '+
-									'type=IFNULL(?,type), '+
 									'state=IFNULL(?,state) '+
 									'WHERE id=?';
-		executeParams = [nickname, avatar, type, state, userid];
+		executeParams = [nickname, avatar, state, userid];
 	} else {
 		// 添加用户信息
-		executeSQL = 'INSERT INTO user SET nick_name=?, avatar_url=?, type=?, state=?';
-		executeParams = [nickname, avatar, type, state];
+		executeSQL = 'INSERT INTO user SET nick_name=?, avatar_url=?, state=?';
+		executeParams = [nickname, avatar, state];
 	}
 	
 	mysql.execute(executeSQL, executeParams, function(err, result){
@@ -53,6 +51,33 @@ UserRemote.prototype.setUser = function(userid, nickname, avatar, type, state, c
 			cb(null, !!userid ? userid : result['insertId']);
 		}
 	});
+}
+
+/**
+ * 根据用户id获取用户信息
+ * 
+ * @param {String} userid 用户id
+ */
+UserRemote.prototype.getUserByUserid = function(userid, cb) {
+	mysql.execute(
+		'SELECT * FROM user WHERE id=?',
+		[userid],
+		function (_err, _result) {
+			if (_err) {
+				cb(_err);
+			} else if (_result.length < 1) {
+				cb('无此用户');
+			} else {
+				var nickName = _result[0]['nick_name'];
+				var avatar = _result[0]['avatar_url'];
+				var state = _result[0]['state'];
+				var createdTime = _result[0]['created_time'];
+				var lastUpdatedTime = _result[0]['last_updated_time'];
+				
+				cb(null, nickName, avatar, state, createdTime, lastUpdatedTime);
+			}
+		}
+	);
 }
 
 /**
