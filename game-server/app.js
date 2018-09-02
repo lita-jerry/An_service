@@ -55,6 +55,18 @@ app.configure('production|development', function() {
 
 app.configure('production|development', 'user', function() {
   // app.filter(abuseFilter());
+  app.set('connectorConfig',
+    {
+      connector : pomelo.connectors.hybridconnector,
+      heartbeat : 3,
+      useDict : false,
+      useProtobuf : false,
+      ssl: {
+        type: 'wss',
+      	key: fs.readFileSync('../shared/server.key'),
+  			cert: fs.readFileSync('../shared/server.crt')
+      }
+    });
 });
 
 // start app
