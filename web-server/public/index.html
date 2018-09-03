@@ -29,11 +29,19 @@
             console.log('pomelo client 初始化成功')
         });
       }
+
+      function entry() {
+        pomelo.request("connector.entryHandler.entry", {token: '0af81e1dd2784860f39a5a6904c1d2d3', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
+              console.log(data);
+          });
+      }
+
       function show2() {
         pomelo.request("connector.entryHandler.loginByOtherPlatform", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
               console.log(data);
           });
       }
+
       function show3() {
         pomelo.request("connector.entryHandler.relogin", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
               console.log(data);
@@ -59,6 +67,7 @@
       </div>
       <div class="g-button">
         <input id="test" type="button" value="Pomelo 初始化" onclick="show()"/>
+        <input id="test" type="button" value="entry" onclick="entry()"/>
         <input id="test" type="button" value="第三方登录" onclick="show2()"/>
         <input id="test" type="button" value="恢复登录" onclick="show3()"/>
       </div>

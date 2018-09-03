@@ -91,7 +91,7 @@ UserRemote.prototype.getUserByUserid = function(userid, cb) {
 UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
 
 	mysql.execute(
-		'SELECT * FROM user_online_state WHERE client_session=?',
+		'SELECT * FROM user_online_state WHERE client_token=?',
 		[token],
 		function (_err, _result) {
 

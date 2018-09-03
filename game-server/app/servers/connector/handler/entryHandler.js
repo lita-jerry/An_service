@@ -13,13 +13,58 @@ var Handler = function(app) {
 /**
  * New client entry.
  *
- * @param  {Object}   msg     request message
+ * @param  {Object}   msg     request message: login token
  * @param  {Object}   session current session object
  * @param  {Function} next    next step callback
  * @return {Void}
  */
 Handler.prototype.entry = function(msg, session, next) {
-	next(null, {code: 200, msg: 'game server is ok.'});
+	var self = this;
+	// var platform = msg.platform;
+	
+	if (!!session.uid) {
+		console.log('user:', session.uid, ' entry again.')
+		next(null, {code: 200, error: false, msg: 'entry again.'});
+		return;
+	}
+
+	// 参数检查
+	if (!msg.token) {
+		next(null, {code: 200, error: true, msg: '参数错误:缺少token参数'});
+		return;
+	}
+
+	var token = msg.token;
+	var err = false;
+	var msg = '';
+
+	// 校验token
+	self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+		if (_err) {
+			_cb(_err);
+		} else if (!_hasData) {
+			err = true;
+			msg = 'token无效';
+		} else {
+			if (_state !== 1) {
+				err = true;
+				msg = 'token已过期';
+			} else {
+				err = false;
+				msg = 'entry success.'
+			}
+		}
+
+		// 断开已经登录此号的Session, 绑定uid到新的Session
+		var sessionService = self.app.get('sessionService');
+		// duplicate log in
+		if( !! sessionService.getByUid(_uid)) {
+			sessionService.getByUid(_uid).unbind();
+		}
+		session.bind(_uid);
+
+		next(null, {code: 200, error: err, msg: msg});
+	});
 };
 
 /**
@@ -210,8 +255,10 @@ Handler.prototype.relogin = function(msg, session, next) {
 			self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
 				if (_err) {
 					_cb(_err);
+				} else if (!_hasData) {
+					_cb('Token无效')
 				} else {
-					if (state !== 1) {
+					if (_state !== 1) {
 						_cb('Token已过期');
 					} else {
 						_cb(null, _uid);
