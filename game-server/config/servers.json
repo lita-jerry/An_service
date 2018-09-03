@@ -4,7 +4,7 @@
     {"id": "connector-server-1", "host": "127.0.0.1", "port": 3150, "clientHost": "127.0.0.1", "clientPort": 3010, "frontend": true}
     ],
     "user":[
-      {"id":"user-server-1", "host":"127.0.0.1", "port":6150, "clientHost": "127.0.0.1", "clientPort": 6010, "frontend": true}
+      {"id":"user-server-1", "host":"127.0.0.1", "port":6150}
     ]
   },
   "production":{
@@ -12,7 +12,7 @@
     {"id": "connector-server-1", "host": "127.0.0.1", "port": 3150, "clientHost": "127.0.0.1", "clientPort": 3010, "frontend": true}
     ],
     "user":[
-      {"id":"user-server-1", "host":"127.0.0.1", "port":6150, "clientHost": "127.0.0.1", "clientPort": 6010, "frontend": true}
+      {"id":"user-server-1", "host":"127.0.0.1", "port":6150}
     ]
   }
 }

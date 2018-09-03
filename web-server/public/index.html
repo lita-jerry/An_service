@@ -19,7 +19,7 @@
     <script type="text/javascript">
       var pomelo = window.pomelo;
       var host = "127.0.0.1";
-      var port = "6010";
+      var port = "3010";
       function show() {
         pomelo.init({
           host: host,
@@ -30,12 +30,12 @@
         });
       }
       function show2() {
-        pomelo.request("user.userHandler.loginByOtherPlatform", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
+        pomelo.request("connector.entryHandler.loginByOtherPlatform", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
               console.log(data);
           });
       }
       function show3() {
-        pomelo.request("user.userHandler.relogin", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
+        pomelo.request("connector.entryHandler.relogin", {token: '72d80b0f90c637b076ced742c03012cb'}, function(data) {
               console.log(data);
           });
       }
