@@ -1,3 +1,7 @@
+
+var async = require("async");
+var userUtil = require('../../../util/user')
+
 module.exports = function(app) {
   return new Handler(app);
 };
@@ -24,7 +28,20 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {}
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.create = function(msg, session, next) {}
+Handler.prototype.create = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  async.waterfall([
+    function(_cb){
+      // 查询是否有未完成的行程
+    }
+  ],function(_err, _result) {});
+}
 
 /**
  * 结束行程
