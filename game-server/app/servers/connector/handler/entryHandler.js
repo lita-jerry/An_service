@@ -59,8 +59,6 @@ Handler.prototype.entry = function(msg, session, next) {
     var sessionService = self.app.get('sessionService');
     // duplicate log in
     if( !! sessionService.getByUid(_uid)) {
-      console.log(sessionService);
-      console.log(sessionService.getByUid(_uid));
       sessionService.kick(_uid);
     }
     session.bind(_uid);
@@ -285,7 +283,7 @@ Handler.prototype.relogin = function(msg, session, next) {
       var sessionService = self.app.get('sessionService');
       // duplicate log in
       if( !! sessionService.getByUid(uid)) {
-        sessionService.getByUid(uid).unbind();
+        sessionService.kick(_uid);
       }
       session.bind(uid);
     }], function (_err, _uid, _token) {
