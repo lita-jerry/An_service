@@ -148,69 +148,67 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
     },
     function(_openid, _sessionKey, _cb) {
       // 查询openid对应的userid
-      self.app.rpc.user.userRemote.getUseridByOpenid(session, 1, _openid, function(_err, _hadData, _userid){
+      self.app.rpc.user.userRemote.getUseridByOpenid(session, 1, _openid, function(_err, _hadData, _uid){
         if (_err) {
           _cb(_err);
         } else if (_hadData) {
-          _cb(null, _userid, _openid, _sessionKey);
+          _cb(null, _uid, _openid, _sessionKey);
         } else {
           _cb(null, null, _openid, _sessionKey); // 未绑定
         }
       });
     },
-    function(_userid, _openid, _sessionKey, _cb) {
+    function(_uid, _openid, _sessionKey, _cb) {
       // 如果没有对应的userid,则创建新用户,否则直接跳到下一个处理函数
-      if (!_userid) {
-        self.app.rpc.user.userRemote.setUser(session, null, nickName, avatarURL, 1, function(_err, _userid){
+      if (!_uid) {
+        self.app.rpc.user.userRemote.setUser(session, null, nickName, avatarURL, 1, function(_err, _uid){
           if (_err) {
             _cb(_err);
           } else {
             // 需要绑定
-            _cb(null, true, _userid, _openid, _sessionKey);
+            _cb(null, true, _uid, _openid, _sessionKey);
           }
         });
       } else {
         // 已经绑定了
-        _cb(null, false, _userid, _openid, _sessionKey);
+        _cb(null, false, _uid, _openid, _sessionKey);
       }
     },
-    function(_needBinding, _userid, _openid, _sessionKey, _cb) {
+    function(_needBinding, _uid, _openid, _sessionKey, _cb) {
       // 用户绑定第三方
       if (_needBinding) {
-        self.app.rpc.user.userRemote.bindingPlatformForUser(session, _userid, 1, _openid, function(_err){
+        self.app.rpc.user.userRemote.bindingPlatformForUser(session, _uid, 1, _openid, function(_err){
           if (_err) {
             _cb(_err);
           } else {
-            _cb(null, _userid, _sessionKey);
+            _cb(null, _uid, _sessionKey);
           }
         });
       } else {
         // 不需要绑定
-        _cb(null, _userid, _sessionKey);
+        _cb(null, _uid, _sessionKey);
       }
     },
-    function(_userid, _sessionKey, _cb) {
+    function(_uid, _sessionKey, _cb) {
       // 用户登录
       var token = userUtil.makeOnlineSession();
       // 此处的platform设置为1,今后多平台需要改成 platform 变量
-      self.app.rpc.user.userRemote.setUserOnlineState(session, _userid, 1, 1, token, _sessionKey, function(_err){
+      self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, token, _sessionKey, function(_err){
         if (_err) {
           _cb(_err);
         } else {
-          _cb(null, _userid, token);
+          _cb(null, _uid, token);
         }
       });
     },
-    function(_userid, token, _cb){
+    function(_uid, token, _cb){
       // 断开已经登录此号的Session, 绑定uid到新的Session
       var sessionService = self.app.get('sessionService');
       // duplicate log in
-      console.log(_userid, sessionService);
-      console.log(sessionService.getByUid(_userid));
-      if( !! sessionService.getByUid(_userid)) {
-        sessionService.getByUid(_userid).unbind();
+      if( !! sessionService.getByUid(_uid)) {
+        sessionService.kick(_uid);
       }
-      session.bind(_userid);
+      session.bind(_uid);
       _cb(null, token);
     }],
     function (_err, _token) {
