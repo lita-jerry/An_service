@@ -11,3 +11,5 @@ module.exports = function(app) {
 var TripRemote = function(app) {
 	this.app = app;
 };
+
+// TripRemote.prototype.add = function(uid, rid, )
