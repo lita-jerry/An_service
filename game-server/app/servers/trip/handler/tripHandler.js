@@ -18,7 +18,26 @@ var Handler = function(app) {
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.queryUnfinished = function(msg, session, next) {}
+Handler.prototype.queryUnfinished = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  var uid = session.uid;
+
+  this.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
+    if (_err) {
+      next(null, {code: 200, error: true, msg: _err});
+    } else if (!_hasData) {
+      next(null, {code: 200, error: false, msg: 'no trip.'});
+    } else {
+      next(null, {code: 200, error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
+    }
+  });
+}
 
 /**
  * 创建行程

@@ -55,7 +55,13 @@
       }
 
       function endTrip() {
-        pomelo.request("trip.tripHandler.end", {ordernumber: '2018090502231715545981'}, function(data) {
+        pomelo.request("trip.tripHandler.end", {ordernumber: '2018090504093582671648'}, function(data) {
+              console.log(data);
+          });
+      }
+      
+      function queryUnfinished() {
+        pomelo.request("trip.tripHandler.queryUnfinished", {}, function(data) {
               console.log(data);
           });
       }
@@ -85,6 +91,7 @@
         <input id="test" type="button" value="恢复登录" onclick="show3()"/>
         <input id="test" type="button" value="创建行程" onclick="createTrip()"/>
         <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
+        <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>
       </div>
     </div>
   </body>
