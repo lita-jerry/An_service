@@ -36,11 +36,38 @@ Handler.prototype.create = function(msg, session, next) {
     return;
   }
 
+  var uid = session.uid;
+
   async.waterfall([
-    function(_cb){
+    function(_cb) {
       // 查询是否有未完成的行程
+      self.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
+        if (_err) {
+          _cb(_err);
+        } else if (_hasData) {
+          _cb('has unfinished.');
+        } else {
+          _cb(null);
+        }
+      });
+    },
+    function(_cb) {
+      // 创建订单
+      self.app.rpc.trip.tripRemote.create(session, uid, function(_err, _ordernumber) {
+        if (_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _ordernumber);
+        }
+      });
     }
-  ],function(_err, _result) {});
+  ],function(_err, _ordernumber) {
+    if (_err) {
+      next(null, {code: 200, error: true, msg: _err});
+    } else {
+      next(null, {code: 200, error: true, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
+    }
+  });
 }
 
 /**
