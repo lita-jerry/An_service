@@ -65,7 +65,7 @@ Handler.prototype.create = function(msg, session, next) {
     if (_err) {
       next(null, {code: 200, error: true, msg: _err});
     } else {
-      next(null, {code: 200, error: true, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
+      next(null, {code: 200, error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
     }
   });
 }
@@ -78,7 +78,55 @@ Handler.prototype.create = function(msg, session, next) {
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.end = function(msg, session, next) {}
+Handler.prototype.end = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  // 检查参数
+  if (!msg.ordernumber) {
+    next(null, {code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
+    return;
+  }
+
+  var uid = session.uid;
+  var ordernumber = msg.ordernumber;
+
+  async.waterfall([
+    function(_cb) {
+      // 检查行程信息(当前状态、所属id)
+      self.app.rpc.trip.tripRemote.queryInfo(session, ordernumber, function(_err, _hasData, _uid, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else if (_uid !== uid) {
+          _cb('无权操作');
+        } else if (_state !== 1) {
+          // 不在进行中
+          _cb('无效操作');
+        } else {
+          _cb();
+        }
+      });
+    },
+    function(_cb) {
+      // 结束行程
+      self.app.rpc.trip.tripRemote.end(session, ordernumber, function(_err) {
+        _cb(!!_err ? _err : null);
+      });
+    }
+  ], function(_err) {
+    if (_err) {
+      next(null, {code: 200, error: true, msg: _err});
+    } else {
+      next(null, {code: 200, error: false, msg: 'end trip success.'});
+    }
+  });
+}
 
 /**
  * 上报当前位置

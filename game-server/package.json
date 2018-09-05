@@ -7,6 +7,7 @@
         "crc": "^3.8.0",
         "crypto": "^1.0.1",
         "https": "^1.0.0",
+        "moment": "^2.22.2",
         "mysql": "github:mysqljs/mysql",
         "pomelo": "2.2.5"
     }

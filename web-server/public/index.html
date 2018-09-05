@@ -31,7 +31,7 @@
       }
 
       function entry() {
-        pomelo.request("connector.entryHandler.entry", {token: '0af81e1dd2784860f39a5a6904c1d2d3', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
+        pomelo.request("connector.entryHandler.entry", {token: '7ef7c68049f4481d950585607edeb39b', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
               console.log(data);
           });
       }
@@ -43,10 +43,23 @@
       }
 
       function show3() {
-        pomelo.request("connector.entryHandler.relogin", {token: '0af81e1dd2784860f39a5a6904c1d2d3'}, function(data) {
+        pomelo.request("connector.entryHandler.relogin", {token: '7ef7c68049f4481d950585607edeb39b'}, function(data) {
               console.log(data);
           });
       }
+
+      function createTrip() {
+        pomelo.request("trip.tripHandler.create", {}, function(data) {
+              console.log(data);
+          });
+      }
+
+      function endTrip() {
+        pomelo.request("trip.tripHandler.end", {ordernumber: '2018090502231715545981'}, function(data) {
+              console.log(data);
+          });
+      }
+
     </script>
   </head>
   <body>
@@ -70,6 +83,8 @@
         <input id="test" type="button" value="entry" onclick="entry()"/>
         <input id="test" type="button" value="第三方登录" onclick="show2()"/>
         <input id="test" type="button" value="恢复登录" onclick="show3()"/>
+        <input id="test" type="button" value="创建行程" onclick="createTrip()"/>
+        <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
       </div>
     </div>
   </body>

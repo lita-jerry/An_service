@@ -52,13 +52,48 @@ TripRemote.prototype.create = function(uid, cb) {
 }
 
 // 结束行程
-TripRemote.prototype.end = function(uid, ordernumber, cb) {}
+TripRemote.prototype.end = function(ordernumber, cb) {
+	mysql.execute('UPDATE trip SET state = ? WHERE order_number = ?',
+		[2, ordernumber],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err);
+			} else if (_result['changedRows'] > 0) {
+				cb();
+			} else {
+				cb('changed rows <= 0');
+			}
+		}
+	);
+}
 
 // 上报行程位置
 TripRemote.prototype.uploadLocation = function(ordernumber, longitude, latitude, cb) {}
 
-// 查询行程信息
-TripRemote.prototype.queryInfo = function(ordernumber, cb) {}
+/**
+ * 查询行程信息
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb err, hasData, userid, state, createdTime, lastUpdatedTime
+ */
+TripRemote.prototype.queryInfo = function(ordernumber, cb) {
+	mysql.execute(
+		'SELECT * FROM trip WHERE order_number = ?',
+		[ordernumber],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length > 0) {
+				cb(null, true, _result[0]['user_id'], 
+											 _result[0]['state'], 
+											 _result[0]['created_time'], 
+											 _result[0]['last_updated_time']);
+			} else {
+				cb(null, false);
+			}
+		}
+	);
+}
 
 // 获取行程日志
 TripRemote.prototype.getLogs = function(ordernumber, cb) {}

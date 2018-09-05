@@ -53,20 +53,26 @@ app.configure('production|development', function() {
   app.filter(pomelo.timeout());
 });
 
-app.configure('production|development', 'user', function() {
-  // app.filter(abuseFilter());
-  app.set('connectorConfig',
-    {
-      connector : pomelo.connectors.hybridconnector,
-      heartbeat : 3,
-      useDict : false,
-      useProtobuf : false,
-      ssl: {
-        type: 'wss',
-      	key: fs.readFileSync('../shared/server.key'),
-  			cert: fs.readFileSync('../shared/server.crt')
-      }
-    });
+// app.configure('production|development', 'user', function() {
+//   // app.filter(abuseFilter());
+//   app.set('connectorConfig',
+//     {
+//       connector : pomelo.connectors.hybridconnector,
+//       heartbeat : 3,
+//       useDict : false,
+//       useProtobuf : false,
+//       ssl: {
+//         type: 'wss',
+//       	key: fs.readFileSync('../shared/server.key'),
+//   			cert: fs.readFileSync('../shared/server.crt')
+//       }
+//     });
+// });
+
+app.configure('production|development', function() {
+	// route configures
+	// app.route('trip', userRoute);
+  app.filter(pomelo.timeout());
 });
 
 // start app
