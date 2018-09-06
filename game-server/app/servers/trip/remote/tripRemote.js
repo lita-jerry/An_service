@@ -14,8 +14,84 @@ var TripRemote = function(app) {
 	this.channelService = app.get('channelService');
 };
 
-// 进入行程房间
-TripRemote.prototype.add = function(uid, sid, name, flag, cb) {}
+/**
+ * Add user into trip channel.
+ *
+ * @param {String} uid unique id for user
+ * @param {String} sid server id
+ * @param {String} roomid trip channel room id
+ * @param {String} nickName user's nick name
+ * @param {String} avatarURL user's avatar url
+ * @param {boolean} isOwner is it the trip's owner
+ *
+ */
+TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwner, cb) {
+	var channel = this.channelService.getChannel(roomid, true);
+	
+	console.log(channel.getMember(uid));
+	if (channel.getMember(uid)) {
+		cb('当前用户已在一个房间');
+	}
+
+	var param = {
+		route: 'onAdd',
+		nickName: nickName,
+		avatarURL: avatarURL,
+		isOwner: isOwner
+	};
+	channel.pushMessage(param);
+
+	if( !! channel) {
+		channel.add(uid, sid);
+	}
+
+	cb();
+	// cb(this.get(roomid, false));
+}
+
+/**
+ * Get user from trip channel.
+ *
+ * @param {Object} opts parameters for request
+ * @param {String} name channel name
+ * @param {boolean} flag channel parameter
+ * @return {Array} users uids in channel
+ *
+ */
+TripRemote.prototype.get = function(name, flag=false) {
+	var users = [];
+	var channel = this.channelService.getChannel(name, flag);
+	if( !! channel) {
+		users = channel.getMembers();
+	}
+	// for(var i = 0; i < users.length; i++) {
+	// 	users[i] = users[i].split('*')[0];
+	// }
+	return users;
+};
+
+/**
+ * Kick user out trip channel.
+ *
+ * @param {String} uid unique id for user
+ * @param {String} sid server id
+ * @param {String} name channel name
+ *
+ */
+TripRemote.prototype.kick = function(uid, sid, name) {
+	var channel = this.channelService.getChannel(name, false);
+	// leave channel
+	if( !! channel) {
+		channel.leave(uid, sid);
+	}
+	// var username = uid.split('*')[0];
+	var param = {
+		route: 'onLeave',
+		user: 'username'
+	};
+	channel.pushMessage(param);
+};
+
 
 // 查询未完成行程
 TripRemote.prototype.queryUnfinished = function(uid, cb) {
@@ -76,7 +152,7 @@ TripRemote.prototype.uploadLocation = function(ordernumber, longitude, latitude,
  * @param {String} ordernumber 行程订单号
  * @param {Function} cb err, hasData, userid, state, createdTime, lastUpdatedTime
  */
-TripRemote.prototype.queryInfo = function(ordernumber, cb) {
+TripRemote.prototype.getInfo = function(ordernumber, cb) {
 	mysql.execute(
 		'SELECT * FROM trip WHERE order_number = ?',
 		[ordernumber],

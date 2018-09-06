@@ -24,13 +24,13 @@ Handler.prototype.entry = function(msg, session, next) {
   
   if (!!session.uid) {
     console.log('user:', session.uid, ' already entered.')
-    next(null, {code: 200, error: false, msg: 'already entered.'});
+    next(null, {error: false, msg: 'already entered.'});
     return;
   }
 
   // 参数检查
   if (!msg.token) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少token参数'});
+    next(null, {error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
@@ -63,7 +63,7 @@ Handler.prototype.entry = function(msg, session, next) {
     }
     session.bind(_uid);
 
-    next(null, {code: 200, error: err, msg: msg});
+    next(null, {error: err, msg: msg});
   });
 };
 
@@ -78,7 +78,7 @@ Handler.prototype.entry = function(msg, session, next) {
 Handler.prototype.publish = function(msg, session, next) {
   var result = {
     topic: 'publish',
-    payload: JSON.stringify({code: 200, msg: 'publish message is ok.'})
+    payload: JSON.stringify({msg: 'publish message is ok.'})
   };
   next(null, result);
 };
@@ -94,7 +94,7 @@ Handler.prototype.publish = function(msg, session, next) {
 Handler.prototype.subscribe = function(msg, session, next) {
   var result = {
     topic: 'subscribe',
-    payload: JSON.stringify({code: 200, msg: 'subscribe message is ok.'})
+    payload: JSON.stringify({msg: 'subscribe message is ok.'})
   };
   next(null, result);
 };
@@ -113,21 +113,21 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
   // 检查当前用户
   if (!!session.uid) {
     console.log('用户', session.uid, '已经登录, 无需再次登录')
-    next(null, {code: 200, error: true, msg: '用户已经登录, 无需再次登录'});
+    next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
     return;
   }
 
   // 检查参数
   if (!msg.code) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少code参数'});
+    next(null, {error: true, msg: '参数错误:缺少code参数'});
     return;
   }
   if (!msg.nickName) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少nickName参数'});
+    next(null, {error: true, msg: '参数错误:缺少nickName参数'});
     return;
   }
   if (!msg.avatarURL) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少avatarURL参数'});
+    next(null, {error: true, msg: '参数错误:缺少avatarURL参数'});
     return;
   }
 
@@ -213,9 +213,9 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
     }],
     function (_err, _token) {
       if (!!_err) {
-        next(null, {code: 200, error: true, msg: _err});
+        next(null, {error: true, msg: _err});
       } else {
-        next(null, {code: 200, error: false, msg: '第三方登录成功', data: {token: _token}});
+        next(null, {error: false, msg: '第三方登录成功', data: {token: _token}});
       }
     });
 };
@@ -234,13 +234,13 @@ Handler.prototype.relogin = function(msg, session, next) {
   
   if (!!session.uid) {
     console.log('用户', session.uid, '已经登录, 无需再次登录')
-    next(null, {code: 200, error: true, msg: '用户已经登录, 无需再次登录'});
+    next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
     return;
   }
 
   // 参数检查
   if (!msg.token) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少token参数'});
+    next(null, {error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
@@ -286,9 +286,9 @@ Handler.prototype.relogin = function(msg, session, next) {
       session.bind(uid);
     }], function (_err, _uid, _token) {
       if (!!_err) {
-        next(null, {code: 200, error: true, msg: _err});
+        next(null, {error: true, msg: _err});
       } else {
-        next(null, {code: 200, error: false, msg: '恢复登录成功', data: {token: _token}});
+        next(null, {error: false, msg: '恢复登录成功', data: {token: _token}});
       }
   });
   // 恢复登录 ---- end
@@ -302,4 +302,86 @@ Handler.prototype.relogin = function(msg, session, next) {
  * @param  {Function} next    next step callback
  * @return {Void}
  */
-Handler.prototype.entry2 = function(msg, session, next) {}
+Handler.prototype.entryTripRoom = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user is un enter.'});
+    return;
+  }
+
+  // 参数检查
+  if (!msg.ordernumber) {
+    next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
+    return;
+  }
+
+  var uid = session.uid;
+  var rid = msg.ordernumber; // room id 就是行程订单号
+
+  async.waterfall([
+    function(_cb) {
+      // 查询行程订单状态
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else if (_state !== 1 && _state !== 3) {
+          // 非正在进行时行程
+          _cb('行程异常');
+        } else {
+          // 是否为行程所有人
+          _cb(null, _uid === uid);
+        }
+			});
+    },
+    function(_isOwner, _cb) {
+      // 获取用户信息
+      self.app.rpc.user.userRemote.getInfo(session, uid, function(_err, _hasData, _nickName, _avatar) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无效用户');
+        } else {
+          _cb(null, _nickName, _avatar, _isOwner);
+        }
+      });
+    },
+    function(_nickName, _avatar, _isOwner, _cb) {
+      session.set('rid', rid);
+      session.push('rid', function(err) {
+        if(err) {
+          console.error('set rid for session service failed! error is : %j', err.stack);
+        }
+      });
+      session.on('closed', onUserLeave.bind(null, self.app));
+
+      //put user into channel
+      self.app.rpc.trip.tripRemote.add(session, uid, self.app.get('serverId'), rid, _nickName, _avatar, _isOwner, function(){
+        _cb();
+      });
+    }], 
+    function(_err) {
+      if (_err) {
+        next(null, {error: true, msg: _err});
+      } else {
+        next(null, {error: false, msg: '进入行程房间成功'});
+      }
+    }
+  );
+}
+
+/**
+ * User log out handler
+ *
+ * @param {Object} app current application
+ * @param {Object} session current session object
+ *
+ */
+var onUserLeave = function(app, session) {
+  if(!session || !session.uid) {
+    return;
+  }
+  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), session.get('rid'), null);
+};

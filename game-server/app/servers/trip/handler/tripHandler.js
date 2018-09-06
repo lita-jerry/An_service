@@ -22,7 +22,7 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    next(null, {error: true, msg: 'user not entered.'});
     return;
   }
 
@@ -30,11 +30,11 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
 
   this.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
     if (_err) {
-      next(null, {code: 200, error: true, msg: _err});
+      next(null, {error: true, msg: _err});
     } else if (!_hasData) {
-      next(null, {code: 200, error: false, msg: 'no trip.'});
+      next(null, {error: false, msg: 'no trip.'});
     } else {
-      next(null, {code: 200, error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
+      next(null, {error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
     }
   });
 }
@@ -51,7 +51,7 @@ Handler.prototype.create = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    next(null, {error: true, msg: 'user not entered.'});
     return;
   }
 
@@ -82,9 +82,9 @@ Handler.prototype.create = function(msg, session, next) {
     }
   ],function(_err, _ordernumber) {
     if (_err) {
-      next(null, {code: 200, error: true, msg: _err});
+      next(null, {error: true, msg: _err});
     } else {
-      next(null, {code: 200, error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
+      next(null, {error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
     }
   });
 }
@@ -101,13 +101,13 @@ Handler.prototype.end = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {code: 200, error: true, msg: 'user not entered.'});
+    next(null, {error: true, msg: 'user not entered.'});
     return;
   }
 
   // 检查参数
   if (!msg.ordernumber) {
-    next(null, {code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
+    next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
@@ -117,7 +117,7 @@ Handler.prototype.end = function(msg, session, next) {
   async.waterfall([
     function(_cb) {
       // 检查行程信息(当前状态、所属id)
-      self.app.rpc.trip.tripRemote.queryInfo(session, ordernumber, function(_err, _hasData, _uid, _state) {
+      self.app.rpc.trip.tripRemote.getInfo(session, ordernumber, function(_err, _hasData, _uid, _state) {
         if (_err) {
           _cb(_err);
         } else if (!_hasData) {
@@ -140,9 +140,9 @@ Handler.prototype.end = function(msg, session, next) {
     }
   ], function(_err) {
     if (_err) {
-      next(null, {code: 200, error: true, msg: _err});
+      next(null, {error: true, msg: _err});
     } else {
-      next(null, {code: 200, error: false, msg: 'end trip success.'});
+      next(null, {error: false, msg: 'end trip success.'});
     }
   });
 }
@@ -166,3 +166,21 @@ Handler.prototype.uploadLocation = function(msg, session, next) {}
  *
  */
 Handler.prototype.get = function(msg, session, next) {}
+
+/**
+ * 获取行程房间内的用户信息
+ * 
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param  {Function} next next stemp callback
+ */
+Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
+  // 检查用户id
+  // 检查是否在房间内
+  // var list = [1, 2];
+  // var sql = 'SELECT * FROM user WHERE id in (' + list + ')'
+  // console.log('SQL语句是:'+sql);
+  // mysql.execute(sql, [], function(err, result){
+  //   console.log(err, result);
+  // });
+}

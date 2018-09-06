@@ -66,6 +66,12 @@
           });
       }
 
+      function entryTripRoom() {
+        pomelo.request("connector.entryHandler.entryTripRoom", {ordernumber: '2018090604302203807000'}, function(data) {
+              console.log(data);
+          });
+      }
+
     </script>
   </head>
   <body>
@@ -92,6 +98,7 @@
         <input id="test" type="button" value="创建行程" onclick="createTrip()"/>
         <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
         <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>
+        <input id="test" type="button" value="进入行程房间" onclick="entryTripRoom()"/>
       </div>
     </div>
   </body>
