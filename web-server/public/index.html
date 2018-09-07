@@ -20,6 +20,9 @@
       var pomelo = window.pomelo;
       var host = "127.0.0.1";
       var port = "3010";
+      
+      var tripOrderNumber = null;
+
       function show() {
         pomelo.init({
           host: host,
@@ -51,11 +54,14 @@
       function createTrip() {
         pomelo.request("trip.tripHandler.create", {}, function(data) {
               console.log(data);
+              if (data.data.ordernumber) {
+                tripOrderNumber = data.data.ordernumber;
+              }
           });
       }
 
       function endTrip() {
-        pomelo.request("trip.tripHandler.end", {ordernumber: '2018090504093582671648'}, function(data) {
+        pomelo.request("trip.tripHandler.end", {}, function(data) {
               console.log(data);
           });
       }
@@ -63,11 +69,20 @@
       function queryUnfinished() {
         pomelo.request("trip.tripHandler.queryUnfinished", {}, function(data) {
               console.log(data);
+              if (data.data.ordernumber) {
+                tripOrderNumber = data.data.ordernumber;
+              }
           });
       }
 
       function entryTripRoom() {
-        pomelo.request("connector.entryHandler.entryTripRoom", {ordernumber: '2018090604302203807000'}, function(data) {
+        pomelo.request("connector.entryHandler.entryTripRoom", {ordernumber: tripOrderNumber}, function(data) {
+              console.log(data);
+          });
+      }
+      
+      function leaveTripRoom() {
+        pomelo.request("connector.entryHandler.leaveTripRoom", {}, function(data) {
               console.log(data);
           });
       }
@@ -99,6 +114,7 @@
         <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
         <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>
         <input id="test" type="button" value="进入行程房间" onclick="entryTripRoom()"/>
+        <input id="test" type="button" value="离开行程房间" onclick="leaveTripRoom()"/>
       </div>
     </div>
   </body>

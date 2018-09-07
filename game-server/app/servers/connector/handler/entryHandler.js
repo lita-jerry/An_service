@@ -373,6 +373,44 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
 }
 
 /**
+ * 离开行程房间
+ * 
+ * @param  {Object}   msg     request message
+ * @param  {Object}   session current session object
+ * @param  {Function} next    next step callback
+ * @return {Void}
+ */
+Handler.prototype.leaveTripRoom = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user is un enter.'});
+    return;
+  }
+
+  // 参数检查
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: '未在房间内'});
+    return;
+  }
+
+  var uid = session.uid;
+  var sid = this.app.get('serverId');
+  var rid = session.get('rid'); // room id
+
+  session.set('rid', null);
+  session.push('rid', function(err) {
+    if(err) {
+      console.error('entryHandler.leaveTripRoom: set rid for session service failed! error is : %j', err.stack);
+    }
+  });
+
+  this.app.rpc.trip.tripRemote.kick(session, uid, sid, rid, ()=>{
+    next(null, {error: false, msg: '已退出行程房间'});
+  });
+}
+
+/**
  * User log out handler
  *
  * @param {Object} app current application
@@ -383,7 +421,5 @@ var onUserLeave = function(app, session) {
   if(!session || !session.uid) {
     return;
   }
-  var rid = String(session.get('rid'));
-  console.log(rid);
-  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), rid, function(){});
+  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), session.get('rid'), ()=>{});
 };

@@ -8,6 +8,7 @@ module.exports = function(app) {
   
 var Handler = function(app) {
   this.app = app;
+  this.channelService = app.get('channelService');
 };
 
 /**
@@ -106,18 +107,24 @@ Handler.prototype.end = function(msg, session, next) {
   }
 
   // 检查参数
-  if (!msg.ordernumber) {
-    next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
+  // if (!msg.ordernumber) {
+  //   next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
+  //   return;
+  // }
+  // 其实一开始考虑上传ordernumber,后来觉得既然在房间内,就可以获取,所以采用下面的方法,更安全
+
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: 'user not in trip room.'});
     return;
   }
 
   var uid = session.uid;
-  var ordernumber = msg.ordernumber;
+  var rid = session.get('rid');
 
   async.waterfall([
     function(_cb) {
       // 检查行程信息(当前状态、所属id)
-      self.app.rpc.trip.tripRemote.getInfo(session, ordernumber, function(_err, _hasData, _uid, _state) {
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
         if (_err) {
           _cb(_err);
         } else if (!_hasData) {
@@ -134,7 +141,7 @@ Handler.prototype.end = function(msg, session, next) {
     },
     function(_cb) {
       // 结束行程
-      self.app.rpc.trip.tripRemote.end(session, ordernumber, function(_err) {
+      self.app.rpc.trip.tripRemote.end(session, rid, function(_err) {
         _cb(!!_err ? _err : null);
       });
     }
@@ -142,6 +149,7 @@ Handler.prototype.end = function(msg, session, next) {
     if (_err) {
       next(null, {error: true, msg: _err});
     } else {
+      self.channelService.destroyChannel(rid);
       next(null, {error: false, msg: 'end trip success.'});
     }
   });
@@ -155,7 +163,31 @@ Handler.prototype.end = function(msg, session, next) {
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.uploadLocation = function(msg, session, next) {}
+Handler.prototype.uploadLocation = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  // 检查参数
+  if (!msg.longitude) { // 经度
+    next(null, {error: true, msg: '参数错误:缺少longitude参数'});
+    return;
+  }
+
+  if (!msg.latitude) { // 纬度
+    next(null, {error: true, msg: '参数错误:缺少latitude参数'});
+    return;
+  }
+
+  var uid = session.uid;
+  var longitude = msg.longitude;
+  var latitude = msg.latitude;
+
+  // 添加位置记录
+}
 
 /**
  * 获取行程信息(时间、日志、轨迹)

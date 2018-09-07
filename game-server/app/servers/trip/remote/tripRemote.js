@@ -89,13 +89,13 @@ TripRemote.prototype.kick = function(uid, sid, name, cb) {
 	// leave channel
 	if( !! channel) {
 		channel.leave(uid, sid);
+		// var username = uid.split('*')[0];
+		var param = {
+			route: 'onLeave',
+			user: 'username'
+		};
+		channel.pushMessage(param);
 	}
-	// var username = uid.split('*')[0];
-	var param = {
-		route: 'onLeave',
-		user: 'username'
-	};
-	channel.pushMessage(param);
 	cb();
 };
 
