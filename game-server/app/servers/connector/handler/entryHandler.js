@@ -358,8 +358,8 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
       session.on('closed', onUserLeave.bind(null, self.app));
 
       //put user into channel
-      self.app.rpc.trip.tripRemote.add(session, uid, self.app.get('serverId'), rid, _nickName, _avatar, _isOwner, function(){
-        _cb();
+      self.app.rpc.trip.tripRemote.add(session, uid, self.app.get('serverId'), rid, _nickName, _avatar, _isOwner, function(_err){
+        _cb(_err);
       });
     }], 
     function(_err) {
@@ -383,5 +383,7 @@ var onUserLeave = function(app, session) {
   if(!session || !session.uid) {
     return;
   }
-  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), session.get('rid'), null);
+  var rid = String(session.get('rid'));
+  console.log(rid);
+  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), rid, function(){});
 };

@@ -28,9 +28,13 @@ var TripRemote = function(app) {
 TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwner, cb) {
 	var channel = this.channelService.getChannel(roomid, true);
 	
+	console.log(uid, sid, roomid);
+	console.log(channel.getMembers());
+
 	console.log(channel.getMember(uid));
 	if (channel.getMember(uid)) {
 		cb('当前用户已在一个房间');
+		return;
 	}
 
 	var param = {
@@ -78,8 +82,10 @@ TripRemote.prototype.get = function(name, flag=false) {
  * @param {String} name channel name
  *
  */
-TripRemote.prototype.kick = function(uid, sid, name) {
+TripRemote.prototype.kick = function(uid, sid, name, cb) {
+	console.log(uid, sid, name);
 	var channel = this.channelService.getChannel(name, false);
+	console.log('kick function\'s channel: channel'+channel);
 	// leave channel
 	if( !! channel) {
 		channel.leave(uid, sid);
@@ -90,6 +96,7 @@ TripRemote.prototype.kick = function(uid, sid, name) {
 		user: 'username'
 	};
 	channel.pushMessage(param);
+	cb();
 };
 
 
