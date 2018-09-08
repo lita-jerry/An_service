@@ -151,7 +151,14 @@ TripRemote.prototype.end = function(ordernumber, cb) {
 }
 
 // 上报行程位置
-TripRemote.prototype.uploadLocation = function(ordernumber, longitude, latitude, cb) {}
+TripRemote.prototype.uploadLocation = function(ordernumber, longitude, latitude, remark, cb) {
+	mysql.execute('INSERT INTO trip_polyline (order_number, longitude, latitude, remark) VALUES(?,?,?,?)',
+								[ordernumber, longitude, latitude, remark],
+								function(_err, _result) {
+									cb(_err);
+								}
+							);
+}
 
 /**
  * 查询行程信息

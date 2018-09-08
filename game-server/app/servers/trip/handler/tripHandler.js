@@ -171,6 +171,11 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
     return;
   }
 
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: 'user not in trip room.'});
+    return;
+  }
+
   // 检查参数
   if (!msg.longitude) { // 经度
     next(null, {error: true, msg: '参数错误:缺少longitude参数'});
@@ -183,10 +188,37 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
   }
 
   var uid = session.uid;
+  var rid = session.rid;
   var longitude = msg.longitude;
   var latitude = msg.latitude;
 
-  // 添加位置记录
+  async.waterfall([
+    function(_cb) {
+      // 检查行程信息(当前状态、所属id)
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else if (_uid !== uid) {
+          _cb('无权操作');
+        } else if (_state !== 1) {
+          // 不在进行中
+          _cb('无效操作');
+        } else {
+          _cb();
+        }
+      });
+    },
+    function(_cb) {
+      // 添加位置记录
+      self.app.rpc.trip.tripRemote.uploadLocation(session, rid, longitude, latitude, null, function(_err) {
+        _cb(_err);
+      });
+    }
+  ], function(_err) {
+    next(null, {error: !!_err, msg: _err ? _err : 'end trip success.'});
+  });
 }
 
 /**
