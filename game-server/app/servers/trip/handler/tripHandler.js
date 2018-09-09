@@ -188,7 +188,7 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
   }
 
   var uid = session.uid;
-  var rid = session.rid;
+  var rid = session.get('rid');
   var longitude = msg.longitude;
   var latitude = msg.latitude;
 
@@ -217,7 +217,7 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
       });
     }
   ], function(_err) {
-    next(null, {error: !!_err, msg: _err ? _err : 'end trip success.'});
+    next(null, {error: !!_err, msg: _err ? _err : 'upload trip location success.'});
   });
 }
 

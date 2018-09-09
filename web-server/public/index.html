@@ -86,6 +86,12 @@
               console.log(data);
           });
       }
+      
+      function uploadLocation() {
+        pomelo.request("trip.tripHandler.uploadLocation", {longitude: '经度', latitude: '纬度'}, function(data) {
+              console.log(data);
+          });
+      }
 
     </script>
   </head>
@@ -115,7 +121,9 @@
         <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>
         <input id="test" type="button" value="进入行程房间" onclick="entryTripRoom()"/>
         <input id="test" type="button" value="离开行程房间" onclick="leaveTripRoom()"/>
+        <input id="test" type="button" value="上报当前位置" onclick="uploadLocation()"/>
       </div>
     </div>
+    <br>
   </body>
 </html>
