@@ -2,7 +2,7 @@
   "development":
     {
       "appid"  : "wx22a93273d6c1ea5f",
-      "secret" : "6ec83a3806b0a51101a10d029e387f5e"
+      "secret" : "d2a2bbfd031dc0f64ccc9ff9163189d4"
     },
   "production":{
       "appid"  : "",

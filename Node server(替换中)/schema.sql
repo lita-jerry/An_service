@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS user_bind;
 DROP TABLE IF EXISTS user_online_state;
+DROP TABLE IF EXISTS user_follow_relation
 DROP TABLE IF EXISTS mobile_sms_log;
 DROP TABLE IF EXISTS trip;
 DROP TABLE IF EXISTS trip_logs;
@@ -44,9 +45,12 @@ DELIMITER ;
 CREATE TABLE `user_online_state` (
   `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INTEGER UNIQUE NOT NULL,
-  `type` INTEGER NOT NULL,
-  `client_session` CHAR(32) UNIQUE NOT NULL,
-  `server_session` CHAR(64),
+  `platform` INTEGER NOT NULL,
+  `state` INTEGER NOT NULL,
+  `client_token` CHAR(64) UNIQUE NOT NULL,
+  `session_key` CHAR(255),
+  `device_id` CHAR(255),
+  `device_token` CHAR(255),
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)
@@ -54,6 +58,22 @@ CREATE TABLE `user_online_state` (
 DROP TRIGGER IF EXISTS `update_user_online_state_trigger`;
 DELIMITER //
 CREATE TRIGGER `update_user_online_state_trigger` BEFORE UPDATE ON `user_online_state`
+ FOR EACH ROW SET NEW.`last_updated_time` = NOW()
+//
+DELIMITER ;
+
+
+CREATE TABLE `user_follow_relation` (
+  `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INTEGER NOT NULL,
+  `follower_id` INTEGER NOT NULL,
+  `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+DROP TRIGGER IF EXISTS `update_user_follow_relation_trigger`;
+DELIMITER //
+CREATE TRIGGER `update_user_follow_relation_trigger` BEFORE UPDATE ON `user_follow_relation`
  FOR EACH ROW SET NEW.`last_updated_time` = NOW()
 //
 DELIMITER ;

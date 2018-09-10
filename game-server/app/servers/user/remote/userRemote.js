@@ -116,7 +116,7 @@ UserRemote.prototype.getInfoList = function(uidList, cb) {
  * 根据登录Token获取用户登录信息
  *
  * @param {String} token 登录Token
- * @param {Function} cb 回调函数 err, hasData, uid, platform, state, sessionKey, createdTime, lastUpdatedTime
+ * @param {Function} cb 回调函数 err, hasData, uid, platform, state, sessionKey, deviceId, deviceToken, createdTime, lastUpdatedTime
  *
  */
 UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
@@ -134,11 +134,13 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
 				var uid = _result[0]['user_id'];
 				var platform = _result[0]['platform'];
 				var state = _result[0]['state'];
-				var sessionKey = _result[0]['server_session'];
+				var sessionKey = _result[0]['session_key'];
+				var deviceId = _result[0]['device_id'];
+				var deviceToken = _result[0]['device_token'];
 				var createdTime = _result[0]['created_time'];
 				var lastUpdatedTime = _result[0]['last_updated_time'];
 
-				cb(null, true, uid, platform, state, sessionKey, createdTime, lastUpdatedTime);
+				cb(null, true, uid, platform, state, sessionKey, deviceId, deviceToken, createdTime, lastUpdatedTime);
 			}
 		}
 	)
@@ -158,10 +160,10 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
  * @param {String} server 第三方服务器Session key
  * @param {Function} cb err
  */
-UserRemote.prototype.setUserOnlineState = function(uid, platform, state, token, sessionKey, cb) {
+UserRemote.prototype.setUserOnlineState = function(uid, platform, state, token, sessionKey, deviceId, deviceToken, cb) {
 	mysql.execute(
-		'INSERT INTO user_online_state SET user_id=?,platform=?, state=?, client_token=?, session_key=? ON DUPLICATE KEY UPDATE platform=?, state=?, client_token=?, session_key=?',
-		[uid, platform, state, token, sessionKey,  platform, state, token, sessionKey],
+		'INSERT INTO user_online_state SET user_id=?, platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=? ON DUPLICATE KEY UPDATE platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=?',
+		[uid, platform, state, token, sessionKey, deviceId, deviceToken,  platform, state, token, sessionKey, deviceId, deviceToken],
 		function (_err, _result) {
 
 			var err = null;
@@ -233,3 +235,12 @@ UserRemote.prototype.bindingPlatformForUser = function(uid, platform, openid, cb
 }
 
 // 用户在线状态 ------ End ------
+
+// 用户关注关系 ------ Start ------
+// 查询是否关注
+UserRemote.prototype.getFollowState = function(uid, follower, cb) {}
+// 获取该用户所关注的人
+UserRemote.prototype.getFollowing = function(uid, cb) {}
+// 获取关注该用户的所有人
+UserRemote.prototype.getFollower = function(uid, cb) {}
+// 用户关注关系 ------ End ------

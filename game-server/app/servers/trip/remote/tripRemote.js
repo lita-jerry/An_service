@@ -196,3 +196,20 @@ TripRemote.prototype.SOS = function(ordernumber, cb) {}
 
 // ------ 辅助函数 ------
 
+/**
+ * 添加行程日志
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Number} event 事件类型 1,SOS求救
+ * @param {String} operation 操作内容(显示到前端的内容)
+ * @param {String} remark 备注(用于标注,不在前端显示)
+ * @param {Function} cb 回调函数
+ */
+TripRemote.prototype.addLog = function(ordernumber, event, operation, remark, cb) {
+	mysql.execute('INSERT INTO trip_logs (order_number, event_type, operation, remark) VALUES(?,?,?,?)',
+								[ordernumber, event, operation, remark],
+								function(_err, _result) {
+									cb(_err);
+								}
+							);
+}
