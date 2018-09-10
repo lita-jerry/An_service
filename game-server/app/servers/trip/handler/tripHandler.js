@@ -353,14 +353,25 @@ Handler.prototype.follow = function(msg, session, next) {
     },
     function(_uid, _cb) {
       // 查询当前关注状态
-      
+      self.app,rpc.trip.tripRemote.getFollowState(session, _uid, uid, function(_err, _isSure) {
+        if (_err) {
+          _cb(_err);
+        } else if (_isSure) {
+          _cb('已经关注过了');
+        } else {
+          _cb(null, _uid);
+        }
+      });
     },
     function(_uid, _cb) {
       // 添加关注绑定 关注人 被关注人 起始订单
-      
+      self.app.rpc.trip.tripRemote.addFollower(session, _uid, uid, function(_err) {
+        _cb(_err);
+      });
     },
     function(_cb) {
-      // 发出通知
+      // 发出通知 稍后完成
+      _cb();
     }
   ], function(_err) {
     next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
