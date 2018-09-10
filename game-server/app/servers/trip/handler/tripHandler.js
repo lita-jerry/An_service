@@ -364,7 +364,7 @@ Handler.prototype.follow = function(msg, session, next) {
       });
     },
     function(_uid, _cb) {
-      // 添加关注绑定 关注人 被关注人 起始订单
+      // 添加关注绑定
       self.app.rpc.trip.tripRemote.addFollower(session, _uid, uid, function(_err) {
         _cb(_err);
       });
@@ -386,7 +386,61 @@ Handler.prototype.follow = function(msg, session, next) {
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.unfollow = function(msg, session, next) {}
+Handler.prototype.unfollow = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: 'user not in trip room.'});
+    return;
+  }
+
+  var uid = session.uid;
+  var rid = session.get('rid');
+
+  async.waterfall([
+    function(_cb) {
+      // 检查行程信息(所属uid)
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 查询当前关注状态
+      self.app,rpc.trip.tripRemote.getFollowState(session, _uid, uid, function(_err, _isSure) {
+        if (_err) {
+          _cb(_err);
+        } else if (_isSure) {
+          _cb(null, _uid);
+        } else {
+          _cb('还未关注');
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 删除关注绑定的关系
+      self.app.rpc.trip.tripRemote.deleteFollower(session, _uid, uid, function(_err) {
+        _cb(_err);
+      });
+    },
+    function(_cb) {
+      // 发出通知 稍后完成
+      _cb();
+    }
+  ], function(_err) {
+    next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
+  });
+}
 
 /**
  * 获取行程信息(时间、日志、轨迹)

@@ -256,6 +256,28 @@ UserRemote.prototype.addFollower = function(uid, follower, cb) {
 }
 
 /**
+ * 删除关注者
+ * 
+ * @param {*} uid 
+ * @param {*} follower 
+ * @param {*} cb 
+ */
+UserRemote.prototype.deleteFollower = function(uid, follower, cb) {
+	mysql.execute(
+		'DELETE FROM user_follow_relation WHERE user_id=? AND follower_id=?',
+		[uid, follower],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err);
+			} else {
+				console.log('这里待测试:', _result);
+				cb();
+			}
+		}
+	);
+}
+
+/**
  * 查询关注关系是否成立
  * 
  * @param {String} uid 被关注者用户id
