@@ -237,10 +237,94 @@ UserRemote.prototype.bindingPlatformForUser = function(uid, platform, openid, cb
 // 用户在线状态 ------ End ------
 
 // 用户关注关系 ------ Start ------
-// 查询是否关注
-UserRemote.prototype.getFollowState = function(uid, follower, cb) {}
-// 获取该用户所关注的人
-UserRemote.prototype.getFollowing = function(uid, cb) {}
-// 获取关注该用户的所有人
-UserRemote.prototype.getFollower = function(uid, cb) {}
+
+/**
+ * 添加关注者
+ * 
+ * @param {String} uid 被关注者用户id
+ * @param {String} follower 关注者用户id
+ * @param {Function} cb err
+ */
+UserRemote.prototype.addFollower = function(uid, follower, cb) {
+	mysql.execute(
+		'INSERT INTO user_follow_relation SET user_id=?, follower_id=?',
+		[uid, follower],
+		function(_err, _result) {
+			cb(_err);
+		}
+	);
+}
+
+/**
+ * 查询关注关系是否成立
+ * 
+ * @param {String} uid 被关注者用户id
+ * @param {String} follower 关注者用户id
+ * @param {Function} cb err, isSure
+ */
+UserRemote.prototype.getFollowState = function(uid, follower, cb) {
+	mysql.execute(
+		'SELECT * FROM user_follow_relation WHERE user_id=? AND follower_id=?',
+		[uid, follower],
+		function(_err, _result) {
+			if (!!_err) {
+				cb(_err, false);
+			} else if (_result.length < 1) {
+				cb(null, false); // 关注关系不成立
+			} else {
+				cb(null, true); // 关注关系成立
+			}
+		}
+	);
+}
+
+/**
+ * 获取该用户所关注的人
+ * 
+ * @param {String} uid 用户id
+ * @param {Function} cb err, hasData, [uid]
+ */
+UserRemote.prototype.getFollowing = function(uid, cb) {
+	mysql.execute(
+		'SELECT * FROM user_follow_relation WHERE follower_id=?',
+		[uid],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length < 1) {
+				cb(null, false);
+			} else {
+				var datas = _result.map((currentValue, index, arr) => {
+					return currentValue['user_id'];
+				});
+				cb(null, true, datas);
+			}
+		}
+	);
+}
+
+/**
+ * 获取关注该用户的所有人
+ * 
+ * @param {String} uid 用户id
+ * @param {Function} cb err, [uid]
+ */
+UserRemote.prototype.getFollower = function(uid, cb) {
+	mysql.execute(
+		'SELECT * FROM user_follow_relation WHERE user_id=?',
+		[uid],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length < 1) {
+				cb(null, false);
+			} else {
+				var datas = _result.map((currentValue, index, arr) => {
+					return currentValue['follower_id'];
+				});
+				cb(null, true, datas);
+			}
+		}
+	);
+}
 // 用户关注关系 ------ End ------
