@@ -30,7 +30,7 @@ var getWXMPSession = function(code, callback) {
             '&secret=' + WXMPConf.secret +
             '&js_code=' + code + 
             '&grant_type=' + 'authorization_code',function(_req,_res){  
-        var responseData='';  
+        var responseData='';
         _req.on('data',function(data){
             responseData+=data;  
         });  

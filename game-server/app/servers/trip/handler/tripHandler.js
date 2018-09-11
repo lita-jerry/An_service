@@ -303,11 +303,12 @@ Handler.prototype.SOS = function(msg, session, next) {
         if (_err) {
           console.error('entryHandler.SOS: add log failed! error is : %j', _err.stack);
         }
-        cb(); // 这里没想好怎么做错误处理,不管记录没记录都先发通知吧
+        _cb(); // 这里没想好怎么做错误处理,不管记录没记录都先发通知吧
       });
     },
     function(_cb) {
       // 发出通知
+      _cb();
     }
   ], function(_err) {
     next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
@@ -499,7 +500,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
     },
     function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
       // 获取轨迹
-      self.app,rpc.trip.tripRemote.getPolyline(session, rid, function(_err, _polyline) {
+      self.app.rpc.trip.tripRemote.getPolyline(session, rid, function(_err, _polyline) {
         if (_err) {
           _cb(_err);
         } else {
@@ -568,30 +569,32 @@ Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
         } else if (_state === 2) {
           _cb('行程已经结束');
         } else {
-          _cb(_uid);
+          _cb(null, _uid);
         }
       });
     },
     function(_uid, _cb) {
       // 获取room内成员
-      var _userList = self.app.rpc.trip.tripRemote.getUsersInRoom(session, rid);
-      // 去除房主 (犹豫要不要去除查询的本人,即 uid)
-      var _uidList = _userList.map((currentValue, index, arr) => {
-        return currentValue['uid'];
-      });
-      if (_uidList.length > 0) {
-        var _index = _uidList.indexOf(_uid);
-        if (_index !== -1) {
-          _userList.splice(_index, 1);
+      self.app.rpc.trip.tripRemote.getUsersInRoom(session, rid, function(_err, _userList) {
+        // 去除房主 (犹豫要不要去除查询的本人,即 uid)
+        var _uidList = _userList.map((currentValue, index, arr) => {
+          return currentValue['uid'];
+        });
+        if (_uidList.length > 0) {
+          var _index = _uidList.indexOf(''+_uid);
+          if (_index !== -1) {
+            _userList.splice(_index, 1);
+          }
         }
-      }
 
-      _cb(null, _userList.map((currentValue, index, arr) => {
-        return {
-          nickName: currentValue['nickName'],
-          avatar: currentValue['avatar']
-        };
-      }));
+        _cb(null, _userList.map((currentValue, index, arr) => {
+          return {
+            nickName: currentValue['nickName'],
+            avatar: currentValue['avatar']
+          };
+        }));
+      });
+      
     }], function(_err, _data) {
       if (!!_err) {
         next(null, {error: true, msg: _err});

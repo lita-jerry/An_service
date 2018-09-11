@@ -61,18 +61,17 @@ TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwn
  * Get user from trip channel.
  *
  * @param {Object} opts parameters for request
- * @param {String} name channel name
+ * @param {String} roomid trip room id
  * @param {boolean} flag channel parameter
  * @return {Array} users info in channel: [uid, nickName, avatar]
  *
  */
-TripRemote.prototype.getUsersInRoom = function(name, flag=false) {
+TripRemote.prototype.getUsersInRoom = function(roomid, cb) {
 	var users = [];
-	var channel = this.channelService.getChannel(name, flag);
+	var channel = this.channelService.getChannel(roomid, false);
 	if( !! channel) {
 		users = channel.getMembers();
 	}
-
 	for(var i = 0; i < users.length; i++) {
 		users[i] = {
 			uid: users[i].split('*')[0],
@@ -80,8 +79,7 @@ TripRemote.prototype.getUsersInRoom = function(name, flag=false) {
 			avatar: users[i].split('*')[2]
 		}
 	}
-	
-	return users;
+	cb(null, users);
 };
 
 /**
@@ -93,7 +91,6 @@ TripRemote.prototype.getUsersInRoom = function(name, flag=false) {
  *
  */
 TripRemote.prototype.kick = function(uid, sid, name, cb) {
-	console.log(uid, sid, name);
 	var channel = this.channelService.getChannel(name, false);
 	console.log('kick function\'s channel: channel'+channel);
 	// leave channel

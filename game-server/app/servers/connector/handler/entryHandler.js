@@ -216,7 +216,7 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
       // 用户登录
       var token = userUtil.makeOnlineSession();
       // 此处的platform设置为1,今后多平台需要改成 platform 变量
-      self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, token, _sessionKey, function(_err){
+      self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, token, _sessionKey, null, null, function(_err){
         if (_err) {
           _cb(_err);
         } else {
@@ -224,7 +224,7 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
         }
       });
     }],
-    function (_err, _token) {
+    function (_err, _uid, _token) {
       if (!!_err) {
         next(null, {error: true, msg: _err});
       } else {
@@ -235,8 +235,8 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
           sessionService.kick(_uid);
         }
         session.bind(_uid);
-        session.set('nickName', _nickName);
-        session.set('avatar', _avatar);
+        session.set('nickName', nickName);
+        session.set('avatar', avatarURL);
         session.pushAll(function(err) {
           if(err) {
             console.error('set nickName and avatar for session service failed! error is : %j', err.stack);
@@ -448,8 +448,8 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
  *
  */
 var onUserLeave = function(app, session) {
-  if(!session || !session.uid) {
-    var _uid = '' + uid + '*' + session.get('nickName') + '*' + session.get('avatar');
+  if(!!session && !!session.uid) {
+    var _uid = '' + session.uid + '*' + session.get('nickName') + '*' + session.get('avatar');
     app.rpc.trip.tripRemote.kick(session, _uid, app.get('serverId'), session.get('rid'), ()=>{});
     return;
   }

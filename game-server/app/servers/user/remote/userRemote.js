@@ -156,14 +156,16 @@ UserRemote.prototype.getUserOnlineStateByToken = function(token, cb) {
  * @param {String} uid 用户id
  * @param {Number} platform 平台 1:小程序
  * @param {Number} state 状态 1:生效中; 2:过期
- * @param {String} client 客户端Token
- * @param {String} server 第三方服务器Session key
+ * @param {String} clientToken 客户端Token
+ * @param {String} sessionKey 第三方服务器Session key
+ * @param {String} deviceId 推送device id
+ * @param {String} deviceToken 推送device token
  * @param {Function} cb err
  */
-UserRemote.prototype.setUserOnlineState = function(uid, platform, state, token, sessionKey, deviceId, deviceToken, cb) {
+UserRemote.prototype.setUserOnlineState = function(uid, platform, state, clientToken, sessionKey, deviceId, deviceToken, cb) {
 	mysql.execute(
 		'INSERT INTO user_online_state SET user_id=?, platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=? ON DUPLICATE KEY UPDATE platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=?',
-		[uid, platform, state, token, sessionKey, deviceId, deviceToken,  platform, state, token, sessionKey, deviceId, deviceToken],
+		[uid, platform, state, clientToken, sessionKey, deviceId, deviceToken,  platform, state, clientToken, sessionKey, deviceId, deviceToken],
 		function (_err, _result) {
 
 			var err = null;
