@@ -67,22 +67,26 @@ Handler.prototype.entry = function(msg, session, next) {
       });
     }
   ], function(_err, _uid, _nickName, _avatar) {
-    // 断开已经登录此号的Session, 绑定uid到新的Session
-    var sessionService = self.app.get('sessionService');
-    // duplicate log in
-    if( !! sessionService.getByUid(_uid)) {
-      sessionService.kick(_uid);
-    }
-    session.bind(_uid);
-    session.set('nickName', _nickName);
-    session.set('avatar', _avatar);
-    session.pushAll(function(err) {
-      if(err) {
-        console.error('set nickName and avatar for session service failed! error is : %j', err.stack);
+    if (!!_err) {
+      next(null, {error: true, msg: _err});
+    } else {
+      // 断开已经登录此号的Session, 绑定uid到新的Session
+      var sessionService = self.app.get('sessionService');
+      // duplicate log in
+      if( !! sessionService.getByUid(_uid)) {
+        sessionService.kick(_uid);
       }
-    });
+      session.bind(_uid);
+      session.set('nickName', _nickName);
+      session.set('avatar', _avatar);
+      session.pushAll(function(err) {
+        if(err) {
+          console.error('set nickName and avatar for session service failed! error is : %j', err.stack);
+        }
+      });
 
-    next(null, {error: err, msg: msg});
+      next(null, {error: false, msg: 'entry succes.'});
+    }
   });
 };
 
@@ -330,7 +334,7 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user is un enter.'});
+    next(null, {error: true, msg: 'user not entered.'});
     return;
   }
 
@@ -408,7 +412,7 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user is un enter.'});
+    next(null, {error: true, msg: 'user not entered.'});
     return;
   }
 

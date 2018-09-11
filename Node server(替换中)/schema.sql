@@ -12,7 +12,7 @@ CREATE TABLE `user` (
   `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `nick_name` CHAR(64),
   `avatar_url`  CHAR(255),
-  `mobile` CHAR(16),
+  `state` INTEGER NOT NULL,
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)
@@ -28,7 +28,7 @@ DELIMITER ;
 CREATE TABLE `user_bind` (
   `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INTEGER NOT NULL,
-  `type` INTEGER NOT NULL,
+  `platform` INTEGER NOT NULL,
   `open_id` CHAR(32) NOT NULL,
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),

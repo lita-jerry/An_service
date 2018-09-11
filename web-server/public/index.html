@@ -87,6 +87,36 @@
           });
       }
 
+      function tripSOS() {
+        pomelo.request("trip.tripHandler.SOS", {}, function(data) {
+              console.log(data);
+          });
+      }
+
+      function getInfo() {
+        pomelo.request("trip.tripHandler.getInfo", {}, function(data) {
+              console.log(data);
+          });
+      }
+
+      function getUserInfoInTripRoom() {
+        pomelo.request("trip.tripHandler.getUserInfoInTripRoom", {}, function(data) {
+              console.log(data);
+          });
+      }
+
+      function follow() {
+        pomelo.request("trip.tripHandler.follow", {}, function(data) {
+              console.log(data);
+          });
+      }
+
+      function unfollow() {
+        pomelo.request("trip.tripHandler.unfollow", {}, function(data) {
+              console.log(data);
+          });
+      }
+
     </script>
   </head>
   <body>
@@ -115,6 +145,11 @@
         <input id="test" type="button" value="进入行程房间" onclick="entryTripRoom()"/>
         <input id="test" type="button" value="离开行程房间" onclick="leaveTripRoom()"/>
         <input id="test" type="button" value="上报当前位置" onclick="uploadLocation()"/>
+        <input id="test" type="button" value="行程求救" onclick="tripSOS()"/>
+        <input id="test" type="button" value="获取行程信息" onclick="getInfo()"/>
+        <input id="test" type="button" value="获取行程房间内用户" onclick="getUserInfoInTripRoom()"/>
+        <input id="test" type="button" value="关注房主" onclick="follow()"/>
+        <input id="test" type="button" value="取消关注房主" onclick="unfollow()"/>
       </div>
     </div>
     <br>
