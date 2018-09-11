@@ -346,6 +346,8 @@ Handler.prototype.follow = function(msg, session, next) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
+        } else if (_uid === uid) {
+          _cb('不能关注自己');
         } else {
           _cb(null, _uid);
         }
@@ -410,6 +412,8 @@ Handler.prototype.unfollow = function(msg, session, next) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
+        } else if (_uid === uid) {
+          _cb('不能关注自己');
         } else {
           _cb(null, _uid);
         }
@@ -450,7 +454,85 @@ Handler.prototype.unfollow = function(msg, session, next) {
  * @param  {Function} next next stemp callback
  *
  */
-Handler.prototype.getInfo = function(msg, session, next) {}
+Handler.prototype.getInfo = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: 'user not in trip room.'});
+    return;
+  }
+
+  var uid = session.uid;
+  var rid = session.get('rid');
+
+  async.waterfall([
+    function(_cb) {
+      // 查询行程信息
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state, _createdTime, _lastUpdatedTime) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else if (_state === 2) {
+          _cb('行程已结束,无法获取该行程信息');
+        } else {
+          _cb(null, _uid, _state, _createdTime, _lastUpdatedTime);
+        }
+      });
+    },
+    function(_uid, _state, _createdTime, _lastUpdatedTime, _cb) {
+      // 获取用户信息
+      self.app.rpc.user.userRemote.getInfo(session, _uid, function(_err, _hasData, _nickName, _avatar) {
+        if (!!_err) {
+          cb(_err);
+        } else if (!_hasData) {
+          cb('用户查询失败');
+        } else {
+          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime);
+        }
+      });
+    },
+    function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
+      // 获取轨迹
+      self.app,rpc.trip.tripRemote.getPolyline(session, rid, function(_err, _polyline) {
+        if (_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline);
+        }
+      });
+    },
+    function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _cb) {
+      // 获取日志
+      self.app.rpc.trip.tripRemote.getLogs(session, rid, function(_err, _logs) {
+        if (_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _logs);
+        }
+      });
+    }
+  ], function(_err, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _logs) {
+    if (!!_err) {
+      next(null, {error: true, msg: _err});
+    } else {
+      next(null, {error: false, msg: '行程信息获取成功', data: {
+        uid: _uid,
+        avatar: _avatar,
+        tripState: _state,
+        createdTime: _createdTime,
+        lastUpdatedTime: _lastUpdatedTime,
+        polyline: _polyline,
+        logs: _logs
+      }});
+    }
+  });
+}
 
 /**
  * 获取行程房间内的用户信息
@@ -460,12 +542,61 @@ Handler.prototype.getInfo = function(msg, session, next) {}
  * @param  {Function} next next stemp callback
  */
 Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
-  // 检查用户id
-  // 检查是否在房间内
-  // var list = [1, 2];
-  // var sql = 'SELECT * FROM user WHERE id in (' + list + ')'
-  // console.log('SQL语句是:'+sql);
-  // mysql.execute(sql, [], function(err, result){
-  //   console.log(err, result);
-  // });
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, {error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  if (!session.get('rid')) {
+    next(null, {error: true, msg: 'user not in trip room.'});
+    return;
+  }
+
+  var uid = session.uid;
+  var rid = session.get('rid');
+
+  async.waterfall([
+    function(_cb) {
+      // 检查行程信息(当前状态、所属uid)
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else if (_state === 2) {
+          _cb('行程已经结束');
+        } else {
+          _cb(_uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 获取room内成员
+      var _userList = self.app.rpc.trip.tripRemote.getUsersInRoom(session, rid);
+      // 去除房主 (犹豫要不要去除查询的本人,即 uid)
+      var _uidList = _userList.map((currentValue, index, arr) => {
+        return currentValue['uid'];
+      });
+      if (_uidList.length > 0) {
+        var _index = _uidList.indexOf(_uid);
+        if (_index !== -1) {
+          _userList.splice(_index, 1);
+        }
+      }
+
+      _cb(null, _userList.map((currentValue, index, arr) => {
+        return {
+          nickName: currentValue['nickName'],
+          avatar: currentValue['avatar']
+        };
+      }));
+    }], function(_err, _data) {
+      if (!!_err) {
+        next(null, {error: true, msg: _err});
+      } else {
+        next(null, {error: false, msg: '获取用户信息成功', data: _data});
+      }
+  });
 }

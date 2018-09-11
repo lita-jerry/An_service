@@ -45,12 +45,6 @@
           });
       }
 
-      function show3() {
-        pomelo.request("connector.entryHandler.relogin", {token: '4d154fdb7080beb2e60d6c0bf62de9d9'}, function(data) {
-              console.log(data);
-          });
-      }
-
       function createTrip() {
         pomelo.request("trip.tripHandler.create", {}, function(data) {
               console.log(data);
@@ -115,7 +109,6 @@
         <input id="test" type="button" value="Pomelo 初始化" onclick="show()"/>
         <input id="test" type="button" value="entry" onclick="entry()"/>
         <input id="test" type="button" value="第三方登录" onclick="show2()"/>
-        <input id="test" type="button" value="恢复登录" onclick="show3()"/>
         <input id="test" type="button" value="创建行程" onclick="createTrip()"/>
         <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
         <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>

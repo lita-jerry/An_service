@@ -38,23 +38,35 @@ Handler.prototype.entry = function(msg, session, next) {
   var err = false;
   var msg = '';
 
-  // 校验token
-  self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-    if (_err) {
-      _cb(_err);
-    } else if (!_hasData) {
-      err = true;
-      msg = 'token无效';
-    } else {
-      if (_state !== 1) {
-        err = true;
-        msg = 'token已过期';
-      } else {
-        err = false;
-        msg = 'entry success.'
-      }
+  async.waterfall([
+    function(_cb) {
+      // 校验token
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 获取用户信息
+      self.app.rpc.user.userRemote.getInfo(session, _uid, function(_err, _hasData, _nickName, _avatar) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('用户信息获取失败');
+        } else {
+          // 上面其实也可以添加state验证,目前还没有state验证的想法,等以后需要封号的时候可以添加
+          _cb(null, _uid, _nickName, _avatar);
+        }
+      });
     }
-
+  ], function(_err, _uid, _nickName, _avatar) {
     // 断开已经登录此号的Session, 绑定uid到新的Session
     var sessionService = self.app.get('sessionService');
     // duplicate log in
@@ -62,6 +74,13 @@ Handler.prototype.entry = function(msg, session, next) {
       sessionService.kick(_uid);
     }
     session.bind(_uid);
+    session.set('nickName', _nickName);
+    session.set('avatar', _avatar);
+    session.pushAll(function(err) {
+      if(err) {
+        console.error('set nickName and avatar for session service failed! error is : %j', err.stack);
+      }
+    });
 
     next(null, {error: err, msg: msg});
   });
@@ -200,21 +219,26 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
           _cb(null, _uid, token);
         }
       });
-    },
-    function(_uid, token, _cb){
-      // 断开已经登录此号的Session, 绑定uid到新的Session
-      var sessionService = self.app.get('sessionService');
-      // duplicate log in
-      if( !! sessionService.getByUid(_uid)) {
-        sessionService.kick(_uid);
-      }
-      session.bind(_uid);
-      _cb(null, token);
     }],
     function (_err, _token) {
       if (!!_err) {
         next(null, {error: true, msg: _err});
       } else {
+        // 断开已经登录此号的Session, 绑定uid到新的Session
+        var sessionService = self.app.get('sessionService');
+        // duplicate log in
+        if( !! sessionService.getByUid(_uid)) {
+          sessionService.kick(_uid);
+        }
+        session.bind(_uid);
+        session.set('nickName', _nickName);
+        session.set('avatar', _avatar);
+        session.pushAll(function(err) {
+          if(err) {
+            console.error('set nickName and avatar for session service failed! error is : %j', err.stack);
+          }
+        });
+
         next(null, {error: false, msg: '第三方登录成功', data: {token: _token}});
       }
     });
@@ -228,71 +252,71 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
  * @param  {Function} next    next step callback
  * @return {Void}
  */
-Handler.prototype.relogin = function(msg, session, next) {
-  var self = this;
-  // var platform = msg.platform;
+// Handler.prototype.relogin = function(msg, session, next) {
+//   var self = this;
+//   // var platform = msg.platform;
   
-  if (!!session.uid) {
-    console.log('用户', session.uid, '已经登录, 无需再次登录')
-    next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
-    return;
-  }
+//   if (!!session.uid) {
+//     console.log('用户', session.uid, '已经登录, 无需再次登录')
+//     next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
+//     return;
+//   }
 
-  // 参数检查
-  if (!msg.token) {
-    next(null, {error: true, msg: '参数错误:缺少token参数'});
-    return;
-  }
+//   // 参数检查
+//   if (!msg.token) {
+//     next(null, {error: true, msg: '参数错误:缺少token参数'});
+//     return;
+//   }
 
-  var token = msg.token;
+//   var token = msg.token;
 
-  // 恢复登录 ---- start
-  async.waterfall([
-    function (_cb) {
-      // 校验Token
-      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
-          _cb(_err);
-        } else if (!_hasData) {
-          _cb('Token无效')
-        } else {
-          if (_state !== 1) {
-            _cb('Token已过期');
-          } else {
-            _cb(null, _uid);
-          }
-        }
-      });
-    },
-    function (_uid ,_cb) {
-      // 生成新Token
-      var _token = userUtil.makeOnlineSession();
-      // 此处的platform设置为1,今后多平台需要改成 platform 变量
-      self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, _token, null, function(_err){
-        if (_err) {
-          _cb(_err);
-        } else {
-          _cb(null, _uid, _token);
-        }
-      });
-    },
-    function (_uid, _token, _cb) {
-      // 断开已经登录此号的Session, 绑定uid到新的Session
-      var sessionService = self.app.get('sessionService');
-      // duplicate log in
-      if( !! sessionService.getByUid(uid)) {
-        sessionService.kick(_uid);
-      }
-      session.bind(uid);
-    }], function (_err, _uid, _token) {
-      if (!!_err) {
-        next(null, {error: true, msg: _err});
-      } else {
-        next(null, {error: false, msg: '恢复登录成功', data: {token: _token}});
-      }
-  });
-  // 恢复登录 ---- end
-};
+//   // 恢复登录 ---- start
+//   async.waterfall([
+//     function (_cb) {
+//       // 校验Token
+//       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+//         if (_err) {
+//           _cb(_err);
+//         } else if (!_hasData) {
+//           _cb('Token无效')
+//         } else {
+//           if (_state !== 1) {
+//             _cb('Token已过期');
+//           } else {
+//             _cb(null, _uid);
+//           }
+//         }
+//       });
+//     },
+//     function (_uid ,_cb) {
+//       // 生成新Token
+//       var _token = userUtil.makeOnlineSession();
+//       // 此处的platform设置为1,今后多平台需要改成 platform 变量
+//       self.app.rpc.user.userRemote.setUserOnlineState(session, _uid, 1, 1, _token, null, function(_err){
+//         if (_err) {
+//           _cb(_err);
+//         } else {
+//           _cb(null, _uid, _token);
+//         }
+//       });
+//     },
+//     function (_uid, _token, _cb) {
+//       // 断开已经登录此号的Session, 绑定uid到新的Session
+//       var sessionService = self.app.get('sessionService');
+//       // duplicate log in
+//       if( !! sessionService.getByUid(uid)) {
+//         sessionService.kick(_uid);
+//       }
+//       session.bind(uid);
+//     }], function (_err, _uid, _token) {
+//       if (!!_err) {
+//         next(null, {error: true, msg: _err});
+//       } else {
+//         next(null, {error: false, msg: '恢复登录成功', data: {token: _token}});
+//       }
+//   });
+//   // 恢复登录 ---- end
+// };
 
 /**
  * 进入行程房间
@@ -405,7 +429,9 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
     }
   });
 
-  this.app.rpc.trip.tripRemote.kick(session, uid, sid, rid, ()=>{
+  var _uid = '' + uid + '*' + session.get('nickName') + '*' + session.get('avatar');
+
+  this.app.rpc.trip.tripRemote.kick(session, _uid, sid, rid, ()=>{
     next(null, {error: false, msg: '已退出行程房间'});
   });
 }
@@ -419,7 +445,8 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
  */
 var onUserLeave = function(app, session) {
   if(!session || !session.uid) {
+    var _uid = '' + uid + '*' + session.get('nickName') + '*' + session.get('avatar');
+    app.rpc.trip.tripRemote.kick(session, _uid, app.get('serverId'), session.get('rid'), ()=>{});
     return;
   }
-  app.rpc.trip.tripRemote.kick(session, session.uid, app.get('serverId'), session.get('rid'), ()=>{});
 };

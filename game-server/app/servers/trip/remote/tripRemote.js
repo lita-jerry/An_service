@@ -27,12 +27,15 @@ var TripRemote = function(app) {
  */
 TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwner, cb) {
 	var channel = this.channelService.getChannel(roomid, true);
-	
-	console.log(uid, sid, roomid);
+
+	// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
+	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+
+	console.log(uid, sid, roomid, _uid);
 	console.log(channel.getMembers());
 
-	console.log(channel.getMember(uid));
-	if (channel.getMember(uid)) {
+	console.log(channel.getMember(_uid));
+	if (channel.getMember(_uid)) {
 		cb('当前用户已在一个房间');
 		return;
 	}
@@ -46,7 +49,8 @@ TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwn
 	channel.pushMessage(param);
 
 	if( !! channel) {
-		channel.add(uid, sid);
+		
+		channel.add(_uid, sid);
 	}
 
 	cb();
@@ -59,18 +63,24 @@ TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwn
  * @param {Object} opts parameters for request
  * @param {String} name channel name
  * @param {boolean} flag channel parameter
- * @return {Array} users uids in channel
+ * @return {Array} users info in channel: [uid, nickName, avatar]
  *
  */
-TripRemote.prototype.get = function(name, flag=false) {
+TripRemote.prototype.getUsersInRoom = function(name, flag=false) {
 	var users = [];
 	var channel = this.channelService.getChannel(name, flag);
 	if( !! channel) {
 		users = channel.getMembers();
 	}
-	// for(var i = 0; i < users.length; i++) {
-	// 	users[i] = users[i].split('*')[0];
-	// }
+
+	for(var i = 0; i < users.length; i++) {
+		users[i] = {
+			uid: users[i].split('*')[0],
+			nickName: users[i].split('*')[1],
+			avatar: users[i].split('*')[2]
+		}
+	}
+	
 	return users;
 };
 
@@ -89,10 +99,10 @@ TripRemote.prototype.kick = function(uid, sid, name, cb) {
 	// leave channel
 	if( !! channel) {
 		channel.leave(uid, sid);
-		// var username = uid.split('*')[0];
+		var nickName = uid.split('*')[1];
 		var param = {
 			route: 'onLeave',
-			user: 'username'
+			user: nickName
 		};
 		channel.pushMessage(param);
 	}
@@ -186,10 +196,56 @@ TripRemote.prototype.getInfo = function(ordernumber, cb) {
 }
 
 // 获取行程日志
-TripRemote.prototype.getLogs = function(ordernumber, cb) {}
+TripRemote.prototype.getLogs = function(ordernumber, cb) {
+	mysql.execute(
+		'SELECT * FROM trip_logs WHERE order_number=?',
+		[ordernumber],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err);
+			} else {
+				var datas = _result.map((currentValue, index, arr) => {
+					return {
+						eventType: currentValue['event_type'],
+						operation: currentValue['operation'],
+						remark: currentValue['remark']
+					}
+				});
+				
+				cb(null, datas);
+			}
+		}
+	);
+}
 
-// 获取行程轨迹
-TripRemote.prototype.getPolyline = function(ordernumber, cb) {}
+/**
+ * 获取行程轨迹
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb err, [longitude, latitude, remark, time]
+ */
+TripRemote.prototype.getPolyline = function(ordernumber, cb) {
+	mysql.execute(
+		'SELECT * FROM trip_polyline WHERE order_number=?',
+		[ordernumber],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err);
+			} else {
+				var datas = _result.map((currentValue, index, arr) => {
+					return {
+						longitude: currentValue['longitude'],
+						latitude: currentValue['latitude'],
+						remark: currentValue['remark'],
+						time: currentValue['created_time']
+					}
+				});
+				
+				cb(null, datas);
+			}
+		}
+	);
+}
 
 // 发出求救
 TripRemote.prototype.SOS = function(ordernumber, cb) {}
