@@ -258,9 +258,9 @@ UserRemote.prototype.addFollower = function(uid, follower, cb) {
 /**
  * 删除关注者
  * 
- * @param {*} uid 
- * @param {*} follower 
- * @param {*} cb 
+ * @param {String} uid 被关注者用户id
+ * @param {String} follower 关注者用户id
+ * @param {Function} cb err
  */
 UserRemote.prototype.deleteFollower = function(uid, follower, cb) {
 	mysql.execute(
@@ -270,8 +270,11 @@ UserRemote.prototype.deleteFollower = function(uid, follower, cb) {
 			if (_err) {
 				cb(_err);
 			} else {
-				console.log('这里待测试:', _result);
-				cb();
+				if (_result['affectedRows'] > 0) {
+					cb();
+				} else {
+					cb('删除不成功: affectedRows <= 0');
+				}
 			}
 		}
 	);
