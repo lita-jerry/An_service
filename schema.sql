@@ -48,6 +48,8 @@ CREATE TABLE `user_online_state` (
   `state` INTEGER NOT NULL,
   `client_token` CHAR(32) UNIQUE NOT NULL,
   `session_key` CHAR(64),
+  `device_id` CHAR(128),
+  `device_token` CHAR(128),
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated_time` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)
