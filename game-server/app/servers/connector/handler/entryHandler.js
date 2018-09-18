@@ -24,13 +24,13 @@ Handler.prototype.entry = function(msg, session, next) {
   
   if (!!session.uid) {
     console.log('user:', session.uid, ' already entered.')
-    next(null, {error: false, msg: 'already entered.'});
+    next(null, { code: 200, error: false, msg: 'already entered.'});
     return;
   }
 
   // 参数检查
   if (!msg.token) {
-    next(null, {error: true, msg: '参数错误:缺少token参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
@@ -68,7 +68,7 @@ Handler.prototype.entry = function(msg, session, next) {
     }
   ], function(_err, _uid, _nickName, _avatar) {
     if (!!_err) {
-      next(null, {error: true, msg: _err});
+      next(null, { code: 200, error: true, msg: _err});
     } else {
       // 断开已经登录此号的Session, 绑定uid到新的Session
       var sessionService = self.app.get('sessionService');
@@ -85,7 +85,7 @@ Handler.prototype.entry = function(msg, session, next) {
         }
       });
 
-      next(null, {error: false, msg: 'entry succes.'});
+      next(null, { code: 200, error: false, msg: 'entry succes.'});
     }
   });
 };
@@ -136,21 +136,21 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
   // 检查当前用户
   if (!!session.uid) {
     console.log('用户', session.uid, '已经登录, 无需再次登录')
-    next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
+    next(null, { code: 200, error: true, msg: '用户已经登录, 无需再次登录'});
     return;
   }
 
   // 检查参数
   if (!msg.code) {
-    next(null, {error: true, msg: '参数错误:缺少code参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少code参数'});
     return;
   }
   if (!msg.nickName) {
-    next(null, {error: true, msg: '参数错误:缺少nickName参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少nickName参数'});
     return;
   }
   if (!msg.avatarURL) {
-    next(null, {error: true, msg: '参数错误:缺少avatarURL参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少avatarURL参数'});
     return;
   }
 
@@ -226,7 +226,7 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
     }],
     function (_err, _uid, _token) {
       if (!!_err) {
-        next(null, {error: true, msg: _err});
+        next(null, { code: 200, error: true, msg: _err});
       } else {
         // 断开已经登录此号的Session, 绑定uid到新的Session
         var sessionService = self.app.get('sessionService');
@@ -243,7 +243,7 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
           }
         });
 
-        next(null, {error: false, msg: '第三方登录成功', data: {token: _token}});
+        next(null, { code: 200, error: false, msg: '第三方登录成功', data: {token: _token}});
       }
     });
 };
@@ -262,13 +262,13 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
   
 //   if (!!session.uid) {
 //     console.log('用户', session.uid, '已经登录, 无需再次登录')
-//     next(null, {error: true, msg: '用户已经登录, 无需再次登录'});
+//     next(null, { code: 200, error: true, msg: '用户已经登录, 无需再次登录'});
 //     return;
 //   }
 
 //   // 参数检查
 //   if (!msg.token) {
-//     next(null, {error: true, msg: '参数错误:缺少token参数'});
+//     next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
 //     return;
 //   }
 
@@ -314,9 +314,9 @@ Handler.prototype.loginByOtherPlatform = function(msg, session, next) {
 //       session.bind(uid);
 //     }], function (_err, _uid, _token) {
 //       if (!!_err) {
-//         next(null, {error: true, msg: _err});
+//         next(null, { code: 200, error: true, msg: _err});
 //       } else {
-//         next(null, {error: false, msg: '恢复登录成功', data: {token: _token}});
+//         next(null, { code: 200, error: false, msg: '恢复登录成功', data: {token: _token}});
 //       }
 //   });
 //   // 恢复登录 ---- end
@@ -334,13 +334,13 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   // 参数检查
   if (!msg.ordernumber) {
-    next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
@@ -392,9 +392,9 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
     }], 
     function(_err) {
       if (_err) {
-        next(null, {error: true, msg: _err});
+        next(null, { code: 200, error: true, msg: _err});
       } else {
-        next(null, {error: false, msg: '进入行程房间成功'});
+        next(null, { code: 200, error: false, msg: '进入行程房间成功'});
       }
     }
   );
@@ -412,13 +412,13 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   // 参数检查
   if (!session.get('rid')) {
-    next(null, {error: true, msg: '未在房间内'});
+    next(null, { code: 200, error: true, msg: '未在房间内'});
     return;
   }
 
@@ -436,7 +436,7 @@ Handler.prototype.leaveTripRoom = function(msg, session, next) {
   var _uid = '' + uid + '*' + session.get('nickName') + '*' + session.get('avatar');
 
   this.app.rpc.trip.tripRemote.kick(session, _uid, sid, rid, ()=>{
-    next(null, {error: false, msg: '已退出行程房间'});
+    next(null, { code: 200, error: false, msg: '已退出行程房间'});
   });
 }
 

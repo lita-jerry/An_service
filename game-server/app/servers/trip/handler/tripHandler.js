@@ -24,7 +24,7 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
@@ -32,11 +32,11 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
 
   this.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
     if (_err) {
-      next(null, {error: true, msg: _err});
+      next(null, { code: 200, error: true, msg: _err});
     } else if (!_hasData) {
-      next(null, {error: false, msg: 'no trip.'});
+      next(null, { code: 200, error: false, msg: 'no trip.'});
     } else {
-      next(null, {error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
+      next(null, { code: 200, error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
     }
   });
 }
@@ -53,7 +53,7 @@ Handler.prototype.create = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
@@ -84,9 +84,9 @@ Handler.prototype.create = function(msg, session, next) {
     }
   ],function(_err, _ordernumber) {
     if (_err) {
-      next(null, {error: true, msg: _err});
+      next(null, { code: 200, error: true, msg: _err});
     } else {
-      next(null, {error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
+      next(null, { code: 200, error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
     }
   });
 }
@@ -103,19 +103,19 @@ Handler.prototype.end = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   // 检查参数
   // if (!msg.ordernumber) {
-  //   next(null, {error: true, msg: '参数错误:缺少ordernumber参数'});
+  //   next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
   //   return;
   // }
   // 其实一开始考虑上传ordernumber,后来觉得既然在房间内,就可以获取,所以采用下面的方法,更安全
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -148,7 +148,7 @@ Handler.prototype.end = function(msg, session, next) {
     }
   ], function(_err) {
     if (_err) {
-      next(null, {error: true, msg: _err});
+      next(null, { code: 200, error: true, msg: _err});
     } else {
       // channel内成员rid清除
       /* 是真特么清除不了啊，BackendSession.prototype.set() 并不能调用
@@ -184,7 +184,7 @@ Handler.prototype.end = function(msg, session, next) {
       // 销毁channel
       self.channelService.destroyChannel(rid);
       
-      next(null, {error: false, msg: 'end trip success.'});
+      next(null, { code: 200, error: false, msg: 'end trip success.'});
     }
   });
 }
@@ -201,23 +201,23 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
   // 检查参数
   if (!msg.longitude) { // 经度
-    next(null, {error: true, msg: '参数错误:缺少longitude参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少longitude参数'});
     return;
   }
 
   if (!msg.latitude) { // 纬度
-    next(null, {error: true, msg: '参数错误:缺少latitude参数'});
+    next(null, { code: 200, error: true, msg: '参数错误:缺少latitude参数'});
     return;
   }
 
@@ -251,7 +251,7 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
       });
     }
   ], function(_err) {
-    next(null, {error: !!_err, msg: _err ? _err : 'upload trip location success.'});
+    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'upload trip location success.'});
   });
 }
 
@@ -267,12 +267,12 @@ Handler.prototype.SOS = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -311,7 +311,7 @@ Handler.prototype.SOS = function(msg, session, next) {
       _cb();
     }
   ], function(_err) {
-    next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
+    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});
   });
 }
 
@@ -327,12 +327,12 @@ Handler.prototype.follow = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -377,7 +377,7 @@ Handler.prototype.follow = function(msg, session, next) {
       _cb();
     }
   ], function(_err) {
-    next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
+    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});
   });
 }
 
@@ -393,12 +393,12 @@ Handler.prototype.unfollow = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -443,7 +443,7 @@ Handler.prototype.unfollow = function(msg, session, next) {
       _cb();
     }
   ], function(_err) {
-    next(null, {error: !!_err, msg: _err ? _err : 'SOS message send.'});
+    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});
   });
 }
 
@@ -459,12 +459,12 @@ Handler.prototype.getInfo = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -520,9 +520,9 @@ Handler.prototype.getInfo = function(msg, session, next) {
     }
   ], function(_err, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _logs) {
     if (!!_err) {
-      next(null, {error: true, msg: _err});
+      next(null, { code: 200, error: true, msg: _err});
     } else {
-      next(null, {error: false, msg: '行程信息获取成功', data: {
+      next(null, { code: 200, error: false, msg: '行程信息获取成功', data: {
         uid: _uid,
         avatar: _avatar,
         tripState: _state,
@@ -546,12 +546,12 @@ Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
   var self = this;
   
   if (!session.uid) {
-    next(null, {error: true, msg: 'user not entered.'});
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
 
   if (!session.get('rid')) {
-    next(null, {error: true, msg: 'user not in trip room.'});
+    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
@@ -597,9 +597,9 @@ Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
       
     }], function(_err, _data) {
       if (!!_err) {
-        next(null, {error: true, msg: _err});
+        next(null, { code: 200, error: true, msg: _err});
       } else {
-        next(null, {error: false, msg: '获取用户信息成功', data: _data});
+        next(null, { code: 200, error: false, msg: '获取用户信息成功', data: _data});
       }
   });
 }
