@@ -34,7 +34,7 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
     if (_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else if (!_hasData) {
-      next(null, { code: 200, error: false, msg: 'no trip.'});
+      next(null, { code: 200, error: false, msg: 'no trip.', data: {ordernumber: null}});
     } else {
       next(null, { code: 200, error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
     }
