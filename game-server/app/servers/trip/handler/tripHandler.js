@@ -524,6 +524,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
     } else {
       next(null, { code: 200, error: false, msg: '行程信息获取成功', data: {
         uid: _uid,
+        nickName: _nickName,
         avatar: _avatar,
         tripState: _state,
         createdTime: _createdTime,
