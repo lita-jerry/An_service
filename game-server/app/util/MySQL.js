@@ -3,6 +3,8 @@
   var path = require('path')
   var mysql  = require('mysql');
 
+  const mysqlPool = {};
+
   /**
    * 执行SQL语句
    * @param {String} sql 标准SQL语句 'UPDATE user SET name = ?'
@@ -17,9 +19,12 @@
 
     var config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../config/mysql.json')));
 
-    var pool = mysql.createPool(config.development);
+    // var pool = mysql.createPool(config.development);
+    if (!mysqlPool['value']) {
+      mysqlPool['value'] = mysql.createPool(config.development);
+    }
 
-    pool.getConnection(function(error, connection) {
+    mysqlPool['value'].getConnection(function(error, connection) {
       if (error || !connection) { callback('DBERROR: get connection.', null); }
 
       connection.query(sql, sqlparams, (err, result) => {
