@@ -479,8 +479,6 @@ Handler.prototype.getInfo = function(msg, session, next) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
-        } else if (_state === 2) {
-          _cb('行程已结束,无法获取该行程信息');
         } else {
           _cb(null, _uid, _state, _createdTime, _lastUpdatedTime);
         }
