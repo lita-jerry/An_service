@@ -463,13 +463,20 @@ Handler.prototype.getInfo = function(msg, session, next) {
     return;
   }
 
-  if (!session.get('rid')) {
-    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
+  // if (!session.get('rid')) {
+  //   next(null, { code: 200, error: true, msg: 'user not in trip room.'});
+  //   return;
+  // }
+
+  // 检查参数
+  if (!msg.ordernumber) { // 经度
+    next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
   var uid = session.uid;
-  var rid = session.get('rid');
+  // var rid = session.get('rid');
+  var rid = msg.ordernumber;
 
   async.waterfall([
     function(_cb) {
