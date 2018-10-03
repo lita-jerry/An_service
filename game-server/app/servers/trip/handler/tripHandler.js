@@ -462,12 +462,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
     next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
-
-  // if (!session.get('rid')) {
-  //   next(null, { code: 200, error: true, msg: 'user not in trip room.'});
-  //   return;
-  // }
-
+  
   // 检查参数
   if (!msg.ordernumber) { // 经度
     next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
@@ -504,26 +499,22 @@ Handler.prototype.getInfo = function(msg, session, next) {
       });
     },
     function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
-      // 获取轨迹
-      self.app.rpc.trip.tripRemote.getPolyline(session, rid, function(_err, _polyline) {
-        if (_err) {
+      // 获取最后位置
+      self.app.rpc.trip.tripRemote.getLastPlace(session, rid, function(_err, _hasData, _longitude, _latitude, _remark, _time) {
+        if (!!_err) {
           _cb(_err);
         } else {
-          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline);
-        }
-      });
-    },
-    function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _cb) {
-      // 获取日志
-      self.app.rpc.trip.tripRemote.getLogs(session, rid, function(_err, _logs) {
-        if (_err) {
-          _cb(_err);
-        } else {
-          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _logs);
+          var lastPlace = {
+            longitude: _longitude,
+            latitude: _latitude,
+            remark: _remark,
+            time: _time
+          }
+          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, lastPlace);
         }
       });
     }
-  ], function(_err, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _polyline, _logs) {
+  ], function(_err, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _lastPlace) {
     if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
@@ -534,8 +525,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
         tripState: _state,
         createdTime: _createdTime,
         lastUpdatedTime: _lastUpdatedTime,
-        polyline: _polyline,
-        logs: _logs
+        lastPlace: _lastPlace
       }});
     }
   });
