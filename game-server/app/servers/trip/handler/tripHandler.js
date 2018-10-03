@@ -448,7 +448,7 @@ Handler.prototype.unfollow = function(msg, session, next) {
 }
 
 /**
- * 获取行程信息(时间、日志、轨迹)
+ * 获取行程信息、状态及最后出现的位置
  *
  * @param {Object} msg message from client
  * @param {Object} session

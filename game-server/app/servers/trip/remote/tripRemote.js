@@ -244,6 +244,33 @@ TripRemote.prototype.getPolyline = function(ordernumber, cb) {
 	);
 }
 
+/**
+ * 获取最后出现的位置
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb err, hasData, longitude, latitude, remark, time
+ */
+TripRemote.prototype.getLastPlace = function(ordernumber, cb) {
+	mysql.execute(
+		'SELECT * FROM trip_polyline WHERE order_number=? order by id DESC limit 1',
+		[ordernumber],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length > 0) {
+				var longitude = _result[0]['longitude'];
+				var latitude = _result[0]['latitude'];
+				var remark = _result[0]['remark'];
+				var time = _result[0]['created_time'];
+				
+				cb(null, true, longitude, latitude, remark, time);
+			} else {
+				cb(null, false);
+			}
+		}
+	);
+}
+
 // 发出求救
 TripRemote.prototype.SOS = function(ordernumber, cb) {}
 
