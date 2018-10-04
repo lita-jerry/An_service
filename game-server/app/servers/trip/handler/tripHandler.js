@@ -462,15 +462,14 @@ Handler.prototype.getInfo = function(msg, session, next) {
     next(null, { code: 200, error: true, msg: 'user not entered.'});
     return;
   }
-  
+
   // 检查参数
-  if (!msg.ordernumber) { // 经度
+  if (!msg.ordernumber) {
     next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
   var uid = session.uid;
-  // var rid = session.get('rid');
   var rid = msg.ordernumber;
 
   async.waterfall([
@@ -532,11 +531,73 @@ Handler.prototype.getInfo = function(msg, session, next) {
 }
 
 /**
+ * 获取行程路线
+ * 
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param {Function} next next stemp callback
+ */
+Handler.prototype.getPolyline = function(msg, session, next) {
+  var self = this;
+  
+  if (!session.uid) {
+    next(null, { code: 200, error: true, msg: 'user not entered.'});
+    return;
+  }
+
+  // 检查参数
+  if (!msg.ordernumber) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
+    return;
+  }
+
+  if (!msg.page) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少page参数'});
+    return;
+  }
+
+  var uid = session.uid;
+  var rid = msg.ordernumber;
+  var page = msg.page;
+
+  async.waterfall([
+    function(_cb) {
+      // 查询行程信息
+      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state, _createdTime, _lastUpdatedTime) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此行程');
+        } else {
+          _cb(null);
+        }
+      });
+    },
+    function(_cb) {
+      // 获取路线
+      self.app.rpc.trip.tripRemote.getPolyline(rid, page, 20, function(_err, _polyline) {
+        if (_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _polyline);
+        }
+      });
+    }
+  ], function(_err, _polyline) {
+    if (!!_err) {
+      next(null, { code: 200, error: true, msg: _err});
+    } else {
+      next(null, { code: 200, error: false, msg: '行程路线获取成功', data: _polyline});
+    }
+  });
+}
+
+/**
  * 获取行程房间内的用户信息
  * 
  * @param {Object} msg message from client
  * @param {Object} session
- * @param  {Function} next next stemp callback
+ * @param {Function} next next stemp callback
  */
 Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
   var self = this;
