@@ -94,7 +94,7 @@
       }
 
       function getInfo() {
-        pomelo.request("trip.tripHandler.getInfo", {}, function(data) {
+        pomelo.request("trip.tripHandler.getInfo", {ordernumber: tripOrderNumber}, function(data) {
               console.log(data);
           });
       }

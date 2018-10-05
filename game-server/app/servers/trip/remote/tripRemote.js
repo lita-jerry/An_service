@@ -221,7 +221,7 @@ TripRemote.prototype.getLogs = function(ordernumber, cb) {
  * @param {String} ordernumber 行程订单号
  * @param {Number} page 获取第page页的数据
  * @param {Number} count 获取数据的条目数
- * @param {Function} cb err, [longitude, latitude, remark, time]
+ * @param {Function} cb err, [{longitude, latitude, remark, time}]
  */
 TripRemote.prototype.getPolyline = function(ordernumber, page, count, cb) {
 	mysql.execute(

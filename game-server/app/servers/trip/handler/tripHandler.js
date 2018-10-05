@@ -551,7 +551,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     return;
   }
 
-  if (!msg.page) {
+  if (msg.page !== 0 && !msg.page) {
     next(null, { code: 200, error: true, msg: '参数错误:缺少page参数'});
     return;
   }
@@ -575,7 +575,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     },
     function(_cb) {
       // 获取路线
-      self.app.rpc.trip.tripRemote.getPolyline(rid, page, 20, function(_err, _polyline) {
+      self.app.rpc.trip.tripRemote.getPolyline(session, rid, page, 20, function(_err, _polyline) {
         if (_err) {
           _cb(_err);
         } else {
