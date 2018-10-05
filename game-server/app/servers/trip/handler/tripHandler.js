@@ -575,7 +575,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     },
     function(_cb) {
       // 获取路线
-      self.app.rpc.trip.tripRemote.getPolyline(session, rid, page, 20, function(_err, _polyline) {
+      self.app.rpc.trip.tripRemote.getPolyline(session, rid, page * 20, 20, function(_err, _polyline) {
         if (_err) {
           _cb(_err);
         } else {
