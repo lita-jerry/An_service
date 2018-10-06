@@ -23,22 +23,44 @@ var Handler = function(app) {
 Handler.prototype.queryUnfinished = function(msg, session, next) {
   var self = this;
   
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
-  var uid = session.uid;
+  var token = msg.token;
 
-  this.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
-    if (_err) {
-      next(null, { code: 200, error: true, msg: _err});
-    } else if (!_hasData) {
-      next(null, { code: 200, error: false, msg: 'no trip.', data: {ordernumber: null}});
-    } else {
-      next(null, { code: 200, error: false, msg: 'has unfinished trip.', data: {ordernumber: _ordernumber}});
-    }
-  });
+  async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      self.app.rpc.trip.tripRemote.queryUnfinished(session, _uid, function(_err, _hasData, _ordernumber) {
+        if (!!_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _ordernumber);
+        }
+      });
+    }],
+    function(_err, _ordernumber) {
+      if (!!_err) {
+        next(null, { code: 200, error: true, msg: _err});
+      } else {
+        next(null, { code: 200, error: false, msg: !!_ordernumber ? '有未完成行程' : '当前无行程', data: {ordernumber: _ordernumber}});
+      }
+    });
 }
 
 /**
@@ -52,29 +74,43 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
 Handler.prototype.create = function(msg, session, next) {
   var self = this;
   
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
-  var uid = session.uid;
+  var token = msg.token;
 
   async.waterfall([
     function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
       // 查询是否有未完成的行程
-      self.app.rpc.trip.tripRemote.queryUnfinished(session, uid, function(_err, _hasData, _ordernumber) {
+      self.app.rpc.trip.tripRemote.queryUnfinished(session, _uid, function(_err, _hasData, _ordernumber) {
         if (_err) {
           _cb(_err);
         } else if (_hasData) {
           _cb('has unfinished.');
         } else {
-          _cb(null);
+          _cb(null, _uid);
         }
       });
     },
-    function(_cb) {
+    function(_uid, _cb) {
       // 创建订单
-      self.app.rpc.trip.tripRemote.create(session, uid, function(_err, _ordernumber) {
+      self.app.rpc.trip.tripRemote.create(session, _uid, function(_err, _ordernumber) {
         if (_err) {
           _cb(_err);
         } else {
@@ -457,19 +493,19 @@ Handler.prototype.unfollow = function(msg, session, next) {
  */
 Handler.prototype.getInfo = function(msg, session, next) {
   var self = this;
-  
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
+
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
-  // 检查参数
   if (!msg.ordernumber) {
     next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
-  var uid = session.uid;
+  var token = msg.token;
   var rid = msg.ordernumber;
 
   async.waterfall([
@@ -485,19 +521,33 @@ Handler.prototype.getInfo = function(msg, session, next) {
         }
       });
     },
-    function(_uid, _state, _createdTime, _lastUpdatedTime, _cb) {
-      // 获取用户信息
-      self.app.rpc.user.userRemote.getInfo(session, _uid, function(_err, _hasData, _nickName, _avatar) {
+    function(_creatorid, _state, _createdTime, _lastUpdatedTime, _cb) {
+      // 获取行程所属用户的用户信息
+      self.app.rpc.user.userRemote.getInfo(session, _creatorid, function(_err, _hasData, _nickName, _avatar) {
         if (!!_err) {
           cb(_err);
         } else if (!_hasData) {
           cb('用户查询失败');
         } else {
-          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime);
+          _cb(null, _creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime);
         }
       });
     },
-    function(_uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
+    function(_creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
+      // 获取请求者的用户id,为了判断是否为该行程的所有者
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _creatorid === _uid);
+        }
+      });
+    },
+    function(_creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _isCreator, _cb) {
       // 获取最后位置
       self.app.rpc.trip.tripRemote.getLastPlace(session, rid, function(_err, _hasData, _longitude, _latitude, _remark, _time) {
         if (!!_err) {
@@ -509,22 +559,23 @@ Handler.prototype.getInfo = function(msg, session, next) {
             remark: _remark,
             time: _time
           }
-          _cb(null, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, lastPlace);
+          _cb(null, _creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, lastPlace, _isCreator);
         }
       });
-    }
-  ], function(_err, _uid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _lastPlace) {
+    }], 
+    function(_err, _creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _lastPlace, _isCreator) {
     if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
       next(null, { code: 200, error: false, msg: '行程信息获取成功', data: {
-        uid: _uid,
+        creatorid: _creatorid,
         nickName: _nickName,
         avatar: _avatar,
         tripState: _state,
         createdTime: _createdTime,
         lastUpdatedTime: _lastUpdatedTime,
-        lastPlace: _lastPlace
+        lastPlace: _lastPlace,
+        isCreator: _isCreator
       }});
     }
   });
@@ -539,13 +590,13 @@ Handler.prototype.getInfo = function(msg, session, next) {
  */
 Handler.prototype.getPolyline = function(msg, session, next) {
   var self = this;
-  
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
+
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
     return;
   }
 
-  // 检查参数
   if (!msg.ordernumber) {
     next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
@@ -556,11 +607,24 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     return;
   }
 
-  var uid = session.uid;
+  var token = msg.token;
   var rid = msg.ordernumber;
   var page = msg.page;
 
   async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null);
+        }
+      });
+    },
     function(_cb) {
       // 查询行程信息
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state, _createdTime, _lastUpdatedTime) {
@@ -601,18 +665,12 @@ Handler.prototype.getPolyline = function(msg, session, next) {
  */
 Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
   var self = this;
-  
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
-    return;
-  }
 
   if (!session.get('rid')) {
     next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
   }
 
-  var uid = session.uid;
   var rid = session.get('rid');
 
   async.waterfall([

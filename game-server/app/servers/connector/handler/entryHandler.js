@@ -11,7 +11,7 @@ var Handler = function(app) {
 };
 
 /**
- * New client entry.
+ * New client entry.  作废
  *
  * @param  {Object}   msg     request message: login token
  * @param  {Object}   session current session object
@@ -123,7 +123,7 @@ Handler.prototype.subscribe = function(msg, session, next) {
 };
 
 /**
- * 第三方平台登录
+ * 第三方平台登录 作废
  *
  * @param  {Object}   msg     request message
  * @param  {Object}   session current session object
@@ -339,11 +339,17 @@ Handler.prototype.entryTripRoom = function(msg, session, next) {
   }
 
   // 参数检查
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
+    return;
+  }
+
   if (!msg.ordernumber) {
     next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
     return;
   }
 
+  var token = msg.token;
   var uid = session.uid;
   var rid = msg.ordernumber; // room id 就是行程订单号
 
