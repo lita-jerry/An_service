@@ -143,13 +143,7 @@ Handler.prototype.end = function(msg, session, next) {
     return;
   }
 
-  // 检查参数
-  // if (!msg.ordernumber) {
-  //   next(null, { code: 200, error: true, msg: '参数错误:缺少ordernumber参数'});
-  //   return;
-  // }
   // 其实一开始考虑上传ordernumber,后来觉得既然在房间内,就可以获取,所以采用下面的方法,更安全
-
   if (!session.get('rid')) {
     next(null, { code: 200, error: true, msg: 'user not in trip room.'});
     return;
@@ -214,7 +208,7 @@ Handler.prototype.end = function(msg, session, next) {
       var channel = self.channelService.getChannel(rid, false);
       if (!!channel) {
         channel.pushMessage({
-          route: 'onEnd'
+          route: 'onTripEnd'
         })
       }
       // 销毁channel
@@ -344,138 +338,6 @@ Handler.prototype.SOS = function(msg, session, next) {
     },
     function(_cb) {
       // 发出通知
-      _cb();
-    }
-  ], function(_err) {
-    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});
-  });
-}
-
-/**
- * 关注房主
- *
- * @param {Object} msg message from client
- * @param {Object} session
- * @param  {Function} next next stemp callback
- *
- */
-Handler.prototype.follow = function(msg, session, next) {
-  var self = this;
-  
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
-    return;
-  }
-
-  if (!session.get('rid')) {
-    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
-    return;
-  }
-
-  var uid = session.uid;
-  var rid = session.get('rid');
-
-  async.waterfall([
-    function(_cb) {
-      // 检查行程信息(所属uid)
-      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
-          _cb(_err);
-        } else if (!_hasData) {
-          _cb('无此行程');
-        } else if (_uid === uid) {
-          _cb('不能关注自己');
-        } else {
-          _cb(null, _uid);
-        }
-      });
-    },
-    function(_uid, _cb) {
-      // 查询当前关注状态
-      self.app,rpc.trip.tripRemote.getFollowState(session, _uid, uid, function(_err, _isSure) {
-        if (_err) {
-          _cb(_err);
-        } else if (_isSure) {
-          _cb('已经关注过了');
-        } else {
-          _cb(null, _uid);
-        }
-      });
-    },
-    function(_uid, _cb) {
-      // 添加关注绑定
-      self.app.rpc.trip.tripRemote.addFollower(session, _uid, uid, function(_err) {
-        _cb(_err);
-      });
-    },
-    function(_cb) {
-      // 发出通知 稍后完成
-      _cb();
-    }
-  ], function(_err) {
-    next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});
-  });
-}
-
-/**
- * 取消关注房主
- *
- * @param {Object} msg message from client
- * @param {Object} session
- * @param  {Function} next next stemp callback
- *
- */
-Handler.prototype.unfollow = function(msg, session, next) {
-  var self = this;
-  
-  if (!session.uid) {
-    next(null, { code: 200, error: true, msg: 'user not entered.'});
-    return;
-  }
-
-  if (!session.get('rid')) {
-    next(null, { code: 200, error: true, msg: 'user not in trip room.'});
-    return;
-  }
-
-  var uid = session.uid;
-  var rid = session.get('rid');
-
-  async.waterfall([
-    function(_cb) {
-      // 检查行程信息(所属uid)
-      self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
-          _cb(_err);
-        } else if (!_hasData) {
-          _cb('无此行程');
-        } else if (_uid === uid) {
-          _cb('不能关注自己');
-        } else {
-          _cb(null, _uid);
-        }
-      });
-    },
-    function(_uid, _cb) {
-      // 查询当前关注状态
-      self.app,rpc.trip.tripRemote.getFollowState(session, _uid, uid, function(_err, _isSure) {
-        if (_err) {
-          _cb(_err);
-        } else if (_isSure) {
-          _cb(null, _uid);
-        } else {
-          _cb('还未关注');
-        }
-      });
-    },
-    function(_uid, _cb) {
-      // 删除关注绑定的关系
-      self.app.rpc.trip.tripRemote.deleteFollower(session, _uid, uid, function(_err) {
-        _cb(_err);
-      });
-    },
-    function(_cb) {
-      // 发出通知 稍后完成
       _cb();
     }
   ], function(_err) {

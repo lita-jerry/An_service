@@ -15,60 +15,17 @@ var TripRemote = function(app) {
 };
 
 /**
- * Add user into trip channel.
- *
- * @param {String} uid unique id for user
- * @param {String} sid server id
- * @param {String} roomid trip channel room id
- * @param {String} nickName user's nick name
- * @param {String} avatarURL user's avatar url
- * @param {boolean} isOwner is it the trip's owner
- *
- */
-TripRemote.prototype.add = function(uid, sid, roomid, nickName, avatarURL, isOwner, cb) {
-	var channel = this.channelService.getChannel(roomid, true);
-
-	// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
-	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
-
-	console.log(uid, sid, roomid, _uid);
-	console.log(channel.getMembers());
-
-	console.log(channel.getMember(_uid));
-	if (channel.getMember(_uid)) {
-		cb('当前用户已在一个房间');
-		return;
-	}
-
-	var param = {
-		route: 'onAdd',
-		nickName: nickName,
-		avatarURL: avatarURL,
-		isOwner: isOwner
-	};
-	channel.pushMessage(param);
-
-	if( !! channel) {
-		
-		channel.add(_uid, sid);
-	}
-
-	cb();
-	// cb(this.get(roomid, false));
-}
-
-/**
  * Get user from trip channel.
  *
  * @param {Object} opts parameters for request
- * @param {String} roomid trip room id
+ * @param {String} ordernumber trip room id
  * @param {boolean} flag channel parameter
  * @return {Array} users info in channel: [uid, nickName, avatar]
  *
  */
-TripRemote.prototype.getUsersInRoom = function(roomid, cb) {
+TripRemote.prototype.getUsersInRoom = function(ordernumber, cb) {
 	var users = [];
-	var channel = this.channelService.getChannel(roomid, false);
+	var channel = this.channelService.getChannel(ordernumber, false);
 	if( !! channel) {
 		users = channel.getMembers();
 	}
@@ -81,31 +38,6 @@ TripRemote.prototype.getUsersInRoom = function(roomid, cb) {
 	}
 	cb(null, users);
 };
-
-/**
- * Kick user out trip channel.
- *
- * @param {String} uid unique id for user
- * @param {String} sid server id
- * @param {String} name channel name
- *
- */
-TripRemote.prototype.kick = function(uid, sid, name, cb) {
-	var channel = this.channelService.getChannel(name, false);
-	console.log('kick function\'s channel: channel'+channel);
-	// leave channel
-	if( !! channel) {
-		channel.leave(uid, sid);
-		var nickName = uid.split('*')[1];
-		var param = {
-			route: 'onLeave',
-			user: nickName
-		};
-		channel.pushMessage(param);
-	}
-	cb();
-};
-
 
 // 查询未完成行程
 TripRemote.prototype.queryUnfinished = function(uid, cb) {
@@ -282,7 +214,7 @@ TripRemote.prototype.SOS = function(ordernumber, cb) {}
  * 添加行程日志
  * 
  * @param {String} ordernumber 行程订单号
- * @param {Number} event 事件类型 1,SOS求救
+ * @param {Number} event 事件类型 1,SOS求救 2,房主恢复连接 3,房主断开连接
  * @param {String} operation 操作内容(显示到前端的内容)
  * @param {String} remark 备注(用于标注,不在前端显示)
  * @param {Function} cb 回调函数
@@ -294,4 +226,166 @@ TripRemote.prototype.addLog = function(ordernumber, event, operation, remark, cb
 									cb(_err);
 								}
 							);
+}
+
+/**
+ * 行程房主加入Channel
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb 回调函数
+ */
+TripRemote.prototype.tripCreatorAdd = function(uid, sid, ordernumber, nickName, avatarURL, cb) {
+
+	var self = this;
+
+	async.waterfall([
+		function(_cb) {
+			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ?',
+				[1, ordernumber],
+				function(_err, _result) {
+					if (_err) {
+						_cb(_err);
+					} else if (_result['changedRows'] > 0) {
+						_cb();
+					} else {
+						_cb('changed rows <= 0');
+					}
+				}
+			);
+		},
+		function(_cb) {
+			mysql.execute('INSERT INTO trip_logs (order_number, event_type, operation, remark) VALUES(?,?,?,?)',
+				[ordernumber, 2, '恢复连接', ''],
+				function(_err, _result) { _cb(_err); }
+			);
+		},
+		function(_cb) {
+			var channel = self.channelService.getChannel(ordernumber, true);
+
+			// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
+			var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+
+			if (channel.getMember(_uid)) {
+				_cb('当前用户已在一个房间');
+				return;
+			}
+
+			var param = {
+				route: 'onTripCreatorAdd'
+			};
+			channel.pushMessage(param);
+			channel.add(_uid, sid);
+			_cb();
+		}
+	],
+	function(_err) {
+		cb(_err);
+	});
+}
+
+/**
+ * 行程房主离开Channel
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb 回调函数
+ */
+TripRemote.prototype.tripCreatorLeave = function(uid, sid, ordernumber, nickName, avatarURL, cb) {
+
+	var self = this;
+
+	async.waterfall([
+		function(_cb) {
+			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ?',
+				[3, ordernumber],
+				function(_err, _result) {
+					if (_err) {
+						_cb(_err);
+					} else if (_result['changedRows'] > 0) {
+						_cb();
+					} else {
+						_cb('changed rows <= 0');
+					}
+				}
+			);
+		},
+		function(_cb) {
+			mysql.execute('INSERT INTO trip_logs (order_number, event_type, operation, remark) VALUES(?,?,?,?)',
+				[ordernumber, 3, '断开连接', ''],
+				function(_err, _result) { _cb(_err); }
+			);
+		},
+		function(_cb) {
+			var channel = self.channelService.getChannel(ordernumber, false);
+			console.log('kick function\'s channel: channel'+channel);
+			// leave channel
+			if( !! channel) {
+				var param = {
+					route: 'onTripCreatorLeave'
+				};
+				channel.pushMessage(param);
+				var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+				channel.leave(_uid, sid);
+			}
+		}
+	],
+	function(_err) {
+		cb(_err);
+	});
+}
+
+/**
+ * 行程观察者加入Channel
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb 回调函数
+ */
+TripRemote.prototype.tripWatcherAdd = function(uid, sid, ordernumber, nickName, avatarURL, cb) {
+
+	var self = this;
+
+	var channel = self.channelService.getChannel(ordernumber, true);
+
+	// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
+	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+
+	if (channel.getMember(_uid)) {
+		cb('当前用户已在一个房间');
+		return;
+	}
+
+	var param = {
+		route: 'onTripWatcherAdd',
+		nickName: nickName,
+		avatarURL: avatarURL
+	};
+	channel.pushMessage(param);
+	channel.add(_uid, sid);
+
+	cb();
+}
+
+/**
+ * 行程观察者离开Channel
+ * 
+ * @param {String} ordernumber 行程订单号
+ * @param {Function} cb 回调函数
+ */
+TripRemote.prototype.tripWatcherLeave = function(uid, sid, ordernumber, nickName, avatarURL, cb) {
+
+	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+
+	var channel = self.channelService.getChannel(ordernumber, false);
+	console.log('kick function\'s channel: channel'+channel);
+	// leave channel
+	if( !! channel) {
+		var param = {
+			route: 'onTripWatcherLeave',
+			nickName: nickName,
+			avatarURL: avatarURL
+		};
+		channel.pushMessage(param);
+		channel.leave(_uid, sid);
+	}
+
+	cb();
 }
