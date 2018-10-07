@@ -20,10 +20,11 @@
       var pomelo = window.pomelo;
       var host = "127.0.0.1";
       var port = "3010";
+      var loginToken = 'f27ba7d415e97c307c0ff5b79f12ec96';
       
       var tripOrderNumber = null;
 
-      function show() {
+      function init() {
         pomelo.init({
           host: host,
           port: port,
@@ -33,20 +34,20 @@
         });
       }
 
-      function entry() {
-        pomelo.request("connector.entryHandler.entry", {token: '4d154fdb7080beb2e60d6c0bf62de9d9', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
+      function checkLoginToken() {
+        pomelo.request("user.userHandler.checkLoginToken", {token: loginToken}, function(data) {
               console.log(data);
           });
       }
 
-      function show2() {
-        pomelo.request("connector.entryHandler.loginByOtherPlatform", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
+      function loginByWeapp() {
+        pomelo.request("user.userHandler.loginByWeapp", {code: '001w5vtH1VTnr80BZqsH128gtH1w5vt6', nickName: '这个是昵称', avatarURL: '这个是头像url'}, function(data) {
               console.log(data);
           });
       }
 
-      function createTrip() {
-        pomelo.request("trip.tripHandler.create", {}, function(data) {
+      function create() {
+        pomelo.request("trip.tripHandler.create", {token: loginToken}, function(data) {
               console.log(data);
               if (data.data.ordernumber) {
                 tripOrderNumber = data.data.ordernumber;
@@ -54,14 +55,14 @@
           });
       }
 
-      function endTrip() {
+      function end() {
         pomelo.request("trip.tripHandler.end", {}, function(data) {
               console.log(data);
           });
       }
       
       function queryUnfinished() {
-        pomelo.request("trip.tripHandler.queryUnfinished", {}, function(data) {
+        pomelo.request("trip.tripHandler.queryUnfinished", {token: loginToken}, function(data) {
               console.log(data);
               if (data.data.ordernumber) {
                 tripOrderNumber = data.data.ordernumber;
@@ -69,14 +70,14 @@
           });
       }
 
-      function entryTripRoom() {
-        pomelo.request("connector.entryHandler.entryTripRoom", {ordernumber: tripOrderNumber}, function(data) {
+      function entryTrippingRoom() {
+        pomelo.request("connector.entryHandler.entryTrippingRoom", {token: loginToken, ordernumber: tripOrderNumber}, function(data) {
               console.log(data);
           });
       }
-      
-      function leaveTripRoom() {
-        pomelo.request("connector.entryHandler.leaveTripRoom", {}, function(data) {
+
+      function entryWatchingRoom() {
+        pomelo.request("connector.entryHandler.entryWatchingRoom", {token: loginToken, ordernumber: tripOrderNumber}, function(data) {
               console.log(data);
           });
       }
@@ -94,7 +95,7 @@
       }
 
       function getInfo() {
-        pomelo.request("trip.tripHandler.getInfo", {ordernumber: tripOrderNumber}, function(data) {
+        pomelo.request("trip.tripHandler.getInfo", {token: loginToken, ordernumber: tripOrderNumber}, function(data) {
               console.log(data);
           });
       }
@@ -106,13 +107,13 @@
       }
 
       function follow() {
-        pomelo.request("trip.tripHandler.follow", {}, function(data) {
+        pomelo.request("user.userHandler.follow", {}, function(data) {
               console.log(data);
           });
       }
 
       function unfollow() {
-        pomelo.request("trip.tripHandler.unfollow", {}, function(data) {
+        pomelo.request("user.userHandler.unfollow", {}, function(data) {
               console.log(data);
           });
       }
@@ -136,14 +137,14 @@
         <a href="https://github.com/NetEase/pomelo">https://github.com/NetEase/pomelo</a>
       </div>
       <div class="g-button">
-        <input id="test" type="button" value="Pomelo 初始化" onclick="show()"/>
-        <input id="test" type="button" value="entry" onclick="entry()"/>
-        <input id="test" type="button" value="第三方登录" onclick="show2()"/>
-        <input id="test" type="button" value="创建行程" onclick="createTrip()"/>
-        <input id="test" type="button" value="结束行程" onclick="endTrip()"/>
+        <input id="test" type="button" value="Pomelo 初始化" onclick="init()"/>
+        <input id="test" type="button" value="检查Token" onclick="checkLoginToken()"/>
+        <input id="test" type="button" value="微信小程序登录" onclick="loginByWeapp()"/>
+        <input id="test" type="button" value="创建行程" onclick="create()"/>
+        <input id="test" type="button" value="结束行程" onclick="end()"/>
         <input id="test" type="button" value="查询未完成行程" onclick="queryUnfinished()"/>
-        <input id="test" type="button" value="进入行程房间" onclick="entryTripRoom()"/>
-        <input id="test" type="button" value="离开行程房间" onclick="leaveTripRoom()"/>
+        <input id="test" type="button" value="进入行程房间(房主模式)" onclick="entryTrippingRoom()"/>
+        <input id="test" type="button" value="进入行程房间(观察者模式)" onclick="entryWatchingRoom()"/>
         <input id="test" type="button" value="上报当前位置" onclick="uploadLocation()"/>
         <input id="test" type="button" value="行程求救" onclick="tripSOS()"/>
         <input id="test" type="button" value="获取行程信息" onclick="getInfo()"/>
