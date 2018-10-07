@@ -107,13 +107,13 @@
       }
 
       function follow() {
-        pomelo.request("user.userHandler.follow", {}, function(data) {
+        pomelo.request("user.userHandler.follow", {token: loginToken, followid: 2}, function(data) {
               console.log(data);
           });
       }
 
       function unfollow() {
-        pomelo.request("user.userHandler.unfollow", {}, function(data) {
+        pomelo.request("user.userHandler.unfollow", {token: loginToken, followid: 2}, function(data) {
               console.log(data);
           });
       }

@@ -44,7 +44,7 @@ Handler.prototype.entryTrippingRoom = function(msg, session, next) {
     function(_cb) {
       // 检查Token
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -58,7 +58,7 @@ Handler.prototype.entryTrippingRoom = function(msg, session, next) {
     function(_uid, _cb) {
       // 查询行程订单状态
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _creator, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -74,7 +74,7 @@ Handler.prototype.entryTrippingRoom = function(msg, session, next) {
     function(_uid, _cb) {
       // 获取用户信息
       self.app.rpc.user.userRemote.getInfo(session, _uid, function(_err, _hasData, _nickName, _avatar) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无效用户');
@@ -112,7 +112,7 @@ Handler.prototype.entryTrippingRoom = function(msg, session, next) {
     }
   ],
   function(_err) {
-    if (_err) {
+    if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
       next(null, { code: 200, error: false, msg: '进入行程房间成功(房主模式)'});
@@ -168,7 +168,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
     function(_cb) {
       // 检查Token
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -182,7 +182,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
     function(_uid, _cb) {
       // 查询行程订单状态
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _creator, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -198,7 +198,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
     function(_uid, _cb) {
       // 获取用户信息
       self.app.rpc.user.userRemote.getInfo(session, _uid, function(_err, _hasData, _nickName, _avatar) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无效用户');
@@ -236,7 +236,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
     }
   ],
   function(_err) {
-    if (_err) {
+    if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
       next(null, { code: 200, error: false, msg: '进入行程房间成功(观察者模式)'});

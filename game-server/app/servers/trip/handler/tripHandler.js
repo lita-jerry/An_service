@@ -34,7 +34,7 @@ Handler.prototype.queryUnfinished = function(msg, session, next) {
   async.waterfall([
     function(_cb) {
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -85,7 +85,7 @@ Handler.prototype.create = function(msg, session, next) {
   async.waterfall([
     function(_cb) {
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -99,7 +99,7 @@ Handler.prototype.create = function(msg, session, next) {
     function(_uid, _cb) {
       // 查询是否有未完成的行程
       self.app.rpc.trip.tripRemote.queryUnfinished(session, _uid, function(_err, _hasData, _ordernumber) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (_hasData) {
           _cb('has unfinished.');
@@ -111,7 +111,7 @@ Handler.prototype.create = function(msg, session, next) {
     function(_uid, _cb) {
       // 创建订单
       self.app.rpc.trip.tripRemote.create(session, _uid, function(_err, _ordernumber) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else {
           _cb(null, _ordernumber);
@@ -119,7 +119,7 @@ Handler.prototype.create = function(msg, session, next) {
       });
     }
   ],function(_err, _ordernumber) {
-    if (_err) {
+    if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
       next(null, { code: 200, error: false, msg: '行程创建成功', data:{ordernumber: _ordernumber}});
@@ -156,7 +156,7 @@ Handler.prototype.end = function(msg, session, next) {
     function(_cb) {
       // 检查行程信息(当前状态、所属uid)
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -177,7 +177,7 @@ Handler.prototype.end = function(msg, session, next) {
       });
     }
   ], function(_err) {
-    if (_err) {
+    if (!!_err) {
       next(null, { code: 200, error: true, msg: _err});
     } else {
       // channel内成员rid清除
@@ -260,7 +260,7 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
     function(_cb) {
       // 检查行程信息(当前状态、所属uid)
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -313,7 +313,7 @@ Handler.prototype.SOS = function(msg, session, next) {
     function(_cb) {
       // 检查行程信息(当前状态、所属uid)
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -330,7 +330,7 @@ Handler.prototype.SOS = function(msg, session, next) {
     function(_cb) {
       // 记录日志
       self.app.rpc.trip.tripRemote.addLog(session, rid, 1, '发出求救', null, function(_err) {
-        if (_err) {
+        if (!!_err) {
           console.error('entryHandler.SOS: add log failed! error is : %j', _err.stack);
         }
         _cb(); // 这里没想好怎么做错误处理,不管记录没记录都先发通知吧
@@ -374,7 +374,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
     function(_cb) {
       // 查询行程信息
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state, _createdTime, _lastUpdatedTime) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -398,7 +398,7 @@ Handler.prototype.getInfo = function(msg, session, next) {
     function(_creatorid, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime, _cb) {
       // 获取请求者的用户id,为了判断是否为该行程的所有者
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -476,7 +476,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
   async.waterfall([
     function(_cb) {
       self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('token无效');
@@ -490,7 +490,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     function(_cb) {
       // 查询行程信息
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state, _createdTime, _lastUpdatedTime) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
@@ -502,7 +502,7 @@ Handler.prototype.getPolyline = function(msg, session, next) {
     function(_cb) {
       // 获取路线
       self.app.rpc.trip.tripRemote.getPolyline(session, rid, page * 20, 20, function(_err, _polyline) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else {
           _cb(null, _polyline);
@@ -539,7 +539,7 @@ Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
     function(_cb) {
       // 检查行程信息(当前状态、所属uid)
       self.app.rpc.trip.tripRemote.getInfo(session, rid, function(_err, _hasData, _uid, _state) {
-        if (_err) {
+        if (!!_err) {
           _cb(_err);
         } else if (!_hasData) {
           _cb('无此行程');
