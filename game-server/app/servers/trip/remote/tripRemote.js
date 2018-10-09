@@ -92,11 +92,11 @@ TripRemote.prototype.end = function(ordernumber, cb) {
 // 上报行程位置
 TripRemote.prototype.uploadLocation = function(ordernumber, longitude, latitude, remark, cb) {
 	mysql.execute('INSERT INTO trip_polyline (order_number, longitude, latitude, remark) VALUES(?,?,?,?)',
-								[ordernumber, longitude, latitude, remark],
-								function(_err, _result) {
-									cb(_err);
-								}
-							);
+		[ordernumber, longitude, latitude, remark],
+		function(_err, _result) {
+			cb(_err);
+		}
+	);
 }
 
 /**
@@ -264,8 +264,8 @@ TripRemote.prototype.tripCreatorAdd = function(uid, sid, ordernumber, nickName, 
 
 			// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
 			var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
-
-			if (channel.getMember(_uid)) {
+			console.log('Tripping房主进入: ', _uid);
+			if (!!channel.getMember(_uid)) {
 				_cb('当前用户已在一个房间');
 				return;
 			}
@@ -324,6 +324,7 @@ TripRemote.prototype.tripCreatorLeave = function(uid, sid, ordernumber, nickName
 				};
 				channel.pushMessage(param);
 				var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+				console.log('Tripping房主离开: ', _uid);
 				channel.leave(_uid, sid);
 			}
 		}

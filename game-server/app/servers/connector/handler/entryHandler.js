@@ -129,7 +129,7 @@ Handler.prototype.entryTrippingRoom = function(msg, session, next) {
  */
 var onTripCreatorDissconnect = function(app, session) {
   if(!!session && !!session.uid) {
-    self.app.rpc.trip.tripRemote.tripCreatorLeave(session, session.uid, app.get('serverId'), session.get('rid'), session.get('nickName'), session.get('avatar'), ()=>{});
+    app.rpc.trip.tripRemote.tripCreatorLeave(session, session.uid, app.get('serverId'), session.get('rid'), session.get('nickName'), session.get('avatar'), ()=>{});
     return;
   }
 };
@@ -253,7 +253,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
  */
 var onTripWatcherDissconnect = function(app, session) {
   if(!!session && !!session.uid) {
-    self.app.rpc.trip.tripRemote.tripWatcherLeave(session, session.uid, app.get('serverId'), session.get('rid'), session.get('nickName'), session.get('avatar'), ()=>{});
+    app.rpc.trip.tripRemote.tripWatcherLeave(session, session.uid, app.get('serverId'), session.get('rid'), session.get('nickName'), session.get('avatar'), ()=>{});
     return;
   }
 };
