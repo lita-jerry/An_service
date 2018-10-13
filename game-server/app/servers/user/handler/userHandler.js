@@ -311,3 +311,73 @@ Handler.prototype.unfollow = function(msg, session, next) {
     next(null, { code: 200, error: !!_err, msg: _err ? _err : '已取消关注'});
   });
 }
+
+/**
+ * 查询关注状态
+ *
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param  {Function} next next stemp callback
+ *
+ */
+Handler.prototype.getFollowState = function(msg, session, next) {
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
+    return;
+  }
+
+  if (!msg.followid) { // 被关注者的uid
+    next(null, { code: 200, error: true, msg: '参数错误:缺少followid参数'});
+    return;
+  }
+
+  var token = msg.token;
+  var followid = msg.followid;
+
+  var self = this;
+
+  async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (!!_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 检查被关注者的状态
+      self.app.rpc.user.userRemote.getInfo(session, followid, function(_err, _hasData, _nickName, _avatar, _state, _createdTime, _lastUpdatedTime) {
+        if (!!_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('无此关注的用户');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 查询当前关注状态
+      self.app.rpc.user.userRemote.getFollowState(session, followid, _uid, function(_err, _isFollow) {
+        if (!!_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _isFollow);
+        }
+      });
+    }
+  ], function(_err, _isFollow) {
+    if (!!_err) {
+      next(null, { code: 200, error: true, msg: _err });
+    } else {
+      next(null, { code: 200, error: false, msg: '查询成功', data: {isFollow: _isFollow} });
+    }
+  });
+}

@@ -240,7 +240,7 @@ TripRemote.prototype.tripCreatorAdd = function(uid, sid, ordernumber, nickName, 
 
 	async.waterfall([
 		function(_cb) {
-			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ?',
+			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ? AND (state = 3 OR state = 1)',
 				[1, ordernumber],
 				function(_err, _result) {
 					if (_err) {
@@ -267,7 +267,8 @@ TripRemote.prototype.tripCreatorAdd = function(uid, sid, ordernumber, nickName, 
 			console.log('Tripping房主进入: ', _uid);
 			if (!!channel.getMember(_uid)) {
 				_cb('当前用户已在一个房间');
-				return;
+				// return;
+				channel.leave(_uid, sid);
 			}
 
 			var param = {
@@ -295,7 +296,7 @@ TripRemote.prototype.tripCreatorLeave = function(uid, sid, ordernumber, nickName
 
 	async.waterfall([
 		function(_cb) {
-			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ?',
+			mysql.execute('UPDATE trip SET state = ? WHERE order_number = ? AND state = 1',
 				[3, ordernumber],
 				function(_err, _result) {
 					if (_err) {
