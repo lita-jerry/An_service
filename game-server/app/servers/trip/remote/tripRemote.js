@@ -263,7 +263,8 @@ TripRemote.prototype.tripCreatorAdd = function(uid, sid, ordernumber, nickName, 
 			var channel = self.channelService.getChannel(ordernumber, true);
 
 			// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
-			var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+			// var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+			var _uid = uid;
 			console.log('Tripping房主进入: ', _uid);
 			if (!!channel.getMember(_uid)) {
 				_cb('当前用户已在一个房间');
@@ -324,7 +325,8 @@ TripRemote.prototype.tripCreatorLeave = function(uid, sid, ordernumber, nickName
 					route: 'onTripCreatorLeave'
 				};
 				channel.pushMessage(param);
-				var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+				// var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+				var _uid = uid;
 				console.log('Tripping房主离开: ', _uid);
 				channel.leave(_uid, sid);
 			}
@@ -348,7 +350,8 @@ TripRemote.prototype.tripWatcherAdd = function(uid, sid, ordernumber, nickName, 
 	var channel = self.channelService.getChannel(ordernumber, true);
 
 	// 为了减少数据库查询频率,将 uid、nickName、avatar转成: uid*nickName*avatar 格式
-	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+	// var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+	var _uid = uid;
 
 	if (channel.getMember(_uid)) {
 		cb('当前用户已在一个房间');
@@ -374,7 +377,8 @@ TripRemote.prototype.tripWatcherAdd = function(uid, sid, ordernumber, nickName, 
  */
 TripRemote.prototype.tripWatcherLeave = function(uid, sid, ordernumber, nickName, avatarURL, cb) {
 
-	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+	// var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
+	var _uid = uid;
 
 	var channel = this.channelService.getChannel(ordernumber, false);
 	console.log('kick function\'s channel: channel'+channel);
