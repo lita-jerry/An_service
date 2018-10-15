@@ -353,9 +353,7 @@ Handler.prototype.SOS = function(msg, session, next) {
       var channel = self.channelService.getChannel(rid, false);
       if (!!channel) {
         channel.pushMessage({
-          route: 'onLocationChanged',
-          longitude: longitude,
-          latitude: latitude
+          route: 'onSOS'
         });
       }
       _cb();
