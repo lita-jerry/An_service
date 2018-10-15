@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS mobile_sms_log;
 DROP TABLE IF EXISTS trip;
 DROP TABLE IF EXISTS trip_logs;
 DROP TABLE IF EXISTS trip_polyline;
+DROP TABLE IF EXISTS user_follow_relation;
 
 
 CREATE TABLE `user` (
@@ -107,6 +108,15 @@ CREATE TABLE `trip_polyline` (
   `longitude`  CHAR(255) NOT NULL,
   `latitude`  CHAR(255) NOT NULL,
   `remark`  CHAR(255),
+  `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `user_follow_relation` (
+  `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INTEGER NOT NULL,
+  `follower_id` INTEGER NOT NULL,
   `created_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
