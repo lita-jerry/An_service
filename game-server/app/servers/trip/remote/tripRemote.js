@@ -376,7 +376,7 @@ TripRemote.prototype.tripWatcherLeave = function(uid, sid, ordernumber, nickName
 
 	var _uid = ''+uid+'*'+nickName+'*'+avatarURL;
 
-	var channel = self.channelService.getChannel(ordernumber, false);
+	var channel = this.channelService.getChannel(ordernumber, false);
 	console.log('kick function\'s channel: channel'+channel);
 	// leave channel
 	if( !! channel) {

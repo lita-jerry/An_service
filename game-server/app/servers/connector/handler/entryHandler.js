@@ -230,7 +230,7 @@ Handler.prototype.entryWatchingRoom = function(msg, session, next) {
       session.on('closed', onTripWatcherDissconnect.bind(null, self.app));
 
       //put user into channel
-      self.app.rpc.trip.tripRemote.tripWatcherAdd(session, uid, self.app.get('serverId'), rid, _nickName, _avatar, function(_err){
+      self.app.rpc.trip.tripRemote.tripWatcherAdd(session, _uid, self.app.get('serverId'), rid, _nickName, _avatar, function(_err){
         _cb(_err);
       });
     }

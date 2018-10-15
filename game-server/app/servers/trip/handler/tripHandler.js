@@ -279,6 +279,18 @@ Handler.prototype.uploadLocation = function(msg, session, next) {
       self.app.rpc.trip.tripRemote.uploadLocation(session, rid, longitude, latitude, null, function(_err) {
         _cb(_err);
       });
+    },
+    function(_cb) {
+      // 发出通知
+      var channel = self.channelService.getChannel(rid, false);
+      if (!!channel) {
+        channel.pushMessage({
+          route: 'onLocationChanged',
+          longitude: longitude,
+          latitude: latitude
+        });
+      }
+      _cb();
     }
   ], function(_err) {
     next(null, { code: 200, error: !!_err, msg: _err ? _err : 'upload trip location success.'});
@@ -338,6 +350,14 @@ Handler.prototype.SOS = function(msg, session, next) {
     },
     function(_cb) {
       // 发出通知
+      var channel = self.channelService.getChannel(rid, false);
+      if (!!channel) {
+        channel.pushMessage({
+          route: 'onLocationChanged',
+          longitude: longitude,
+          latitude: latitude
+        });
+      }
       _cb();
     }
   ], function(_err) {
