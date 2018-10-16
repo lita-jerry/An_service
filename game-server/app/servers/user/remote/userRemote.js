@@ -85,7 +85,7 @@ UserRemote.prototype.getInfo = function(uid, cb) {
  * 根据用户id数组获取用户信息(组)
  * 
  * @param {Array} uidList 用户id数组
- * @param {Function} cb 回调函数 err, hasData, datas: [{nickName, avatarURL, state, createdTime, lastUpdatedTime}]
+ * @param {Function} cb 回调函数 err, hasData, datas: [{uid, nickName, avatarURL, state, createdTime, lastUpdatedTime}]
  */
 UserRemote.prototype.getInfoList = function(uidList, cb) {
 	mysql.execute(
@@ -98,6 +98,7 @@ UserRemote.prototype.getInfoList = function(uidList, cb) {
 			} else {
 				var datas = _result.map((currentValue, index, arr) => {
 					return {
+						uid: currentValue['id'],
 						nickName: currentValue['nick_name'],
 						avatarURL: currentValue['avatar_url'],
 						state: currentValue['state'],
@@ -306,7 +307,7 @@ UserRemote.prototype.getFollowState = function(uid, follower, cb) {
 }
 
 /**
- * 获取该用户所关注的人
+ * 获取该用户关注的所有人
  * 
  * @param {String} uid 用户id
  * @param {Function} cb err, hasData, [uid]
@@ -334,7 +335,7 @@ UserRemote.prototype.getFollowing = function(uid, cb) {
  * 获取关注该用户的所有人
  * 
  * @param {String} uid 用户id
- * @param {Function} cb err, [uid]
+ * @param {Function} cb err, hasData, [uid]
  */
 UserRemote.prototype.getFollower = function(uid, cb) {
 	mysql.execute(

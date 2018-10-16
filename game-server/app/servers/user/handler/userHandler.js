@@ -381,3 +381,145 @@ Handler.prototype.getFollowState = function(msg, session, next) {
     }
   });
 }
+
+/**
+ * 获取所有关注的人
+ *
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param  {Function} next next stemp callback
+ *
+ */
+Handler.prototype.getFollowing = function(msg, session, next) {
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
+    return;
+  }
+
+  var token = msg.token;
+
+  var self = this;
+
+  async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (!!_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 获取该用户关注的所有人的uid
+      self.app.rpc.user.userRemote.getFollowing(session, _uid, function(err, hasData, uids) {
+        if (!!err) {
+          _cb(err);
+        } else {
+          _cb(null, uids);
+        }
+      });
+    },
+    function(_uids, _cb) {
+      if (_uids.length < 1) { _cb(null, []); return; }
+      // 获取uid列表的信息
+      self.app.rpc.user.userRemote.getInfoList(session, _uids, function(err, hasData, datas) {
+        if (!!err) {
+          _cb(err);
+        } else {
+          _cb(null, datas);
+        }
+      });
+    }
+  ], function(_err, _datas) {
+    if (!!_err) {
+      next(null, { code: 200, error: true, msg: _err });
+    } else {
+      next(null, { code: 200, error: false, msg: '查询成功', 
+                   data: _datas.map((currentValue, index, arr) => {
+                    return {
+                      uid: currentValue['uid'],
+                      nickName: currentValue['nickName'],
+                      avatarURL: currentValue['avatarURL']
+                    };
+                  })
+      });
+    }
+  });
+}
+
+/**
+ * 获取所有关注我的人
+ *
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param  {Function} next next stemp callback
+ *
+ */
+Handler.prototype.getFollower = function(msg, session, next) {
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
+    return;
+  }
+
+  var token = msg.token;
+
+  var self = this;
+
+  async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (!!_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 获取关注该用户的所有人的uid
+      self.app.rpc.user.userRemote.getFollower(session, _uid, function(err, hasData, uids) {
+        if (!!err) {
+          _cb(err);
+        } else {
+          _cb(null, uids);
+        }
+      });
+    },
+    function(_uids, _cb) {
+      if (_uids.length < 1) { _cb(null, []); return; }
+      // 获取uid列表的信息
+      self.app.rpc.user.userRemote.getInfoList(session, _uids, function(err, hasData, datas) {
+        if (!!err) {
+          _cb(err);
+        } else {
+          _cb(null, datas);
+        }
+      });
+    }
+  ], function(_err, _datas) {
+    if (!!_err) {
+      next(null, { code: 200, error: true, msg: _err });
+    } else {
+      next(null, { code: 200, error: false, msg: '查询成功', 
+                   data: _datas.map((currentValue, index, arr) => {
+                    return {
+                      uid: currentValue['uid'],
+                      nickName: currentValue['nickName'],
+                      avatarURL: currentValue['avatarURL']
+                    };
+                  })
+      });
+    }
+  });
+}
