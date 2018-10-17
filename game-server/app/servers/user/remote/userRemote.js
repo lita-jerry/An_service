@@ -94,7 +94,7 @@ UserRemote.prototype.getInfoList = function(uidList, cb) {
 			if (_err) {
 				cb(_err, false);
 			} else if (_result.length < 1) {
-				cb(null, false); // 无数据
+				cb(null, false, []); // 无数据
 			} else {
 				var datas = _result.map((currentValue, index, arr) => {
 					return {
@@ -320,7 +320,7 @@ UserRemote.prototype.getFollowing = function(uid, cb) {
 			if (_err) {
 				cb(_err, false);
 			} else if (_result.length < 1) {
-				cb(null, false);
+				cb(null, false, []);
 			} else {
 				var datas = _result.map((currentValue, index, arr) => {
 					return currentValue['user_id'];
@@ -345,7 +345,7 @@ UserRemote.prototype.getFollower = function(uid, cb) {
 			if (_err) {
 				cb(_err, false);
 			} else if (_result.length < 1) {
-				cb(null, false);
+				cb(null, false, []);
 			} else {
 				var datas = _result.map((currentValue, index, arr) => {
 					return currentValue['follower_id'];
