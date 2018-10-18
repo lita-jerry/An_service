@@ -56,6 +56,30 @@ TripRemote.prototype.queryUnfinished = function(uid, cb) {
 	);
 }
 
+// 查询已完成行程
+TripRemote.prototype.queryFinished = function(uid, cb) {
+	mysql.execute(
+		'SELECT * FROM trip WHERE user_id = ? AND state = 2',
+		[uid],
+		function(_err, _result) {
+			if (_err) {
+				cb(_err, false);
+			} else if (_result.length > 0) {
+				var datas = _result.map((currentValue, index, arr) => {
+					return {
+						ordernumber: currentValue['order_number'],
+						startTime: currentValue['created_time'],
+						endTime: currentValue['last_updated_time']
+					}
+				});
+				cb(null, true, datas);
+			} else {
+				cb(null, false, []); // 查询结果正常,但未查询到结果
+			}
+		}
+	);
+}
+
 // 创建行程订单
 TripRemote.prototype.create = function(uid, cb) {
 

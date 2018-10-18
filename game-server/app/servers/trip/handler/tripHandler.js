@@ -598,3 +598,53 @@ Handler.prototype.getUserInfoInTripRoom = function(msg, session, next) {
       }
   });
 }
+
+/**
+ * 获取已完成的行程列表
+ * 
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param {Function} next next stemp callback
+ */
+Handler.prototype.queryFinishedList = function(msg, session, next) {
+  var self = this;
+
+  // 检查参数
+  if (!msg.token) {
+    next(null, { code: 200, error: true, msg: '参数错误:缺少token参数'});
+    return;
+  }
+
+  var token = msg.token;
+
+  async.waterfall([
+    function(_cb) {
+      self.app.rpc.user.userRemote.getUserOnlineStateByToken(session, token, function(_err, _hasData, _uid, _platform, _state) {
+        if (!!_err) {
+          _cb(_err);
+        } else if (!_hasData) {
+          _cb('token无效');
+        } else if (_state !== 1) {
+          _cb('token已过期');
+        } else {
+          _cb(null, _uid);
+        }
+      });
+    },
+    function(_uid, _cb) {
+      // 获取已完成行程的列表
+      self.app.rpc.trip.tripRemote.queryFinished(session, _uid, function(_err, _hasData, _data) {
+        if (!!_err) {
+          _cb(_err);
+        } else {
+          _cb(null, _data);
+        }
+      });
+    }], function(_err, _data) {
+      if (!!_err) {
+        next(null, { code: 200, error: true, msg: _err});
+      } else {
+        next(null, { code: 200, error: false, msg: '获取用户信息成功', data: _data});
+      }
+  });
+}
