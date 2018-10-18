@@ -357,6 +357,10 @@ Handler.prototype.SOS = function(msg, session, next) {
         });
       }
       _cb();
+    },
+    function(_cb) {
+      // 发关注通知
+      _cb();
     }
   ], function(_err) {
     next(null, { code: 200, error: !!_err, msg: _err ? _err : 'SOS message send.'});

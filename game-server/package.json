@@ -9,6 +9,7 @@
         "https": "^1.0.0",
         "moment": "^2.22.2",
         "mysql": "github:mysqljs/mysql",
-        "pomelo": "2.2.5"
+        "pomelo": "2.2.5",
+        "dayjs": "^1.7.7"
     }
 }
