@@ -70,3 +70,23 @@ WeappPush.prototype.stop = function(force, cb) {
   clearInterval(this.timerId);
   process.nextTick(cb);
 }
+
+WeappPush.prototype.pushTripStartMessage = function (cb) {
+  console.log('当前的access_token是: ', this.access_token);
+  if (!this.access_token) {
+    cb('access_token is null');
+    return;
+  }
+  
+  cb();
+}
+
+WeappPush.prototype.pushTripEndMessage = function (cb) {
+  console.log('当前的access_token是: ', this.access_token);
+  cb();
+}
+
+WeappPush.prototype.pushTripSOSMessage = function (cb) {
+  console.log('当前的access_token是: ', this.access_token);
+  cb();
+}

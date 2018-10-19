@@ -78,7 +78,7 @@ app.configure('production|development', function() {
 var WeappPush = require('./app/components/WeappPush');
 
 app.configure('production|development', 'master', function() {
-  app.load(WeappPush, {interval: 10000});
+  app.load('WeappPush', WeappPush, {interval: 1000});
 });
 
 // start app
