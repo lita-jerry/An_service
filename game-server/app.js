@@ -75,12 +75,6 @@ app.configure('production|development', function() {
   app.filter(pomelo.timeout());
 });
 
-var WeappPush = require('./app/components/WeappPush');
-
-app.configure('production|development', 'master', function() {
-  app.load('WeappPush', WeappPush, {interval: 1000});
-});
-
 // start app
 app.start();
 
