@@ -36,19 +36,19 @@ APP端计划采用Weex框架实现安卓与iOS端；后端采用Flask支撑，�
 愿小仙女明珠安息，天堂没有痛苦。
 
 2018年07月17日:
-- 1，后端实现方案修改为[Node.js](https://github.com/nodejs/node)
-- 2，前端实现方案修改为[Taro](https://github.com/NervJS/taro)
-- 3，位置上传改为自动
-- 4，前端初步使用微信小程序
+- 后端实现方案修改为[Node.js](https://github.com/nodejs/node)
+- 前端实现方案修改为[Taro](https://github.com/NervJS/taro)
+- 位置上传改为自动
+- 前端初步使用微信小程序
 
 2018年08月25日:
-- 1，因为Socket.io的局限性，后端修改为[Pomelo框架](https://github.com/NetEase/pomelo)框架，改为WSS协议
-- 2，原Node.js中Controller中文件仍可以复用
+- 因为Socket.io的局限性，后端修改为[Pomelo框架](https://github.com/NetEase/pomelo)框架，改为WSS协议
+- 原Node.js中Controller中文件仍可以复用
 
 2018年08月26日:
-- 1，用户接口增加获取临时用户登录Token，增加第三方登录(绑定)接口
-- 2，前端取消自动登录功能，增加获取临时用户登录Token接口
-- 3，第三方登录区分已绑定用户及未绑定用户，已绑定用户需要将临时用户所产生的数据迁移到已绑定的用户上；未绑定的用户需要更改用户类型为正式用户
+- 用户接口增加获取临时用户登录Token，增加第三方登录(绑定)接口
+- 前端取消自动登录功能，增加获取临时用户登录Token接口
+- 第三方登录区分已绑定用户及未绑定用户，已绑定用户需要将临时用户所产生的数据迁移到已绑定的用户上；未绑定的用户需要更改用户类型为正式用户
 
 2018年12月03日:
 - 开始重构服务端, 使用 `Beego + Golang + MySQL` 组合
