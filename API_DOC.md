@@ -67,18 +67,6 @@ user_online_state 用户在线状态表
 |  last_updated_time  |  最后更新时间  |  datetime  |    |  NO  |
 <br>
 
-mobile_sms_log 短信发送记录(弃)
-
-| 字段名  |  注释  |  类型  |  Key  |  Null  |
-| ------------ | ------------ | ------------ | ------------ | ------------ |
-|  id  |  记录id  |  INTEGER  |  PRI  |  NO  |
-|  user_id  |  用户id  |  INTEGER  |    |  YES  |
-|  type  |  短信类型: <br>1, 绑定手机号;  |  INTEGER  |    |  NO  |
-|  message  |  短信内容  |  CHAR(255)  |    |  NO  |
-|  code  |  校验值  |  CHAR(8)  |    |  YES  |
-|  created  |  发生时间  |  TIMESTAMP  |    |  NO  |
-<br>
-
 trip 行程订单列表
 
 | 字段名  |  注释  |  类型  |  Key  |  Null  |
@@ -116,95 +104,6 @@ trip_polyline 行程轨迹
 <br>
 
 ### 用户相关接口
-
-获取绑定手机号短信验证码(需登录)(弃)
-
-```
-GET /user/getbindsmscode?session={session}&mobile={mobile}
-```
-间隔为60秒
- - 请求参数说明
-
-| 参数名  |  解释  |  类型  |  必填  |
-| ------------ | ------------ | ------------ | ------------ |
-|  session  |  小程序与服务器会话session  |  String  |  是  |
-|  mobile  |  需要绑定的手机号  |  String  |  是  |
-
- - 成功返回参数说明
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 失败/错误返回参数说明:
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码 非0  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 返回说明
-
-```
-//正常返回的JSON数据包
-{
-    "code": 0,
-    "msg": "send success"
-}
-
-//错误时返回JSON数据包(示例为手机号码格式不正确)
-{
-    "code": -1,
-    "msg": "手机号码格式不正确"
-}
-```
-<br>
-
-绑定用户手机号(弃)
-
-```
-GET /user/bindmobile?session={session}&mobile={mobile}&smscode={smscode}
-```
-间隔为60秒
- - 请求参数说明(需登录)
-
-| 参数名  |  解释  |  类型  |  必填  |
-| ------------ | ------------ | ------------ | ------------ |
-|  session  |  小程序与服务器会话session  |  String  |  是  |
-|  mobile  |  需要绑定的手机号  |  String  |  是  |
-|  smscode  |  短信验证码  |  String  |  是  |
-
- - 成功返回参数说明
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 失败/错误返回参数说明:
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码 非0  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 返回说明
-
-```
-//正常返回的JSON数据包
-{
-    "code": 0,
-    "msg": "bind success"
-}
-
-//错误时返回JSON数据包(示例为手机号码格式不正确)
-{
-    "code": -1,
-    "msg": "手机号码格式不正确"
-}
-```
-<br>
 
 微信小程序用户注册
 
