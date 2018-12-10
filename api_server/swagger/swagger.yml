@@ -1,0 +1,1124 @@
+swagger: "2.0"
+info:
+  title: beego Test API
+  description: beego has a very cool tools to autogenerate documents for your API
+  version: 1.0.0
+  termsOfService: http://beego.me/
+  contact:
+    email: astaxie@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /mobile_sms_log/:
+    get:
+      tags:
+      - mobile_sms_log
+      description: get MobileSmsLog
+      operationId: MobileSmsLogController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.MobileSmsLog'
+        "403":
+          description: ""
+    post:
+      tags:
+      - mobile_sms_log
+      description: create MobileSmsLog
+      operationId: MobileSmsLogController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for MobileSmsLog content
+        required: true
+        schema:
+          $ref: '#/definitions/models.MobileSmsLog'
+      responses:
+        "201":
+          description: '{int} models.MobileSmsLog'
+        "403":
+          description: body is empty
+  /mobile_sms_log/{id}:
+    get:
+      tags:
+      - mobile_sms_log
+      description: get MobileSmsLog by id
+      operationId: MobileSmsLogController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.MobileSmsLog'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - mobile_sms_log
+      description: update the MobileSmsLog
+      operationId: MobileSmsLogController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for MobileSmsLog content
+        required: true
+        schema:
+          $ref: '#/definitions/models.MobileSmsLog'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.MobileSmsLog'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - mobile_sms_log
+      description: delete the MobileSmsLog
+      operationId: MobileSmsLogController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /trip/:
+    get:
+      tags:
+      - trip
+      description: get Trip
+      operationId: TripController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "403":
+          description: ""
+    post:
+      tags:
+      - trip
+      description: create Trip
+      operationId: TripController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for Trip content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Trip'
+      responses:
+        "201":
+          description: '{int} models.Trip'
+        "403":
+          description: body is empty
+  /trip/{id}:
+    get:
+      tags:
+      - trip
+      description: get Trip by id
+      operationId: TripController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - trip
+      description: update the Trip
+      operationId: TripController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for Trip content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Trip'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - trip
+      description: delete the Trip
+      operationId: TripController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /trip_logs/:
+    get:
+      tags:
+      - trip_logs
+      description: get TripLogs
+      operationId: TripLogsController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripLogs'
+        "403":
+          description: ""
+    post:
+      tags:
+      - trip_logs
+      description: create TripLogs
+      operationId: TripLogsController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for TripLogs content
+        required: true
+        schema:
+          $ref: '#/definitions/models.TripLogs'
+      responses:
+        "201":
+          description: '{int} models.TripLogs'
+        "403":
+          description: body is empty
+  /trip_logs/{id}:
+    get:
+      tags:
+      - trip_logs
+      description: get TripLogs by id
+      operationId: TripLogsController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripLogs'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - trip_logs
+      description: update the TripLogs
+      operationId: TripLogsController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for TripLogs content
+        required: true
+        schema:
+          $ref: '#/definitions/models.TripLogs'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripLogs'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - trip_logs
+      description: delete the TripLogs
+      operationId: TripLogsController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /trip_polyline/:
+    get:
+      tags:
+      - trip_polyline
+      description: get TripPolyline
+      operationId: TripPolylineController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripPolyline'
+        "403":
+          description: ""
+    post:
+      tags:
+      - trip_polyline
+      description: create TripPolyline
+      operationId: TripPolylineController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for TripPolyline content
+        required: true
+        schema:
+          $ref: '#/definitions/models.TripPolyline'
+      responses:
+        "201":
+          description: '{int} models.TripPolyline'
+        "403":
+          description: body is empty
+  /trip_polyline/{id}:
+    get:
+      tags:
+      - trip_polyline
+      description: get TripPolyline by id
+      operationId: TripPolylineController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripPolyline'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - trip_polyline
+      description: update the TripPolyline
+      operationId: TripPolylineController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for TripPolyline content
+        required: true
+        schema:
+          $ref: '#/definitions/models.TripPolyline'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TripPolyline'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - trip_polyline
+      description: delete the TripPolyline
+      operationId: TripPolylineController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /user/:
+    get:
+      tags:
+      - user
+      description: get User
+      operationId: UserController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.User'
+        "403":
+          description: ""
+    post:
+      tags:
+      - user
+      description: create User
+      operationId: UserController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for User content
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      responses:
+        "201":
+          description: '{int} models.User'
+        "403":
+          description: body is empty
+  /user/{id}:
+    get:
+      tags:
+      - user
+      description: get User by id
+      operationId: UserController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.User'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - user
+      description: update the User
+      operationId: UserController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for User content
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.User'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - user
+      description: delete the User
+      operationId: UserController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /user_bind/:
+    get:
+      tags:
+      - user_bind
+      description: get UserBind
+      operationId: UserBindController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserBind'
+        "403":
+          description: ""
+    post:
+      tags:
+      - user_bind
+      description: create UserBind
+      operationId: UserBindController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for UserBind content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserBind'
+      responses:
+        "201":
+          description: '{int} models.UserBind'
+        "403":
+          description: body is empty
+  /user_bind/{id}:
+    get:
+      tags:
+      - user_bind
+      description: get UserBind by id
+      operationId: UserBindController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserBind'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - user_bind
+      description: update the UserBind
+      operationId: UserBindController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for UserBind content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserBind'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserBind'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - user_bind
+      description: delete the UserBind
+      operationId: UserBindController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /user_follow_relation/:
+    get:
+      tags:
+      - user_follow_relation
+      description: get UserFollowRelation
+      operationId: UserFollowRelationController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserFollowRelation'
+        "403":
+          description: ""
+    post:
+      tags:
+      - user_follow_relation
+      description: create UserFollowRelation
+      operationId: UserFollowRelationController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for UserFollowRelation content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserFollowRelation'
+      responses:
+        "201":
+          description: '{int} models.UserFollowRelation'
+        "403":
+          description: body is empty
+  /user_follow_relation/{id}:
+    get:
+      tags:
+      - user_follow_relation
+      description: get UserFollowRelation by id
+      operationId: UserFollowRelationController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserFollowRelation'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - user_follow_relation
+      description: update the UserFollowRelation
+      operationId: UserFollowRelationController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for UserFollowRelation content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserFollowRelation'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserFollowRelation'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - user_follow_relation
+      description: delete the UserFollowRelation
+      operationId: UserFollowRelationController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /user_online_state/:
+    get:
+      tags:
+      - user_online_state
+      description: get UserOnlineState
+      operationId: UserOnlineStateController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserOnlineState'
+        "403":
+          description: ""
+    post:
+      tags:
+      - user_online_state
+      description: create UserOnlineState
+      operationId: UserOnlineStateController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for UserOnlineState content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserOnlineState'
+      responses:
+        "201":
+          description: '{int} models.UserOnlineState'
+        "403":
+          description: body is empty
+  /user_online_state/{id}:
+    get:
+      tags:
+      - user_online_state
+      description: get UserOnlineState by id
+      operationId: UserOnlineStateController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserOnlineState'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - user_online_state
+      description: update the UserOnlineState
+      operationId: UserOnlineStateController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for UserOnlineState content
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserOnlineState'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserOnlineState'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - user_online_state
+      description: delete the UserOnlineState
+      operationId: UserOnlineStateController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+definitions:
+  models.MobileSmsLog:
+    title: MobileSmsLog
+    type: object
+    properties:
+      Code:
+        type: string
+      CreatedTime:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      Message:
+        type: string
+      Type:
+        type: integer
+        format: int64
+      UserId:
+        type: integer
+        format: int64
+  models.Trip:
+    title: Trip
+    type: object
+    properties:
+      CreatedTime:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      LastUpdatedTime:
+        type: string
+        format: datetime
+      OrderNumber:
+        type: string
+      State:
+        type: integer
+        format: int64
+      UserId:
+        type: integer
+        format: int64
+  models.TripLogs:
+    title: TripLogs
+    type: object
+    properties:
+      CreatedTime:
+        type: string
+        format: datetime
+      EventType:
+        type: integer
+        format: int64
+      Id:
+        type: integer
+        format: int64
+      Operation:
+        type: string
+      OrderNumber:
+        type: string
+      Remark:
+        type: string
+  models.TripPolyline:
+    title: TripPolyline
+    type: object
+    properties:
+      CreatedTime:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      Latitude:
+        type: string
+      Longitude:
+        type: string
+      OrderNumber:
+        type: string
+      Remark:
+        type: string
+  models.User:
+    title: User
+    type: object
+    properties:
+      AvatarUrl:
+        type: string
+      CreatedTime:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      LastUpdatedTime:
+        type: string
+        format: datetime
+      NickName:
+        type: string
+      State:
+        type: integer
+        format: int64
+  models.UserBind:
+    title: UserBind
+    type: object
+    properties:
+      CreatedTime:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      LastUpdatedTime:
+        type: string
+        format: datetime
+      OpenId:
+        type: string
+      Platform:
+        type: integer
+        format: int64
+      UserId:
+        type: integer
+        format: int64
+  models.UserFollowRelation:
+    title: UserFollowRelation
+    type: object
+    properties:
+      CreatedTime:
+        type: string
+        format: datetime
+      FollowerId:
+        type: integer
+        format: int64
+      Id:
+        type: integer
+        format: int64
+      UserId:
+        type: integer
+        format: int64
+  models.UserOnlineState:
+    title: UserOnlineState
+    type: object
+    properties:
+      ClientToken:
+        type: string
+      CreatedTime:
+        type: string
+        format: datetime
+      DeviceId:
+        type: string
+      DeviceToken:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      LastUpdatedTime:
+        type: string
+        format: datetime
+      Platform:
+        type: integer
+        format: int64
+      SessionKey:
+        type: string
+      State:
+        type: integer
+        format: int64
+      UserId:
+        type: integer
+        format: int64
+tags:
+- name: mobile_sms_log
+  description: |
+    MobileSmsLogController operations for MobileSmsLog
+- name: trip
+  description: |
+    TripController operations for Trip
+- name: trip_logs
+  description: |
+    TripLogsController operations for TripLogs
+- name: trip_polyline
+  description: |
+    TripPolylineController operations for TripPolyline
+- name: user
+  description: |
+    UserController operations for User
+- name: user_bind
+  description: |
+    UserBindController operations for UserBind
+- name: user_follow_relation
+  description: |
+    UserFollowRelationController operations for UserFollowRelation
+- name: user_online_state
+  description: |
+    UserOnlineStateController operations for UserOnlineState
