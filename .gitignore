@@ -111,3 +111,61 @@ venv.bak/
 /web-server/node_modules/*
 /game-server/package-lock.json
 /web-server/package-lock.json
+
+# Golang
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+### macOS template
+*.DS_Store
+.AppleDouble
+.DS_Store
+.LSOverride
+
+# Icon must end with two \r
+Icon
+cache
+tests
+dochub4test
+
+cache/runtime/
+logs/
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+uploads/
+.idea
+/logs/*.log
+/cache/*
+DocHub
+*.conf
+*.lock
+sitemap
+sitemap.xml
