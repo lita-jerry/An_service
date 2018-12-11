@@ -53,3 +53,8 @@ APP端计划采用Weex框架实现安卓与iOS端；后端采用Flask支撑，�
 2018年12月03日:
 - 开始重构服务端, 使用 `Beego + Golang + MySQL` 组合
 - 重新设计 API 接口文档
+
+2018年12月11日:
+- 添加根据数据库结构生成的Beego api server(/api_server), 仅供MySQL数据库使用方式的参考
+- 新建Beego api server
+- 配置路由
