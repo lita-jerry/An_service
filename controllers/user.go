@@ -12,6 +12,36 @@ type UserController struct {
 	beego.Controller
 }
 
+// @Title WXMPRegist
+// @Description Regist WXMP User
+// @Param	code		    query 	string	true		"The wx code for login"
+// @Param	nickname		query 	string	true		"The user's nickname"
+// @Param	avatarurl		query 	string	true		"The user's avatarurl"
+// @Success 200 {string} login success
+// @Failure 403 user not exist
+// @router /wxmp/regist [get]
+func (u *UserController) WXMPRegist() {
+	// code := u.GetString("code")
+	// nickname := u.GetString("nickname")
+	// avatarurl := u.GetString("avatarurl")
+	if true {
+		u.Data["json"] = map[string]string{"code": "0", "msg": "login success.", "token": "login token"}
+	} else {
+		u.Data["json"] = map[string]string{"code": "-1", "msg": "login fail."}
+	}
+	u.ServeJSON()
+}
+
+// @Title WXMPLogin
+// @Description Login WXMP User
+// @router /wxmp/login [get]
+func (u *UserController) WXMPLogin() {}
+
+// @Title WXMPInfoUpdate
+// @Description Update WXMP info
+// @router /wxmp/info [post]
+func (u *UserController) WXMPInfoUpdate() {}
+
 // @Title CreateUser
 // @Description create users
 // @Param	body		body 	models.User	true		"body for user content"

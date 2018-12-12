@@ -140,7 +140,7 @@ GET /v1/user/wxmp/regist?code={code}&nickname={nickname}&avatarurl={avatarurl}
 //正常返回的JSON数据包
 {
       "code": 0,
-      "msg": "send success",
+      "msg": "login success.",
       "token": "login token"
 }
 
