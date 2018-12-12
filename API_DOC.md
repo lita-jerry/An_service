@@ -5,7 +5,7 @@
 - [用户相关接口](#用户相关接口)<br>
 - [行程相关接口](#行程相关接口)<br>
 
-### 目录结构
+### 目录结构(作废)
 
 ```
 ├── Conf                               项目配置
@@ -108,29 +108,7 @@ trip_polyline 行程轨迹
 微信小程序用户注册
 
 ```
-GET /v1/u/wxmp/regist?code={code}&nickname={nickname}&avatarurl={avatarurl}
-```
-
-```seq
-微信小程序->Node Server: 上传code、nickname、avatarurl
-Node Server->WX Server: 提交code
-WX Server-->Node Server: 返回session_key、openid
-Note right of Node Server: 注册过程，流程见下图
-Node Server->Node Server: 生成具有登录状态的session
-Node Server-->微信小程序: 返回code、msg、session
-```
-
-```flow
-st=>start: 注册
-op=>operation: 接收session_key、openid
-cond=>condition: 查询用户是否已经注册
-up=>operation: 更新nickname、avatarurl
-rg=>operation: 注册用户
-e=>end: 登录、生成session
-
-st->op->cond
-cond(yes)->up->e
-cond(no)->rg->e
+GET /v1/user/wxmp/regist?code={code}&nickname={nickname}&avatarurl={avatarurl}
 ```
 
  - 请求参数说明
@@ -147,7 +125,7 @@ cond(no)->rg->e
 | ------------ | ------------ | ------------ |
 |  code  |  状态码  |  Int  |
 |  msg  |  提示信息  |  String  |
-|  session  |  小程序与服务器会话session  |  String  |
+|  token  |  登录token  |  String  |
 
  - 失败/错误返回参数说明:
 
@@ -163,7 +141,7 @@ cond(no)->rg->e
 {
       "code": 0,
       "msg": "send success",
-      "session": "SESSION"
+      "token": "login token"
 }
 
 //错误时返回JSON数据包(示例为Code无效)
@@ -179,16 +157,7 @@ cond(no)->rg->e
 > 每次启动微信小程序的时候执行自动登录用
 
 ```
-GET /v1/u/wxmp/login?code={code}
-```
-
-```seq
-微信小程序->Node Server: 上传code
-Node Server->WX Server: 上传code
-WX Server-->Node Server: 返回session_key、openid
-Note right of Node Server: 根据openid查询用户,如未注册则返回错误
-Node Server->Node Server: 生成具有登录状态的session
-Node Server-->微信小程序: 返回code、msg、session
+GET /v1/user/wxmp/login?code={code}
 ```
 
  - 请求参数说明
@@ -203,7 +172,7 @@ Node Server-->微信小程序: 返回code、msg、session
 | ------------ | ------------ | ------------ |
 |  code  |  状态码  |  Int  |
 |  msg  |  提示信息  |  String  |
-|  session  |  小程序与服务器会话session  |  String  |
+|  token  |  登录token  |  String  |
 
  - 失败/错误返回参数说明:
 
@@ -219,7 +188,7 @@ Node Server-->微信小程序: 返回code、msg、session
 {
       "code": 0,
       "msg": "登录成功",
-      "session": "SESSION"
+      "token": "login token"
 }
 
 //错误时返回JSON数据包
@@ -230,17 +199,17 @@ Node Server-->微信小程序: 返回code、msg、session
 ```
 <br>
 
-微信小程序用户信息同步(需登录)
+微信小程序用户信息更新(需登录)
 
 ```
-GET /v1/u/wxmp/info/update?session={session}&nickname={nickname}&avatarurl={avatarurl}
+POST /v1/user/wxmp/info
 ```
 
  - 请求参数说明
 
 | 参数名  |  解释  |  类型  |  必填  |
 | ------------ | ------------ | ------------ | ------------ |
-|  session  |  小程序与服务器会话session  |  String  |  是  |
+|  token  |  登录token  |  String  |  是  |
 |  nickname  |  wx.getUserInfo()获取的用户昵称  |  String length < 32  |  是  |
 |  avatarurl  |  wx.getUserInfo()获取的用户头像url  |  String length < 64  |  是  |
 
@@ -270,10 +239,11 @@ GET /v1/u/wxmp/info/update?session={session}&nickname={nickname}&avatarurl={avat
 //错误时返回JSON数据包
 {
     "code": -1,
-    "msg": "Session已过期"
+    "msg": "Token已过期"
 }
 ```
 <br>
+
 
 ### 行程相关接口
 
