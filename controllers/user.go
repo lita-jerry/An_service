@@ -17,8 +17,8 @@ type UserController struct {
 // @Param	code		    query 	string	true		"The wx code for login"
 // @Param	nickname		query 	string	true		"The user's nickname"
 // @Param	avatarurl		query 	string	true		"The user's avatarurl"
-// @Success 200 {string} login success
-// @Failure 403 user not exist
+// @Success 200 {string} regist success
+// @Failure 403 regist fail
 // @router /wxmp/regist [get]
 func (u *UserController) WXMPRegist() {
 	// code := u.GetString("code")
@@ -34,8 +34,19 @@ func (u *UserController) WXMPRegist() {
 
 // @Title WXMPLogin
 // @Description Login WXMP User
+// @Param	code		    query 	string	true		"The wx code for login"
+// @Success 200 {string} login success
+// @Failure 403 user not exist
 // @router /wxmp/login [get]
-func (u *UserController) WXMPLogin() {}
+func (u *UserController) WXMPLogin() {
+	// code := u.GetString("code")
+	if true {
+		u.Data["json"] = map[string]string{"code": "0", "msg": "login success.", "token": "login token"}
+	} else {
+		u.Data["json"] = map[string]string{"code": "-1", "msg": "login fail."}
+	}
+	u.ServeJSON()
+}
 
 // @Title WXMPInfoUpdate
 // @Description Update WXMP info
