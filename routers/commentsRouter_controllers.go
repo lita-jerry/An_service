@@ -72,15 +72,6 @@ func init() {
 
     beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
         beego.ControllerComments{
-            Method: "Get",
-            Router: `/:uid`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
-        beego.ControllerComments{
             Method: "Put",
             Router: `/:uid`,
             AllowHTTPMethods: []string{"put"},
@@ -99,6 +90,15 @@ func init() {
 
     beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
         beego.ControllerComments{
+            Method: "Get",
+            Router: `/:uid`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
+        beego.ControllerComments{
             Method: "Login",
             Router: `/login`,
             AllowHTTPMethods: []string{"get"},
@@ -110,6 +110,33 @@ func init() {
         beego.ControllerComments{
             Method: "Logout",
             Router: `/logout`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "WXMPInfoUpdate",
+            Router: `/wxmp/info`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "WXMPLogin",
+            Router: `/wxmp/login`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_Server/controllers:UserController"] = append(beego.GlobalControllerRouter["An_Server/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "WXMPRegist",
+            Router: `/wxmp/regist`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
