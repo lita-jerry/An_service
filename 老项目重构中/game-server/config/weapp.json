@@ -1,8 +1,8 @@
 {
   "development":
     {
-      "appid"  : "wx22a93273d6c1ea5f",
-      "secret" : "d2a2bbfd031dc0f64ccc9ff9163189d4"
+      "appid"  : "",
+      "secret" : ""
     },
   "production":{
       "appid"  : "",
