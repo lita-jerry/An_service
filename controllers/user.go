@@ -12,43 +12,47 @@ type UserController struct {
 	beego.Controller
 }
 
-// @Title WXMPRegist
-// @Description Regist WXMP User
+// @Title WXMPLogin
+// @Description WXMP user login
 // @Param	code		    query 	string	true		"The wx code for login"
 // @Param	nickname		query 	string	true		"The user's nickname"
 // @Param	avatarurl		query 	string	true		"The user's avatarurl"
 // @Success 200 {string} regist success
 // @Failure 403 regist fail
-// @router /wxmp/regist [get]
-func (u *UserController) WXMPRegist() {
-	// code := u.GetString("code")
-	// nickname := u.GetString("nickname")
-	// avatarurl := u.GetString("avatarurl")
-	if true {
-		u.Data["json"] = map[string]string{"code": "0", "msg": "login success.", "token": "login token"}
+// @router /wxmp/login [get]
+func (u *UserController) WXMPLogin() {
+
+	code := u.GetString("code")
+	nickname := u.GetString("nickname")
+	avatarurl := u.GetString("avatarurl")
+
+	token, err := models.Login(nickname, avatarurl, code)
+
+	if err == nil {
+		u.Data["json"] = map[string]interface{}{"code": 0, "msg": "login success.", "token": token}
 	} else {
-		u.Data["json"] = map[string]string{"code": "-1", "msg": "login fail."}
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "login fail."}
 	}
 	u.ServeJSON()
 }
 
-// @Title WXMPLogin
+// @Title WXMPLogin 作废
 // @Description Login WXMP User
 // @Param	code		    query 	string	true		"The wx code for login"
 // @Success 200 {string} login success
 // @Failure 403 user not exist
 // @router /wxmp/login [get]
-func (u *UserController) WXMPLogin() {
-	// code := u.GetString("code")
-	if true {
-		u.Data["json"] = map[string]string{"code": "0", "msg": "login success.", "token": "login token"}
-	} else {
-		u.Data["json"] = map[string]string{"code": "-1", "msg": "login fail."}
-	}
-	u.ServeJSON()
-}
+// func (u *UserController) WXMPLogin() {
+// 	// code := u.GetString("code")
+// 	if true {
+// 		u.Data["json"] = map[string]interface{}{"code": 0, "msg": "login success.", "token": "login token"}
+// 	} else {
+// 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "login fail."}
+// 	}
+// 	u.ServeJSON()
+// }
 
-// @Title WXMPInfoUpdate
+// @Title WXMPInfoUpdate 作废
 // @Description Update WXMP info
 // @router /wxmp/info [post]
 func (u *UserController) WXMPInfoUpdate() {}
@@ -138,16 +142,16 @@ func (u *UserController) Delete() {
 // @Success 200 {string} login success
 // @Failure 403 user not exist
 // @router /login [get]
-func (u *UserController) Login() {
-	username := u.GetString("username")
-	password := u.GetString("password")
-	if models.Login(username, password) {
-		u.Data["json"] = "login success"
-	} else {
-		u.Data["json"] = "user not exist"
-	}
-	u.ServeJSON()
-}
+// func (u *UserController) Login() {
+// 	username := u.GetString("username")
+// 	password := u.GetString("password")
+// 	if models.Login(username, password) {
+// 		u.Data["json"] = "login success"
+// 	} else {
+// 		u.Data["json"] = "user not exist"
+// 	}
+// 	u.ServeJSON()
+// }
 
 // @Title logout
 // @Description Logs out current logged in user session

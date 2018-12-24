@@ -30,6 +30,16 @@ type Profile struct {
 	Email   string
 }
 
+func Login(nickname, avatarurl, code string) (token string, err error) {
+	return nickname + avatarurl + code + "token value", nil
+}
+
+
+
+
+
+
+
 func AddUser(u User) string {
 	u.Id = "user_" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	UserList[u.Id] = &u
@@ -72,14 +82,14 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 	return nil, errors.New("User Not Exist")
 }
 
-func Login(username, password string) bool {
-	for _, u := range UserList {
-		if u.Username == username && u.Password == password {
-			return true
-		}
-	}
-	return false
-}
+// func Login(username, password string) bool {
+// 	for _, u := range UserList {
+// 		if u.Username == username && u.Password == password {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func DeleteUser(uid string) {
 	delete(UserList, uid)
