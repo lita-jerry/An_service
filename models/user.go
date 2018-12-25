@@ -1,7 +1,11 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -31,14 +35,47 @@ type Profile struct {
 }
 
 func Login(nickname, avatarurl, code string) (token string, err error) {
-	return nickname + avatarurl + code + "token value", nil
+	openid, session_key, err := weappJScode2Session(code)
+
+	if err != nil {
+		return "", err
+	}
+
+	return openid + session_key + "token value", nil
 }
 
+func weappJScode2Session(code string) (openid, session_key string, err error) {
+	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session" +
+		"?appid=" + "wx22a93273d6c1ea5f" +
+		"&secret=" + "d2a2bbfd031dc0f64ccc9ff9163189d4" +
+		"&js_code=" + code +
+		"&grant_type=authorization_code")
+	if err != nil {
+		return "", "", err
+	}
 
+	defer resp.Body.Close()
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", err
+	}
 
+	var dat map[string]interface{}
+	if err := json.Unmarshal([]byte(body), &dat); err == nil {
+		fmt.Println(dat)
+		if dat["errcode"] != nil {
+			return "", "", errors.New(dat["errmsg"].(string))
+		} else {
+			// here
+			return "dat[\"errcode\"]", dat["errmsg"].(string), nil
+		}
+	} else {
+		return "", "", err
+	}
 
-
+	// return string(body), string(body), nil
+}
 
 func AddUser(u User) string {
 	u.Id = "user_" + strconv.FormatInt(time.Now().UnixNano(), 10)

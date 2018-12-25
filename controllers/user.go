@@ -3,7 +3,6 @@ package controllers
 import (
 	"An_service/models"
 	"encoding/json"
-
 	"github.com/astaxie/beego"
 )
 
@@ -46,7 +45,7 @@ func (u *UserController) WXMPLogin() {
 	if err == nil {
 		u.Data["json"] = map[string]interface{}{"code": 0, "msg": "login success.", "token": token}
 	} else {
-		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "login fail."}
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
 	u.ServeJSON()
 }
