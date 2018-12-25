@@ -108,7 +108,7 @@ trip_polyline 行程轨迹
 微信小程序用户注册
 
 ```
-GET /v1/user/wxmp/regist?code={code}&nickname={nickname}&avatarurl={avatarurl}
+GET /v1/user/wxmp/login?code={code}&nickname={nickname}&avatarurl={avatarurl}
 ```
 
  - 请求参数说明
@@ -151,99 +151,6 @@ GET /v1/user/wxmp/regist?code={code}&nickname={nickname}&avatarurl={avatarurl}
 }
 ```
 <br>
-
-微信小程序用户登录
-
-> 每次启动微信小程序的时候执行自动登录用
-
-```
-GET /v1/user/wxmp/login?code={code}
-```
-
- - 请求参数说明
-
-| 参数名  |  解释  |  类型  |  必填  |
-| ------------ | ------------ | ------------ | ------------ |
-|  code  |  wx.login()获取的临时code  |  String  |  是  |
-
- - 成功返回参数说明
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码  |  Int  |
-|  msg  |  提示信息  |  String  |
-|  token  |  登录token  |  String  |
-
- - 失败/错误返回参数说明:
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码 非0  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 返回说明
-
-```
-//正常返回的JSON数据包
-{
-      "code": 0,
-      "msg": "登录成功",
-      "token": "login token"
-}
-
-//错误时返回JSON数据包
-{
-    "code": -1,
-    "msg": "Code无效"
-}
-```
-<br>
-
-微信小程序用户信息更新(需登录)
-
-```
-POST /v1/user/wxmp/info
-```
-
- - 请求参数说明
-
-| 参数名  |  解释  |  类型  |  必填  |
-| ------------ | ------------ | ------------ | ------------ |
-|  token  |  登录token  |  String  |  是  |
-|  nickname  |  wx.getUserInfo()获取的用户昵称  |  String length < 32  |  是  |
-|  avatarurl  |  wx.getUserInfo()获取的用户头像url  |  String length < 64  |  是  |
-
- - 成功返回参数说明
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 失败/错误返回参数说明:
-
-| 参数名  |  解释  |  类型  |
-| ------------ | ------------ | ------------ |
-|  code  |  状态码 非0  |  Int  |
-|  msg  |  提示信息  |  String  |
-
- - 返回说明
-
-```
-//正常返回的JSON数据包
-{
-    "code": 0,
-    "msg": "update success"
-}
-
-//错误时返回JSON数据包
-{
-    "code": -1,
-    "msg": "Token已过期"
-}
-```
-<br>
-
 
 ### 行程相关接口
 

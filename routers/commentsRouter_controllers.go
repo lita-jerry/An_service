@@ -72,15 +72,6 @@ func init() {
 
     beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
         beego.ControllerComments{
-            Method: "Delete",
-            Router: `/:uid`,
-            AllowHTTPMethods: []string{"delete"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
             Method: "Get",
             Router: `/:uid`,
             AllowHTTPMethods: []string{"get"},
@@ -99,18 +90,18 @@ func init() {
 
     beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
         beego.ControllerComments{
-            Method: "Logout",
-            Router: `/logout`,
-            AllowHTTPMethods: []string{"get"},
+            Method: "Delete",
+            Router: `/:uid`,
+            AllowHTTPMethods: []string{"delete"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
 
     beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
         beego.ControllerComments{
-            Method: "WXMPInfoUpdate",
-            Router: `/wxmp/info`,
-            AllowHTTPMethods: []string{"post"},
+            Method: "Logout",
+            Router: `/logout`,
+            AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

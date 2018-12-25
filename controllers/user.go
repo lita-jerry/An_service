@@ -23,8 +23,23 @@ type UserController struct {
 func (u *UserController) WXMPLogin() {
 
 	code := u.GetString("code")
+	if code == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "code is nil."}
+		u.ServeJSON()
+		return
+	}
 	nickname := u.GetString("nickname")
+	if nickname == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "nickname is nil."}
+		u.ServeJSON()
+		return
+	}
 	avatarurl := u.GetString("avatarurl")
+	if avatarurl == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "avatarurl is nil."}
+		u.ServeJSON()
+		return
+	}
 
 	token, err := models.Login(nickname, avatarurl, code)
 
@@ -55,7 +70,7 @@ func (u *UserController) WXMPLogin() {
 // @Title WXMPInfoUpdate 作废
 // @Description Update WXMP info
 // @router /wxmp/info [post]
-func (u *UserController) WXMPInfoUpdate() {}
+// func (u *UserController) WXMPInfoUpdate() {}
 
 // @Title CreateUser
 // @Description create users
