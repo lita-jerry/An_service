@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"An_Server/controllers"
+	"An_service/controllers"
 
 	"github.com/astaxie/beego"
 )
