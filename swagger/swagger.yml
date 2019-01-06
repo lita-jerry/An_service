@@ -187,28 +187,6 @@ paths:
           description: '{string} delete success!'
         "403":
           description: uid is empty
-  /user/login:
-    get:
-      tags:
-      - user
-      description: Logs user into the system
-      operationId: UserController.Login
-      parameters:
-      - in: query
-        name: username
-        description: The username for login
-        required: true
-        type: string
-      - in: query
-        name: password
-        description: The password for login
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} login success'
-        "403":
-          description: user not exist
   /user/logout:
     get:
       tags:
@@ -218,35 +196,12 @@ paths:
       responses:
         "200":
           description: '{string} logout success'
-  /user/wxmp/info:
-    post:
-      tags:
-      - user
-      description: Update WXMP info
-      operationId: UserController.WXMPInfoUpdate
   /user/wxmp/login:
     get:
       tags:
       - user
-      description: Login WXMP User
+      description: WXMP user login
       operationId: UserController.WXMPLogin
-      parameters:
-      - in: query
-        name: code
-        description: The wx code for login
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} login success'
-        "403":
-          description: user not exist
-  /user/wxmp/regist:
-    get:
-      tags:
-      - user
-      description: Regist WXMP User
-      operationId: UserController.WXMPRegist
       parameters:
       - in: query
         name: code
