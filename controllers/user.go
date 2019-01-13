@@ -16,7 +16,7 @@ type UserController struct {
 // @Param	code		    query 	string	true		"The wx code for login"
 // @Param	nickname		query 	string	true		"The user's nickname"
 // @Param	avatarurl		query 	string	true		"The user's avatarurl"
-// @Success 200 {string} regist success
+// @Success 200 {code: string, msg: string, token: string} regist success
 // @Failure 403 regist fail
 // @router /wxmp/login [get]
 func (u *UserController) WXMPLogin() {

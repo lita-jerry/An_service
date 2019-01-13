@@ -239,7 +239,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{string} regist success"
+                        "description": "{code: string, msg: string, token: string} regist success"
                     },
                     "403": {
                         "description": "regist fail"
