@@ -7,9 +7,14 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"database/sql"
 	"fmt"
+	// MySQL
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	// 加密部分
+	"crypto/md5"
+    "encoding/hex"
+    "crypto/rand"
 )
 
 type DbWorker struct {
@@ -124,11 +129,10 @@ func (dbw *DbWorker) queryData() {
 }
 
 func Login(nickname, avatarurl, code string) (token string, err error) {
-	openid, session_key, err := weappJScode2Session(code)
+	openid, sessionkey, err := weappJScode2Session(code)
 	if err != nil {
-		// return "", err
+		return "", err
 	}
-	openid = "oljeP4vGE3tfAqqL2bZA8PM3zDOI1"
 
 	var userid int64 = 0
 	// 查询该openid是否已经绑定
@@ -173,10 +177,27 @@ func Login(nickname, avatarurl, code string) (token string, err error) {
 		Tx.Commit()
 	}
 
-	// 生成token并更新
-	// var token = ""
+	// 生成token
+	b := make([]byte, 16)
+    rand.Read(b)
+    hasher := md5.New()
+    hasher.Write([]byte(b))
+    token = hex.EncodeToString(hasher.Sum(nil))
+	fmt.Printf("generate random Token: %s\n", token)
+	
+	// 更新token
+	stmt, err := dbw.Db.Prepare("INSERT INTO user_online_state SET user_id=?, platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=? ON DUPLICATE KEY UPDATE platform=?, state=?, client_token=?, session_key=?, device_id=?, device_token=?")
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	_, err = stmt.Exec(userid, 1, 1, token, sessionkey, nil, nil, 1, 1, token, sessionkey, nil, nil)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
 
-	return openid + "  " + session_key + "  token value", nil
+	return token, nil
 }
 
 func weappJScode2Session(code string) (openid, session_key string, err error) {
