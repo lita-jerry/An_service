@@ -55,7 +55,7 @@ func init() {
     beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
         beego.ControllerComments{
             Method: "Unfinished",
-            Router: `/unfinished`,
+            Router: `/wxmp/unfinished`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

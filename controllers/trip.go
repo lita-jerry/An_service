@@ -16,7 +16,7 @@ type TripController struct {
 // @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
 // @Success 200 {code: int, msg: string, ordernumber: string} get unfinished success
 // @Failure 403 {code: int, msg: string} get unfinished fail
-// @router /unfinished [get]
+// @router /wxmp/unfinished [get]
 func (t *TripController) Unfinished() {
 
 	token := t.Ctx.Input.Header("auth-token")
@@ -26,7 +26,7 @@ func (t *TripController) Unfinished() {
 		return
 	}
 
-	ordernumber, err := models.GetUnfinishedTrip(token)
+	ordernumber, err := models.GetUnfinishedTrip(token, 1)
 
 	if err == nil {
 		t.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}

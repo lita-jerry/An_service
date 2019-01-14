@@ -7,7 +7,7 @@ import (
 	// "net/http"
 	// "strconv"
 	// "time"
-	// "fmt"
+	"fmt"
 	// MySQL
 	// "database/sql"
 	// _ "github.com/go-sql-driver/mysql"
@@ -16,6 +16,15 @@ import (
 func init() {
 }
 
-func GetUnfinishedTrip(token string) (ordernumber string, err error) {
+func GetUnfinishedTrip(token string, platform int) (ordernumber string, err error) {
+	u, err := GetUserWithToken(token, platform)
+	if err != nil {
+		return "", err
+	} else if u == nil {
+		return "", nil
+	}
+	
+	// Here, 根据uid获取未完成的行程
+
 	return "order number", nil
 }

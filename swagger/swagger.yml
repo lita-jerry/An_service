@@ -100,7 +100,7 @@ paths:
           description: '{string} delete success!'
         "403":
           description: objectId is empty
-  /trip/unfinished:
+  /trip/wxmp/unfinished:
     get:
       tags:
       - trip

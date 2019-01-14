@@ -187,8 +187,12 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 		}
 	}
 
+	u = &userTB{}
+	fmt.Println(u)
+	
 	err = dbw.Db.QueryRow(`SELECT * FROM user WHERE id = ?`, userid).Scan(&u.Id, &u.NickName, &u.AvatarUrl, &u.State, &u.CreatedTime, &u.LastUpdatedTime)
 	if err != nil {
+		fmt.Println(err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		} else {
