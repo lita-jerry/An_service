@@ -100,102 +100,24 @@ paths:
           description: '{string} delete success!'
         "403":
           description: objectId is empty
-  /user/:
+  /trip/unfinished:
     get:
       tags:
-      - user
-      description: get all Users
-      operationId: UserController.GetAll
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.User'
-    post:
-      tags:
-      - user
-      description: create users
-      operationId: UserController.CreateUser
+      - trip
+      description: get unfinished trip
+      operationId: TripController.Unfinished
       parameters:
-      - in: body
-        name: body
-        description: body for user content
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      responses:
-        "200":
-          description: '{int} models.User.Id'
-        "403":
-          description: body is empty
-  /user/{uid}:
-    get:
-      tags:
-      - user
-      description: get user by uid
-      operationId: UserController.Get
-      parameters:
-      - in: path
-        name: uid
-        description: The key for staticblock
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
         required: true
         type: string
       responses:
         "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.User'
+          description: '{code: int, msg: string, ordernumber: string} get unfinished
+            success'
         "403":
-          description: :uid is empty
-    put:
-      tags:
-      - user
-      description: update the user
-      operationId: UserController.Update
-      parameters:
-      - in: path
-        name: uid
-        description: The uid you want to update
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: body for user content
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.User'
-        "403":
-          description: :uid is not int
-    delete:
-      tags:
-      - user
-      description: delete the user
-      operationId: UserController.Delete
-      parameters:
-      - in: path
-        name: uid
-        description: The uid you want to delete
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} delete success!'
-        "403":
-          description: uid is empty
-  /user/logout:
-    get:
-      tags:
-      - user
-      description: Logs out current logged in user session
-      operationId: UserController.logout
-      responses:
-        "200":
-          description: '{string} logout success'
+          description: '{code: int, msg: string} get unfinished fail'
   /user/wxmp/login:
     get:
       tags:
@@ -220,9 +142,9 @@ paths:
         type: string
       responses:
         "200":
-          description: '{code: string, msg: string, token: string} regist success'
+          description: '{code: int, msg: string, token: string} regist success'
         "403":
-          description: regist fail
+          description: '{code: int, msg: string} regist fail'
 definitions:
   models.Object:
     title: Object
@@ -235,30 +157,13 @@ definitions:
       Score:
         type: integer
         format: int64
-  models.User:
-    title: User
-    type: object
-    properties:
-      AvatarUrl:
-        type: string
-      CreatedTime:
-        type: string
-        format: datetime
-      Id:
-        type: integer
-        format: int64
-      LastUpdatedTime:
-        type: string
-        format: datetime
-      NickName:
-        type: string
-      State:
-        type: integer
-        format: int64
 tags:
 - name: object
   description: |
     Operations about object
 - name: user
+  description: |
+    Operations about Users
+- name: trip
   description: |
     Operations about Users

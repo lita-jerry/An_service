@@ -5,80 +5,17 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"strconv"
-	"time"
+	// "strconv"
+	// "time"
 	"fmt"
 	// MySQL
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	// _ "github.com/go-sql-driver/mysql"
 	// 加密部分
 	"crypto/md5"
     "encoding/hex"
     "crypto/rand"
 )
-
-type DbWorker struct {
-	Dsn      string
-	Db       *sql.DB
-	UserInfo userTB
-}
-
-type userTB struct {
-	Id              int
-	NickName        sql.NullString
-	AvatarUrl       sql.NullString
-	State           sql.NullInt64
-	CreatedTime     time.Time
-	LastUpdatedTime time.Time
-	// Age  sql.NullInt64
-}
-
-type userBindTB struct {
-	Id 				int
-	UserId 			int
-	Platfrom		int
-	OpenId 			string
-	CreatedTime     time.Time
-	LastUpdatedTime time.Time
-}
-
-var (
-	UserList map[string]*User
-	dbw DbWorker
-)
-
-func init() {
-	var err error
-	dbw = DbWorker{
-		Dsn: "root:CKK.930807@tcp(localhost:3306)/an?parseTime=true&charset=utf8mb4",
-	}
-	dbw.Db, err = sql.Open("mysql", dbw.Dsn)
-	if err != nil {
-		panic(err)
-		return
-	}
-	// defer dbw.Db.Close()
-
-	// dbw.queryData()
-
-	// UserList = make(map[string]*User)
-	// u := User{"user_11111", "astaxie", "11111", Profile{"male", 20, "Singapore", "astaxie@gmail.com"}}
-	// UserList["user_11111"] = &u
-}
-
-type User struct {
-	Id       string
-	Username string
-	Password string
-	Profile  Profile
-}
-
-type Profile struct {
-	Gender  string
-	Age     int
-	Address string
-	Email   string
-}
 
 func (dbw *DbWorker) queryDataPre() {
 	dbw.UserInfo = userTB{}
@@ -128,7 +65,7 @@ func (dbw *DbWorker) queryData() {
 	}
 }
 
-func Login(nickname, avatarurl, code string) (token string, err error) {
+func WXMPLogin(nickname, avatarurl, code string) (token string, err error) {
 	openid, sessionkey, err := weappJScode2Session(code)
 	if err != nil {
 		return "", err
@@ -231,65 +168,68 @@ func weappJScode2Session(code string) (openid, session_key string, err error) {
 
 func GetUserWithOpenId(openid string, platform int) (userid int, nickname, avatarurl string, state int, err error) {
 
-	err = dbw.Db.QueryRow(`SELECT user_id From user_bind where platform = ? AND open_id = ?`, platform, openid).Scan(&userid)
+	err = dbw.Db.QueryRow(`SELECT user_id FROM user_bind WHERE platform = ? AND open_id = ?`, platform, openid).Scan(&userid)
 	if err != nil && err != sql.ErrNoRows {
-		fmt.Printf("SELECT user_id From user_bind where platform = %s AND open_id = %s\nErr: %v", platform, openid, err)
+		fmt.Printf("SELECT user_id FROM user_bind WHERE platform = %s AND open_id = %s\nErr: %v", platform, openid, err)
 		return 0, "", "", 0, err
 	}
 	return userid, nickname, avatarurl, state, nil
 }
 
-func AddUser(u User) string {
-	u.Id = "user_" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	UserList[u.Id] = &u
-	return u.Id
-}
-
-func GetUser(uid string) (u *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		return u, nil
+func GetUserWithToken(token string, platform int) (u *userTB, err error) {
+	var userid int
+	err = dbw.Db.QueryRow(`SELECT user_id FROM user_online_state WHERE client_token = ? AND platform = ?`, token, platform).Scan(&userid)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
-	return nil, errors.New("User not exists")
-}
 
-func GetAllUsers() map[string]*User {
-	return UserList
-}
-
-func UpdateUser(uid string, uu *User) (a *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		if uu.Username != "" {
-			u.Username = uu.Username
+	err = dbw.Db.QueryRow(`SELECT * FROM user WHERE id = ?`, userid).Scan(&u.Id, &u.NickName, &u.AvatarUrl, &u.State, &u.CreatedTime, &u.LastUpdatedTime)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
 		}
-		if uu.Password != "" {
-			u.Password = uu.Password
-		}
-		if uu.Profile.Age != 0 {
-			u.Profile.Age = uu.Profile.Age
-		}
-		if uu.Profile.Address != "" {
-			u.Profile.Address = uu.Profile.Address
-		}
-		if uu.Profile.Gender != "" {
-			u.Profile.Gender = uu.Profile.Gender
-		}
-		if uu.Profile.Email != "" {
-			u.Profile.Email = uu.Profile.Email
-		}
-		return u, nil
 	}
-	return nil, errors.New("User Not Exist")
+	return u, nil
 }
 
-// func Login(username, password string) bool {
-// 	for _, u := range UserList {
-// 		if u.Username == username && u.Password == password {
-// 			return true
-// 		}
+// func GetUser(uid string) (u *User, err error) {
+// 	if u, ok := UserList[uid]; ok {
+// 		return u, nil
 // 	}
-// 	return false
+// 	return nil, errors.New("User not exists")
 // }
 
-func DeleteUser(uid string) {
-	delete(UserList, uid)
-}
+// func GetAllUsers() map[string]*User {
+// 	return UserList
+// }
+
+// func UpdateUser(uid string, uu *User) (a *User, err error) {
+// 	if u, ok := UserList[uid]; ok {
+// 		if uu.Username != "" {
+// 			u.Username = uu.Username
+// 		}
+// 		if uu.Password != "" {
+// 			u.Password = uu.Password
+// 		}
+// 		if uu.Profile.Age != 0 {
+// 			u.Profile.Age = uu.Profile.Age
+// 		}
+// 		if uu.Profile.Address != "" {
+// 			u.Profile.Address = uu.Profile.Address
+// 		}
+// 		if uu.Profile.Gender != "" {
+// 			u.Profile.Gender = uu.Profile.Gender
+// 		}
+// 		if uu.Profile.Email != "" {
+// 			u.Profile.Email = uu.Profile.Email
+// 		}
+// 		return u, nil
+// 	}
+// 	return nil, errors.New("User Not Exist")
+// }

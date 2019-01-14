@@ -25,6 +25,11 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
+		beego.NSNamespace("/trip",
+			beego.NSInclude(
+				&controllers.TripController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

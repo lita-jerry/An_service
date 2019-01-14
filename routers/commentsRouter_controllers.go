@@ -52,55 +52,10 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
         beego.ControllerComments{
-            Method: "Post",
-            Router: `/`,
-            AllowHTTPMethods: []string{"post"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
-            Method: "GetAll",
-            Router: `/`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
-            Method: "Get",
-            Router: `/:uid`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
-            Method: "Put",
-            Router: `/:uid`,
-            AllowHTTPMethods: []string{"put"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
-            Method: "Delete",
-            Router: `/:uid`,
-            AllowHTTPMethods: []string{"delete"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
-        beego.ControllerComments{
-            Method: "Logout",
-            Router: `/logout`,
+            Method: "Unfinished",
+            Router: `/unfinished`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
