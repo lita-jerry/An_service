@@ -150,6 +150,32 @@
                 }
             }
         },
+        "/trip/wxmp/create": {
+            "get": {
+                "tags": [
+                    "trip"
+                ],
+                "description": "create a new trip order",
+                "operationId": "TripController.Create",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string, ordernumber: string} get unfinished success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} create new trip order fail"
+                    }
+                }
+            }
+        },
         "/trip/wxmp/unfinished": {
             "get": {
                 "tags": [
