@@ -6,7 +6,8 @@ import (
 	// "io/ioutil"
 	// "net/http"
 	// "strconv"
-	// "time"
+	"crypto/rand"
+	"time"
 	"fmt"
 	// MySQL
 	"database/sql"
@@ -45,17 +46,29 @@ func CreateTrip(token string, platform int) (ordernumber string, err error) {
 		return "", err
 	}
 
-	rs, err := stmt.Exec("789", u.Id)
+	ordernumber = ordernumberGenerator()
+
+	rs, err := stmt.Exec(ordernumber, u.Id)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
 	}
 
 	affect, _ := rs.RowsAffected()
-	fmt.Println(affect)
+	
 	if affect == 0 {
 		return "", errors.New("创建行程失败")
 	}
 	
-	return "789", nil
+	return ordernumber, nil
+}
+
+// 创建行程订单号
+func ordernumberGenerator() string {
+	t := time.Now()
+
+	b := make([]byte, 4)
+	rand.Read(b)
+	
+	return fmt.Sprintf("%s%x", t.Format("20060102150405"), b)
 }
