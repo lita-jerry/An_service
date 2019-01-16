@@ -48,3 +48,42 @@ func (u *UserController) WXMPLogin() {
 	}
 	u.ServeJSON()
 }
+
+// @Title GetFollowState
+// @Description get follow state
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string, isfollow: string} get follow state success
+// @Failure 403 {code: int, msg: string} get follow state fail
+// @router /wxmp/follow/state [get]
+func (u *TripController) GetFollowState() {
+
+	token := u.Ctx.Input.Header("auth-token")
+	if token == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	toUserId := 0
+	toUserId, err := u.GetInt("uid")
+	if err != nil || toUserId == 0 {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "uid is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	}
+
+	isFollow, err := models.GetFollowState(user.Id, 2)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "", "isfollow": isFollow}
+	}
+	u.ServeJSON()
+}

@@ -188,19 +188,57 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 	}
 
 	u = &userTB{}
-	fmt.Println(u)
 	
 	err = dbw.Db.QueryRow(`SELECT * FROM user WHERE id = ?`, userid).Scan(&u.Id, &u.NickName, &u.AvatarUrl, &u.State, &u.CreatedTime, &u.LastUpdatedTime)
 	if err != nil {
-		fmt.Println(err)
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, errors.New("Token无效")
 		} else {
+			fmt.Println(err)
 			return nil, err
 		}
 	}
 	return u, nil
 }
+
+// 关注相关
+
+// func AddFollow(token string, platform, toUserId int) (err error) {
+// 	isFollow, err := GetFollowState(token, platform, toUserId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if isFollow {
+// 		return errors.New("已经关注过了")
+// 	}
+
+// 	toUserIsFromUserFollower, err := GetFollowState()
+
+
+// 	stmt, err := dbw.Db.Prepare("INSERT INTO follow_state(from_user_id, to_user_id, both_status) VALUES(?,?,)")
+// 	return
+// }
+
+// func DeleteFollow(token string, platform, toUserId int) (err error) {
+// 	return
+// }
+
+func GetFollowState(fromUserId, toUserId int) (isFollow bool, err error) {
+	rowId := 0
+	err = dbw.Db.QueryRow(`SELECT id FROM follow_state WHERE from_user_id = ? AND to_user_id = ?`, fromUserId, toUserId).Scan(&rowId)
+	if err != nil && err != sql.ErrNoRows {
+		return false, err
+	}
+	return err != sql.ErrNoRows, nil // 没有数据的话, err一定是sql.ErrNoRows
+}
+
+// func GetAllFollower(token string, platform) (err error) {
+// 	return
+// }
+
+// func GetAllFollowing(token string, platform) (err error) {
+// 	return
+// }
 
 // func GetUser(uid string) (u *User, err error) {
 // 	if u, ok := UserList[uid]; ok {

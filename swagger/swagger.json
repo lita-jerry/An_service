@@ -176,6 +176,32 @@
                 }
             }
         },
+        "/trip/wxmp/follow/state": {
+            "get": {
+                "tags": [
+                    "trip"
+                ],
+                "description": "get follow state",
+                "operationId": "TripController.GetFollowState",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string, isfollow: string} get follow state success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} get follow state fail"
+                    }
+                }
+            }
+        },
         "/trip/wxmp/unfinished": {
             "get": {
                 "tags": [

@@ -32,6 +32,14 @@ type userBindTB struct {
 	LastUpdatedTime time.Time
 }
 
+type followStateTB struct {
+	Id	        int
+	FromUserId  int
+	ToUserId    int
+	BothStatus  bool
+	CreatedTime time.Time
+}
+
 type User struct {
 	Id       string
 	Username string
