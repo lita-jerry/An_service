@@ -203,29 +203,53 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 
 // 关注相关
 
-// func AddFollow(token string, platform, toUserId int) (err error) {
-// 	isFollow, err := GetFollowState(token, platform, toUserId)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if isFollow {
-// 		return errors.New("已经关注过了")
-// 	}
+func AddFollow(fromUserId, toUserId int) (err error) {
+	isFollow, err := GetFollowState(fromUserId, toUserId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if isFollow {
+		return errors.New("已经关注过了")
+	}
 
-// 	toUserIsFromUserFollower, err := GetFollowState()
+	toUserIsFromUserFollower, err := GetFollowState(toUserId, fromUserId)
 
+	Tx, err := dbw.Db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-// 	stmt, err := dbw.Db.Prepare("INSERT INTO follow_state(from_user_id, to_user_id, both_status) VALUES(?,?,)")
-// 	return
-// }
+	_, err = Tx.Exec("INSERT INTO follow_state(from_user_id, to_user_id, both_status) VALUES(?,?,?)", 
+					 fromUserId, toUserId, toUserIsFromUserFollower)
+	if err != nil {
+		fmt.Println(err)
+		Tx.Rollback()
+		return
+	}
+	// 互关
+	if toUserIsFromUserFollower {
+		_, err = Tx.Exec("UPDATE follow_state SET both_status=TRUE WHERE from_user_id=? AND to_user_id=?", 
+						 toUserId, fromUserId)
+		if err != nil {
+			fmt.Println(err)
+			Tx.Rollback()
+			return
+		}
+	}
+	Tx.Commit()
+	return
+}
 
-// func DeleteFollow(token string, platform, toUserId int) (err error) {
-// 	return
-// }
+func DeleteFollow(token string, platform, toUserId int) (err error) {
+	return
+}
 
 func GetFollowState(fromUserId, toUserId int) (isFollow bool, err error) {
 	rowId := 0
-	err = dbw.Db.QueryRow(`SELECT id FROM follow_state WHERE from_user_id = ? AND to_user_id = ?`, fromUserId, toUserId).Scan(&rowId)
+	err = dbw.Db.QueryRow(`SELECT id FROM follow_state WHERE from_user_id = ? AND to_user_id = ?`, 
+						  fromUserId, toUserId).Scan(&rowId)
 	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}

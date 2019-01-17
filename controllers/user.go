@@ -41,10 +41,10 @@ func (u *UserController) WXMPLogin() {
 
 	token, err := models.WXMPLogin(nickname, avatarurl, code)
 
-	if err == nil {
-		u.Data["json"] = map[string]interface{}{"code": 0, "msg": "login success.", "token": token}
-	} else {
+	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "login success.", "token": token}
 	}
 	u.ServeJSON()
 }
@@ -56,7 +56,6 @@ func (u *UserController) WXMPLogin() {
 // @Failure 403 {code: int, msg: string} get follow state fail
 // @router /wxmp/follow/state [get]
 func (u *TripController) GetFollowState() {
-
 	token := u.Ctx.Input.Header("auth-token")
 	if token == "" {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -79,11 +78,60 @@ func (u *TripController) GetFollowState() {
 		return
 	}
 
-	isFollow, err := models.GetFollowState(user.Id, 2)
+	isFollow, err := models.GetFollowState(user.Id, toUserId)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	} else {
-		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "", "isfollow": isFollow}
+		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "", "isfollow": isFollow}
+	}
+	u.ServeJSON()
+}
+
+// @Title AddFollow
+// @Description add follow
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string} add follow success
+// @Failure 403 {code: int, msg: string} add follow fail
+// @router /wxmp/follow/add [get]
+func (u *TripController) AddFollow() {
+	token := u.Ctx.Input.Header("auth-token")
+	if token == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	toUserId := 0
+	toUserId, err := u.GetInt("uid")
+	if err != nil || toUserId == 0 {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "uid is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	}
+
+	isFollow, err := models.GetFollowState(user.Id, toUserId)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	} else if isFollow {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "已经关注过了"}
+		u.ServeJSON()
+		return
+	}
+	
+	err = models.AddFollow(user.Id, toUserId)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "已关注"}
 	}
 	u.ServeJSON()
 }

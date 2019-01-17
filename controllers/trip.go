@@ -26,7 +26,14 @@ func (t *TripController) Unfinished() {
 		return
 	}
 
-	ordernumber, err := models.GetUnfinishedTrip(token, 1)
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		t.ServeJSON()
+		return
+	}
+
+	ordernumber, err := models.GetUnfinishedTrip(user.Id)
 
 	if err == nil {
 		t.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
@@ -51,7 +58,14 @@ func (t *TripController) Create() {
 		return
 	}
 
-	ordernumber, err := models.GetUnfinishedTrip(token, 1)
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		t.ServeJSON()
+		return
+	}
+
+	ordernumber, err := models.GetUnfinishedTrip(user.Id)
 	if err != nil {
 		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 		t.ServeJSON()
@@ -62,7 +76,7 @@ func (t *TripController) Create() {
 		return
 	}
 
-	ordernumber, err = models.CreateTrip(token, 1)
+	ordernumber, err = models.CreateTrip(user.Id)
 
 	if err == nil {
 		t.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}

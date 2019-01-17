@@ -118,6 +118,23 @@ paths:
             success'
         "403":
           description: '{code: int, msg: string} create new trip order fail'
+  /trip/wxmp/follow/add:
+    get:
+      tags:
+      - trip
+      description: add follow
+      operationId: TripController.AddFollow
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{code: int, msg: string} add follow success'
+        "403":
+          description: '{code: int, msg: string} add follow fail'
   /trip/wxmp/follow/state:
     get:
       tags:

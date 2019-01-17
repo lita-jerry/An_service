@@ -17,29 +17,15 @@ import (
 func init() {
 }
 
-func GetUnfinishedTrip(token string, platform int) (ordernumber string, err error) {
-	u, err := GetUserWithToken(token, platform)
-	if err != nil {
-		return "", err
-	} else if u == nil {
-		return "", errors.New("无此用户")
-	}
-
-	err = dbw.Db.QueryRow(`SELECT order_number FROM trip WHERE user_id = ? AND state = 1`, u.Id).Scan(&ordernumber)
+func GetUnfinishedTrip(userid int) (ordernumber string, err error) {
+	err = dbw.Db.QueryRow(`SELECT order_number FROM trip WHERE user_id = ? AND state = 1`, userid).Scan(&ordernumber)
 	if err == sql.ErrNoRows {
 		return "", nil
 	}
 	return
 }
 
-func CreateTrip(token string, platform int) (ordernumber string, err error) {
-	u, err := GetUserWithToken(token, platform)
-	if err != nil {
-		return "", err
-	} else if u == nil {
-		return "", errors.New("无此用户")
-	}
-
+func CreateTrip(userid int) (ordernumber string, err error) {
 	stmt, err := dbw.Db.Prepare("INSERT INTO trip(order_number, user_id, state) VALUES (?, ?, 1)")
 	if err != nil {
 		fmt.Println(err)
@@ -48,7 +34,7 @@ func CreateTrip(token string, platform int) (ordernumber string, err error) {
 
 	ordernumber = ordernumberGenerator()
 
-	rs, err := stmt.Exec(ordernumber, u.Id)
+	rs, err := stmt.Exec(ordernumber, userid)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
