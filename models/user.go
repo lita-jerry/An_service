@@ -260,7 +260,8 @@ func GetFollowState(fromUserId, toUserId int) (isFollow bool, isBoth bool, err e
 	if err != nil && err != sql.ErrNoRows {
 		return false, false, err
 	}
-	return true, isBoth, nil // 没有数据的话, err一定是sql.ErrNoRows
+	isFollow = err != sql.ErrNoRows
+	return isFollow, isBoth, nil
 }
 
 // func GetAllFollower(token string, platform) (err error) {
