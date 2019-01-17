@@ -78,6 +78,12 @@ func (u *TripController) GetFollowState() {
 		return
 	}
 
+	if user.Id == toUserId {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "不能关注自己"}
+		u.ServeJSON()
+		return
+	}
+
 	isFollow, isBoth, err := models.GetFollowState(user.Id, toUserId)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
@@ -112,6 +118,12 @@ func (u *TripController) AddFollow() {
 	user, err := models.GetUserWithToken(token, 1)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	}
+
+	if user.Id == toUserId {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "不能关注自己"}
 		u.ServeJSON()
 		return
 	}
@@ -161,6 +173,12 @@ func (u *TripController) RemoveFollow() {
 	user, err := models.GetUserWithToken(token, 1)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	}
+
+	if user.Id == toUserId {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "不能关注自己"}
 		u.ServeJSON()
 		return
 	}
