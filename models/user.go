@@ -87,7 +87,7 @@ func WXMPLogin(nickname, avatarurl, code string) (token string, err error) {
 			return "", err
 		}
 		// 创建用户
-		stmt, err := dbw.Db.Prepare("INSERT INTO user(nick_name, avatar_url, state) VALUES (?, ?, 1)")
+		rs, err := Tx.Exec("INSERT INTO user(nick_name, avatar_url, state) VALUES (?, ?, 1)",
 							nickname, avatarurl)
 		if err != nil {
 			fmt.Println(err)
