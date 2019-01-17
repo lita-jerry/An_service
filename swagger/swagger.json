@@ -202,6 +202,32 @@
                 }
             }
         },
+        "/trip/wxmp/follow/remove": {
+            "get": {
+                "tags": [
+                    "trip"
+                ],
+                "description": "remove follow",
+                "operationId": "TripController.RemoveFollow",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} remove follow success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} remove follow fail"
+                    }
+                }
+            }
+        },
         "/trip/wxmp/follow/state": {
             "get": {
                 "tags": [

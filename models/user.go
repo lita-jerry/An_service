@@ -196,16 +196,7 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 // 关注相关
 
 func AddFollow(fromUserId, toUserId int) (err error) {
-	isFollow, err := GetFollowState(fromUserId, toUserId)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	if isFollow {
-		return errors.New("已经关注过了")
-	}
-
-	toUserIsFromUserFollower, err := GetFollowState(toUserId, fromUserId)
+	toUserIsFromUserFollower, _, err := GetFollowState(toUserId, fromUserId)
 
 	Tx, err := dbw.Db.Begin()
 	if err != nil {
@@ -234,18 +225,42 @@ func AddFollow(fromUserId, toUserId int) (err error) {
 	return
 }
 
-func DeleteFollow(token string, platform, toUserId int) (err error) {
+func RemoveFollow(fromUserId, toUserId int, isBoth bool) (err error) {
+	Tx, err := dbw.Db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = Tx.Exec("DELETE FROM follow_state WHERE from_user_id=? AND to_user_id=?", 
+					 fromUserId, toUserId)
+	if err != nil {
+		fmt.Println(err)
+		Tx.Rollback()
+		return
+	}
+	// 互关
+	if isBoth {
+		_, err = Tx.Exec("UPDATE follow_state SET both_status=FALSE WHERE from_user_id=? AND to_user_id=?", 
+						 toUserId, fromUserId)
+		if err != nil {
+			fmt.Println(err)
+			Tx.Rollback()
+			return
+		}
+	}
+	Tx.Commit()
 	return
 }
 
-func GetFollowState(fromUserId, toUserId int) (isFollow bool, err error) {
-	rowId := 0
-	err = dbw.Db.QueryRow(`SELECT id FROM follow_state WHERE from_user_id = ? AND to_user_id = ?`, 
-						  fromUserId, toUserId).Scan(&rowId)
+func GetFollowState(fromUserId, toUserId int) (isFollow bool, isBoth bool, err error) {
+	isBoth = false // 是否互关
+	err = dbw.Db.QueryRow(`SELECT both_status FROM follow_state WHERE from_user_id = ? AND to_user_id = ?`, 
+						  fromUserId, toUserId).Scan(&isBoth)
 	if err != nil && err != sql.ErrNoRows {
-		return false, err
+		return false, false, err
 	}
-	return err != sql.ErrNoRows, nil // 没有数据的话, err一定是sql.ErrNoRows
+	return true, isBoth, nil // 没有数据的话, err一定是sql.ErrNoRows
 }
 
 // func GetAllFollower(token string, platform) (err error) {

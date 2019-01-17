@@ -72,6 +72,15 @@ func init() {
 
     beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
         beego.ControllerComments{
+            Method: "RemoveFollow",
+            Router: `/wxmp/follow/remove`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
+        beego.ControllerComments{
             Method: "GetFollowState",
             Router: `/wxmp/follow/state`,
             AllowHTTPMethods: []string{"get"},

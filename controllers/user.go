@@ -78,11 +78,11 @@ func (u *TripController) GetFollowState() {
 		return
 	}
 
-	isFollow, err := models.GetFollowState(user.Id, toUserId)
+	isFollow, isBoth, err := models.GetFollowState(user.Id, toUserId)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	} else {
-		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "", "isfollow": isFollow}
+		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "", "isfollow": isFollow, "isboth": isBoth}
 	}
 	u.ServeJSON()
 }
@@ -116,7 +116,7 @@ func (u *TripController) AddFollow() {
 		return
 	}
 
-	isFollow, err := models.GetFollowState(user.Id, toUserId)
+	isFollow, _, err := models.GetFollowState(user.Id, toUserId)
 	if err != nil {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 		u.ServeJSON()
@@ -132,6 +132,55 @@ func (u *TripController) AddFollow() {
 		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	} else {
 		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "已关注"}
+	}
+	u.ServeJSON()
+}
+
+// @Title RemoveFollow
+// @Description remove follow
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string} remove follow success
+// @Failure 403 {code: int, msg: string} remove follow fail
+// @router /wxmp/follow/remove [get]
+func (u *TripController) RemoveFollow() {
+	token := u.Ctx.Input.Header("auth-token")
+	if token == "" {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	toUserId := 0
+	toUserId, err := u.GetInt("uid")
+	if err != nil || toUserId == 0 {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "uid is nil."}
+		u.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	}
+
+	isFollow, isBoth, err := models.GetFollowState(user.Id, toUserId)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		u.ServeJSON()
+		return
+	} else if !isFollow {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": "还未关注"}
+		u.ServeJSON()
+		return
+	}
+	
+	err = models.RemoveFollow(user.Id, toUserId, isBoth)
+	if err != nil {
+		u.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		u.Data["json"] = map[string]interface{}{"code": 200, "msg": "已取消关注"}
 	}
 	u.ServeJSON()
 }
