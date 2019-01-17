@@ -88,26 +88,18 @@ func WXMPLogin(nickname, avatarurl, code string) (token string, err error) {
 		}
 		// 创建用户
 		stmt, err := dbw.Db.Prepare("INSERT INTO user(nick_name, avatar_url, state) VALUES (?, ?, 1)")
+							nickname, avatarurl)
 		if err != nil {
 			fmt.Println(err)
-			return "", err
-		}
-		rs, err := stmt.Exec(nickname, avatarurl)
-		if err != nil {
-			fmt.Printf("INSERT INTO user(nick_name, avatar_url, state) VALUES (%s, %s, 1)\nErr: %v\n", nickname, avatarurl, err)
 			Tx.Rollback()
 			return "", err
 		}
 		userid, err = rs.LastInsertId()
 		// 绑定平台
-		stmt, err = dbw.Db.Prepare("INSERT INTO user_bind(user_id, platform, open_id) VALUES (?, 1, ?)")
+		_, err = Tx.Exec("INSERT INTO user_bind(user_id, platform, open_id) VALUES (?, 1, ?)",
+						 userid, openid)
 		if err != nil {
 			fmt.Println(err)
-			return "", err
-		}
-		rs, err = stmt.Exec(userid, openid)
-		if err != nil {
-			fmt.Printf("INSERT INTO user_bind(user_id, platform, open_id) VALUES (%s, 1, %s)\nErr: %v\n", userid, openid, err)
 			Tx.Rollback()
 			return "", err
 		}
@@ -140,7 +132,7 @@ func WXMPLogin(nickname, avatarurl, code string) (token string, err error) {
 func weappJScode2Session(code string) (openid, session_key string, err error) {
 	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session" +
 		"?appid=" + "wx22a93273d6c1ea5f" +
-		"&secret=" + "" +
+		"&secret=" + "6512a53d2576e1629117121825f39492" +
 		"&js_code=" + code +
 		"&grant_type=authorization_code")
 	if err != nil {
