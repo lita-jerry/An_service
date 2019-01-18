@@ -263,3 +263,63 @@ func (this *TripController) GetAllFollower() {
 	}
 	this.ServeJSON()
 }
+
+// @Title GetAllFollowing
+// @Description get all following
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string} get all following success
+// @Failure 403 {code: int, msg: string} get all following fail
+// @router /wxmp/follow/following [get]
+func (this *TripController) GetAllFollowing() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	followings, err := models.GetAllFollowing(user.Id)
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+	userIdList := []int{}
+	for _, following := range followings {
+		userIdList = append(userIdList, following.ToUserId)
+	}
+	userList, err := models.GetUserList(userIdList)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	followingsMap := []map[string]interface{}{}
+	for i, following := range followings {
+		if userList[i].Id != following.ToUserId {
+			err = errors.New("Get user list error!")
+			break
+		}
+		followingsMap = append(followingsMap, map[string]interface{}{
+			"userid":    following.Id,
+			"nickname":  userList[i].NickName.String,
+			"avatarurl": userList[i].AvatarUrl.String,
+			"isboth":    following.BothStatus})
+	}
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "获取所有已关注请求成功", "following": followingsMap}
+	}
+	this.ServeJSON()
+}

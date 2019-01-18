@@ -152,6 +152,23 @@ paths:
           description: '{code: int, msg: string} get all follower success'
         "403":
           description: '{code: int, msg: string} get all follower fail'
+  /trip/wxmp/follow/following:
+    get:
+      tags:
+      - trip
+      description: get all following
+      operationId: TripController.GetAllFollowing
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{code: int, msg: string} get all following success'
+        "403":
+          description: '{code: int, msg: string} get all following fail'
   /trip/wxmp/follow/remove:
     get:
       tags:
