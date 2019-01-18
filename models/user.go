@@ -264,9 +264,42 @@ func GetFollowState(fromUserId, toUserId int) (isFollow bool, isBoth bool, err e
 	return isFollow, isBoth, nil
 }
 
-// func GetAllFollower(token string, platform) (err error) {
-// 	return
-// }
+func GetAllFollower(fromUserId int) (followers []followStateTB, err error) {
+	stmt, _ := dbw.Db.Prepare(`SELECT * From follow_state WHERE from_user_id=?`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query(fromUserId)
+	defer rows.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for rows.Next() {
+		follower := followStateTB{}
+		err = rows.Scan(&follower.Id, 
+						&follower.FromUserId, 
+						&follower.ToUserId,
+						&follower.BothStatus,
+						&follower.CreatedTime)
+		if err != nil {
+			fmt.Printf(err.Error())
+			continue
+		}
+		// if !dbw.UserInfo.NickName.Valid {
+		// 	dbw.UserInfo.NickName.String = ""
+		// }
+		// if !dbw.UserInfo.State.Valid {
+		// 	dbw.UserInfo.State.Int64 = 0
+		// }
+		followers = append(followers, follower)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return
+}
 
 // func GetAllFollowing(token string, platform) (err error) {
 // 	return
