@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	// "strconv"
 	// "time"
 	"fmt"
@@ -193,6 +194,51 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 	return u, nil
 }
 
+func GetUserList(uids []int) (userList []userTB, err error) {
+	sqlStr := fmt.Sprintf("SELECT * From user WHERE id IN (%s)", 
+						strings.Trim(strings.Replace(fmt.Sprint(uids), " ", ", ", -1), "[]"))
+	stmt, err := dbw.Db.Prepare(sqlStr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer stmt.Close()
+	
+	
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for rows.Next() {
+		user := userTB{}
+		err = rows.Scan(&user.Id, 
+			&user.NickName, 
+			&user.AvatarUrl,
+			&user.State,
+			&user.CreatedTime,
+			&user.LastUpdatedTime)
+		if err != nil {
+			fmt.Printf(err.Error())
+			continue
+		}
+		if !user.NickName.Valid {
+			user.NickName.String = ""
+		}
+		if !user.AvatarUrl.Valid {
+			user.AvatarUrl.String = ""
+		}
+		userList = append(userList, user)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return
+}
+
 // 关注相关
 
 func AddFollow(fromUserId, toUserId int) (err error) {
@@ -264,11 +310,11 @@ func GetFollowState(fromUserId, toUserId int) (isFollow bool, isBoth bool, err e
 	return isFollow, isBoth, nil
 }
 
-func GetAllFollower(fromUserId int) (followers []followStateTB, err error) {
-	stmt, _ := dbw.Db.Prepare(`SELECT * From follow_state WHERE from_user_id=?`)
+func GetAllFollower(toUserId int) (followers []followStateTB, err error) {
+	stmt, _ := dbw.Db.Prepare(`SELECT * From follow_state WHERE to_user_id=?`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(fromUserId)
+	rows, err := stmt.Query(toUserId)
 	defer rows.Close()
 	if err != nil {
 		fmt.Println(err)

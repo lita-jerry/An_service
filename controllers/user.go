@@ -3,6 +3,7 @@ package controllers
 import (
 	"An_service/models"
 	"github.com/astaxie/beego"
+	"errors"
 )
 
 // Operations about Users
@@ -226,9 +227,33 @@ func (this *TripController) GetAllFollower() {
 
 	followers, err := models.GetAllFollower(user.Id)
 
-	followersMap := []map[string]interface{}{}
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+	userIdList := []int{}
 	for _, follower := range followers {
-		followersMap = append(followersMap, map[string]interface{}{"userid":follower.Id})
+		userIdList = append(userIdList, follower.FromUserId)
+	}
+	userList, err := models.GetUserList(userIdList)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	followersMap := []map[string]interface{}{}
+	for i, follower := range followers {
+		if userList[i].Id != follower.FromUserId {
+			err = errors.New("Get user list error!")
+			break
+		}
+		followersMap = append(followersMap, map[string]interface{}{
+			"userid":    follower.Id,
+			"nickname":  userList[i].NickName.String,
+			"avatarurl": userList[i].AvatarUrl.String,
+			"isboth":    follower.BothStatus})
 	}
 
 	if err != nil {
