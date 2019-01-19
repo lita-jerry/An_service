@@ -17,30 +17,30 @@ type TripController struct {
 // @Success 200 {code: int, msg: string, ordernumber: string} get unfinished success
 // @Failure 403 {code: int, msg: string} get unfinished fail
 // @router /wxmp/unfinished [get]
-func (t *TripController) Unfinished() {
+func (this *TripController) Unfinished() {
 
-	token := t.Ctx.Input.Header("auth-token")
+	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
 		return
 	}
 
 	user, err := models.GetUserWithToken(token, 1)
 	if err != nil {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
 		return
 	}
 
 	ordernumber, err := models.GetUnfinishedTrip(user.Id)
 
 	if err == nil {
-		t.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
+		this.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
 	} else {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
-	t.ServeJSON()
+	this.ServeJSON()
 }
 
 // @Title CreateTrip
@@ -49,41 +49,41 @@ func (t *TripController) Unfinished() {
 // @Success 200 {code: int, msg: string, ordernumber: string} get unfinished success
 // @Failure 403 {code: int, msg: string} create new trip order fail
 // @router /wxmp/create [get]
-func (t *TripController) Create() {
+func (this *TripController) Create() {
 
-	token := t.Ctx.Input.Header("auth-token")
+	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
 		return
 	}
 
 	user, err := models.GetUserWithToken(token, 1)
 	if err != nil {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
 		return
 	}
 
 	ordernumber, err := models.GetUnfinishedTrip(user.Id)
 	if err != nil {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
 		return
 	} else if ordernumber != "" {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": "has unfinished trip"}
-		t.ServeJSON()
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "has unfinished trip"}
+		this.ServeJSON()
 		return
 	}
 
 	ordernumber, err = models.CreateTrip(user.Id)
 
 	if err == nil {
-		t.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
+		this.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
 	} else {
-		t.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
-	t.ServeJSON()
+	this.ServeJSON()
 }
 
 // @Title StopTrip
