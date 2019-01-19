@@ -49,6 +49,20 @@ func CreateTrip(userid int) (ordernumber string, err error) {
 	return ordernumber, nil
 }
 
+func StopTrip(userid int, ordernumber string) (err error) {
+	rs, err := dbw.Db.Exec("UPDATE trip SET state=2 WHERE order_number=? AND user_id=? AND state!= 2", ordernumber, userid)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	affect, _ := rs.RowsAffected()
+	
+	if affect == 0 {
+		return errors.New("结束行程失败")
+	}
+	return nil
+}
+
 // 创建行程订单号
 func ordernumberGenerator() string {
 	t := time.Now()

@@ -105,7 +105,7 @@ paths:
       tags:
       - trip
       description: create a new trip order
-      operationId: TripController.Create
+      operationId: TripController.CreateTrip
       parameters:
       - in: query
         name: Headers{auth-token}
@@ -204,6 +204,23 @@ paths:
             success'
         "403":
           description: '{code: int, msg: string} get follow state fail'
+  /trip/wxmp/stop:
+    get:
+      tags:
+      - trip
+      description: stop a trip order
+      operationId: TripController.StopTrip
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{code: int, msg: string} stop a trip order success'
+        "403":
+          description: '{code: int, msg: string} stop a trip order fail'
   /trip/wxmp/unfinished:
     get:
       tags:
