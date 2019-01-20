@@ -40,6 +40,24 @@ type followStateTB struct {
 	CreatedTime time.Time
 }
 
+type tripTB struct {
+	Id				int
+	OrderNumber 	string
+	UserId			int
+	State			int
+	CreatedTime     time.Time
+	LastUpdatedTime time.Time
+}
+
+type tripPolylineTB struct {
+	Id				int
+	OrderNumber		string
+	Longitude		string
+	Latitude		string
+	Remark			sql.NullString
+	CreatedTime     time.Time
+}
+
 type User struct {
 	Id       string
 	Username string

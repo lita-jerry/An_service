@@ -306,6 +306,39 @@
                 }
             }
         },
+        "/trip/wxmp/info": {
+            "get": {
+                "tags": [
+                    "trip"
+                ],
+                "description": "get a trip info (last updated location)",
+                "operationId": "TripController.GetTripInfo",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordernumber",
+                        "description": "The trip's ordernumber",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} get trip's info success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} get trip's info fail"
+                    }
+                }
+            }
+        },
         "/trip/wxmp/stop": {
             "get": {
                 "tags": [
@@ -318,6 +351,13 @@
                         "in": "query",
                         "name": "Headers{auth-token}",
                         "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordernumber",
+                        "description": "The trip's ordernumber",
                         "required": true,
                         "type": "string"
                     }

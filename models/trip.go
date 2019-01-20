@@ -72,3 +72,29 @@ func ordernumberGenerator() string {
 	
 	return fmt.Sprintf("%s%x", t.Format("20060102150405"), b)
 }
+
+func GetTripInfo(ordernumber string) (trip *tripTB, err error) {
+	trip = &tripTB{}
+	err = dbw.Db.QueryRow(`SELECT * FROM trip WHERE order_number=?`, ordernumber).Scan(&trip.Id, &trip.OrderNumber, &trip.UserId, &trip.State, &trip.CreatedTime, &trip.LastUpdatedTime)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("无数据")
+		} else {
+			return nil, err
+		}
+	}
+	return
+}
+
+func GetTripLastUpdatedLocation(ordernumber string) (location *tripPolylineTB, err error) {
+	location = &tripPolylineTB{}
+	err = dbw.Db.QueryRow(`SELECT * FROM trip_polyline WHERE order_number=? ORDER BY created_time DESC LIMIT 1`, ordernumber).Scan(&location.Id, &location.OrderNumber, &location.Longitude, &location.Latitude, &location.Remark, &location.CreatedTime)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("无数据")
+		} else {
+			return nil, err
+		}
+	}
+	return
+}

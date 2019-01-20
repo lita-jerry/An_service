@@ -36,7 +36,7 @@ func (this *TripController) Unfinished() {
 	ordernumber, err := models.GetUnfinishedTrip(user.Id)
 
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
@@ -79,7 +79,7 @@ func (this *TripController) Create() {
 	ordernumber, err = models.CreateTrip(user.Id)
 
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 0, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get unfinished trip success.", "ordernumber": ordernumber}
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
@@ -89,6 +89,7 @@ func (this *TripController) Create() {
 // @Title StopTrip
 // @Description stop a trip order
 // @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Param	ordernumber		query 	string	true		"The trip's ordernumber"
 // @Success 200 {code: int, msg: string} stop a trip order success
 // @Failure 403 {code: int, msg: string} stop a trip order fail
 // @router /wxmp/stop [get]
@@ -118,7 +119,54 @@ func (this *TripController) Stop() {
 	err = models.StopTrip(user.Id, ordernumber)
 
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 0, "msg": "stop trip success."}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "stop trip success."}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	}
+	this.ServeJSON()
+}
+
+// @Title GetTripInfo
+// @Description get a trip info (last updated location)
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Param	ordernumber		query 	string	true		"The trip's ordernumber"
+// @Success 200 {code: int, msg: string} get trip's info success
+// @Failure 403 {code: int, msg: string} get trip's info fail
+// @router /wxmp/info [get]
+func (this *TripController) Info() {
+
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	ordernumber := this.GetString("ordernumber")
+	if ordernumber == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "ordernumber is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	_, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	trip, err := models.GetTripInfo(ordernumber)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	location, err := models.GetTripLastUpdatedLocation(ordernumber)
+
+	if err == nil {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}}
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	}
