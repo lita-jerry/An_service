@@ -4,6 +4,7 @@ import (
 	"An_service/models"
 	// "encoding/json"
 	"github.com/astaxie/beego"
+	// "errors"
 )
 
 // Operations about Users
@@ -283,6 +284,78 @@ func (this *TripController) GetAllFinishedTrip() {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "获取行程路线成功", "data": finishedMap}
+	}
+	this.ServeJSON()
+}
+
+// @Title UpdateCurrentLocation
+// @Description update current location
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Param	ordernumber		query 	string	true 	"The trip ordernumber"
+// @Param	longitude		query 	string	true 	"Longitude of current location"
+// @Param	latitude		query 	string	true 	"Latitude  of current location"
+// @Success 200 {code: int, msg: string} updated current location success
+// @Failure 403 {code: int, msg: string} updated current location fail
+// @router /wxmp/update [get]
+func (this *TripController) UpdateCurrentLocation() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	ordernumber := this.GetString("ordernumber")
+	if ordernumber == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "ordernumber is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	longitude := this.GetString("longitude")
+	if longitude == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "longitude is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	latitude := this.GetString("latitude")
+	if latitude == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "latitude is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	trip, err := models.GetTripInfo(ordernumber)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+	if user.Id != trip.UserId {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "您无权限操作该行程"}
+		this.ServeJSON()
+		return
+	}
+	if trip.State == 2 {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "该行程已结束"}
+		this.ServeJSON()
+		return
+	}
+
+	err = models.UpdateCurrentLocation(ordernumber, longitude, latitude, "")
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "updated current location success"}
 	}
 	this.ServeJSON()
 }

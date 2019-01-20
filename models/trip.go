@@ -165,3 +165,24 @@ func GetFinishedTrip(userid int) (finished []tripTB, err error) {
 	}
 	return
 }
+
+func UpdateCurrentLocation(ordernumber, longitude, latitude, remark string) (err error) {
+	stmt, err := dbw.Db.Prepare("INSERT INTO trip_polyline(order_number, longitude, latitude, remark) VALUES (?,?,?,?)")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	rs, err := stmt.Exec(ordernumber, longitude, latitude, remark)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	affect, _ := rs.RowsAffected()
+	
+	if affect == 0 {
+		err = errors.New("上次位置失败")
+	}
+	return
+}

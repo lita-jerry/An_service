@@ -151,6 +151,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
+        beego.ControllerComments{
+            Method: "UpdateCurrentLocation",
+            Router: `/wxmp/update`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
         beego.ControllerComments{
             Method: "WXMPLogin",
