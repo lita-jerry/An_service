@@ -277,6 +277,28 @@ paths:
           description: '{code: int, msg: string} get trip polyline success'
         "403":
           description: '{code: int, msg: string} get trip polyline fail'
+  /trip/wxmp/sos:
+    get:
+      tags:
+      - trip
+      description: send for SOS
+      operationId: TripController.SendForSOS
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      - in: query
+        name: ordernumber
+        description: The trip ordernumber
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{code: int, msg: string} send for SOS success'
+        "403":
+          description: '{code: int, msg: string} send for SOS fail'
   /trip/wxmp/stop:
     get:
       tags:

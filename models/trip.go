@@ -186,3 +186,18 @@ func UpdateCurrentLocation(ordernumber, longitude, latitude, remark string) (err
 	}
 	return
 }
+
+func SendForSOS(ordernumber string) (err error) {
+	// 这里没想好具体怎么操作, 只能先更改行程状态
+	rs, err := dbw.Db.Exec("UPDATE trip SET state=3 WHERE order_number=? AND state!= 2", ordernumber)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	affect, _ := rs.RowsAffected()
+	
+	if affect == 0 {
+		return errors.New("行程状态变更失败")
+	}
+	return nil
+}

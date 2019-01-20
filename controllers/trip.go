@@ -359,3 +359,59 @@ func (this *TripController) UpdateCurrentLocation() {
 	}
 	this.ServeJSON()
 }
+
+// @Title SendForSOS
+// @Description send for SOS
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Param	ordernumber		query 	string	true 	"The trip ordernumber"
+// @Success 200 {code: int, msg: string} send for SOS success
+// @Failure 403 {code: int, msg: string} send for SOS fail
+// @router /wxmp/sos [get]
+func (this *TripController) SendForSOS() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	ordernumber := this.GetString("ordernumber")
+	if ordernumber == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "ordernumber is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	trip, err := models.GetTripInfo(ordernumber)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+	if user.Id != trip.UserId {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "您无权限操作该行程"}
+		this.ServeJSON()
+		return
+	}
+	if trip.State == 2 {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "该行程已结束"}
+		this.ServeJSON()
+		return
+	}
+
+	err = models.SendForSOS(ordernumber)
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "send for SOS success"}
+	}
+	this.ServeJSON()
+}
