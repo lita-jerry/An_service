@@ -226,6 +226,40 @@ paths:
           description: '{code: int, msg: string} get trip''s info success'
         "403":
           description: '{code: int, msg: string} get trip''s info fail'
+  /trip/wxmp/polyline:
+    get:
+      tags:
+      - trip
+      description: get trip polyline
+      operationId: TripController.GetTripPolyline
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      - in: query
+        name: ordernumber
+        description: The trip ordernumber
+        required: true
+        type: string
+      - in: query
+        name: pageno
+        description: Get the page of No.
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: pagesize
+        description: Get the page of size
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: '{code: int, msg: string} get trip polyline success'
+        "403":
+          description: '{code: int, msg: string} get trip polyline fail'
   /trip/wxmp/stop:
     get:
       tags:

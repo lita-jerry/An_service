@@ -172,3 +172,72 @@ func (this *TripController) Info() {
 	}
 	this.ServeJSON()
 }
+
+// @Title GetTripPolyline
+// @Description get trip polyline
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Param	ordernumber		query 	string	true 	"The trip ordernumber"
+// @Param	pageno 			query 	int		true 	"Get the page of No."
+// @Param	pagesize 		query 	int		true 	"Get the page of size"
+// @Success 200 {code: int, msg: string} get trip polyline success
+// @Failure 403 {code: int, msg: string} get trip polyline fail
+// @router /wxmp/polyline [get]
+func (this *TripController) GetTripPolyline() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	ordernumber := this.GetString("ordernumber")
+	if ordernumber == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "ordernumber is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	pageno, err := this.GetInt("pageno")
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "pageno is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	pagesize, err := this.GetInt("pagesize")
+	if err != nil || pagesize == 0 {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "pagesize is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	_, err = models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	polyline, err := models.GetTripPolyline(ordernumber, pageno, pagesize)
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	polylineMap := []map[string]interface{}{}
+	for _, location := range polyline {
+		polylineMap = append(polylineMap, map[string]interface{}{
+			"longitude": location.Longitude,
+			"latitude": location.Latitude,
+			"time": location.CreatedTime})
+	}
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "获取行程路线成功", "polyline": polylineMap}
+	}
+	this.ServeJSON()
+}

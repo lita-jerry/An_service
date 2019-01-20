@@ -98,3 +98,42 @@ func GetTripLastUpdatedLocation(ordernumber string) (location *tripPolylineTB, e
 	}
 	return
 }
+
+func GetTripPolyline(ordernumber string, pageNo, pageSize int) (polyline []tripPolylineTB, err error) {
+	stmt, _ := dbw.Db.Prepare(`SELECT * From trip_polyline WHERE order_number=? LIMIT ?,?`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query(ordernumber, pageNo*pageSize, pageSize)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		location := tripPolylineTB{}
+		err = rows.Scan(&location.Id, 
+						&location.OrderNumber, 
+						&location.Longitude, 
+						&location.Latitude, 
+						&location.Remark, 
+						&location.CreatedTime)
+		if err != nil {
+			fmt.Printf(err.Error())
+			continue
+		}
+		if !location.Remark.Valid {
+			location.Remark.String = ""
+		}
+		polyline = append(polyline, location)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return
+}
+
+// func GetFinishedTrip(userid int) (finished []tripTB, err error) {
+
+// }
