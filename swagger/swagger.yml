@@ -118,6 +118,23 @@ paths:
             success'
         "403":
           description: '{code: int, msg: string} create new trip order fail'
+  /trip/wxmp/finished:
+    get:
+      tags:
+      - trip
+      description: get all finished trip
+      operationId: TripController.GetAllFinishedTrip
+      parameters:
+      - in: query
+        name: Headers{auth-token}
+        description: The user login token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{code: int, msg: string} get all finished trip success'
+        "403":
+          description: '{code: int, msg: string} get all finished trip fail'
   /trip/wxmp/follow/add:
     get:
       tags:

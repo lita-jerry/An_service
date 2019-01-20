@@ -134,6 +134,34 @@ func GetTripPolyline(ordernumber string, pageNo, pageSize int) (polyline []tripP
 	return
 }
 
-// func GetFinishedTrip(userid int) (finished []tripTB, err error) {
+func GetFinishedTrip(userid int) (finished []tripTB, err error) {
+	stmt, _ := dbw.Db.Prepare(`SELECT * From trip WHERE user_id=?`)
+	defer stmt.Close()
 
-// }
+	rows, err := stmt.Query(userid)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		trip := tripTB{}
+		err = rows.Scan(&trip.Id, 
+						&trip.OrderNumber, 
+						&trip.UserId, 
+						&trip.State, 
+						&trip.CreatedTime, 
+						&trip.LastUpdatedTime)
+		if err != nil {
+			fmt.Printf(err.Error())
+			continue
+		}
+		finished = append(finished, trip)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return
+}

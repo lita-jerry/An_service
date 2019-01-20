@@ -241,3 +241,48 @@ func (this *TripController) GetTripPolyline() {
 	}
 	this.ServeJSON()
 }
+
+// @Title GetAllFinishedTrip
+// @Description get all finished trip
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string} get all finished trip success
+// @Failure 403 {code: int, msg: string} get all finished trip fail
+// @router /wxmp/finished [get]
+func (this *TripController) GetAllFinishedTrip() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	user, err := models.GetUserWithToken(token, 1)
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	finished, err := models.GetFinishedTrip(user.Id)
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.ServeJSON()
+		return
+	}
+
+	finishedMap := []map[string]interface{}{}
+	for _, trip := range finished {
+		finishedMap = append(finishedMap, map[string]interface{}{
+			"ordernumber": trip.OrderNumber,
+			"ctime": trip.CreatedTime,
+			"stime": trip.LastUpdatedTime})
+	}
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "获取行程路线成功", "data": finishedMap}
+	}
+	this.ServeJSON()
+}
