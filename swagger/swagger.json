@@ -202,136 +202,6 @@
                 }
             }
         },
-        "/trip/wxmp/follow/add": {
-            "get": {
-                "tags": [
-                    "trip"
-                ],
-                "description": "add follow",
-                "operationId": "TripController.AddFollow",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "Headers{auth-token}",
-                        "description": "The user login token",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{code: int, msg: string} add follow success"
-                    },
-                    "403": {
-                        "description": "{code: int, msg: string} add follow fail"
-                    }
-                }
-            }
-        },
-        "/trip/wxmp/follow/follower": {
-            "get": {
-                "tags": [
-                    "trip"
-                ],
-                "description": "get all follower",
-                "operationId": "TripController.GetAllFollower",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "Headers{auth-token}",
-                        "description": "The user login token",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{code: int, msg: string} get all follower success"
-                    },
-                    "403": {
-                        "description": "{code: int, msg: string} get all follower fail"
-                    }
-                }
-            }
-        },
-        "/trip/wxmp/follow/following": {
-            "get": {
-                "tags": [
-                    "trip"
-                ],
-                "description": "get all following",
-                "operationId": "TripController.GetAllFollowing",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "Headers{auth-token}",
-                        "description": "The user login token",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{code: int, msg: string} get all following success"
-                    },
-                    "403": {
-                        "description": "{code: int, msg: string} get all following fail"
-                    }
-                }
-            }
-        },
-        "/trip/wxmp/follow/remove": {
-            "get": {
-                "tags": [
-                    "trip"
-                ],
-                "description": "remove follow",
-                "operationId": "TripController.RemoveFollow",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "Headers{auth-token}",
-                        "description": "The user login token",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{code: int, msg: string} remove follow success"
-                    },
-                    "403": {
-                        "description": "{code: int, msg: string} remove follow fail"
-                    }
-                }
-            }
-        },
-        "/trip/wxmp/follow/state": {
-            "get": {
-                "tags": [
-                    "trip"
-                ],
-                "description": "get follow state",
-                "operationId": "TripController.GetFollowState",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "Headers{auth-token}",
-                        "description": "The user login token",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{code: int, msg: string, isfollow: string} get follow state success"
-                    },
-                    "403": {
-                        "description": "{code: int, msg: string} get follow state fail"
-                    }
-                }
-            }
-        },
         "/trip/wxmp/info": {
             "get": {
                 "tags": [
@@ -549,6 +419,162 @@
                     },
                     "403": {
                         "description": "{code: int, msg: string} updated current location fail"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/check": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "check login token",
+                "operationId": "UserController.CheckLoginToken",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} login token is effective"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} login token is not effective"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/follow/add": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "add follow",
+                "operationId": "UserController.AddFollow",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} add follow success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} add follow fail"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/follow/follower": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "get all follower",
+                "operationId": "UserController.GetAllFollower",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} get all follower success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} get all follower fail"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/follow/following": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "get all following",
+                "operationId": "UserController.GetAllFollowing",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} get all following success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} get all following fail"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/follow/remove": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "remove follow",
+                "operationId": "UserController.RemoveFollow",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string} remove follow success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} remove follow fail"
+                    }
+                }
+            }
+        },
+        "/user/wxmp/follow/state": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "get follow state",
+                "operationId": "UserController.GetFollowState",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Headers{auth-token}",
+                        "description": "The user login token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{code: int, msg: string, isfollow: string} get follow state success"
+                    },
+                    "403": {
+                        "description": "{code: int, msg: string} get follow state fail"
                     }
                 }
             }

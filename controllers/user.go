@@ -56,7 +56,7 @@ func (this *UserController) WXMPLogin() {
 // @Success 200 {code: int, msg: string, isfollow: string} get follow state success
 // @Failure 403 {code: int, msg: string} get follow state fail
 // @router /wxmp/follow/state [get]
-func (this *TripController) GetFollowState() {
+func (this *UserController) GetFollowState() {
 	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -100,7 +100,7 @@ func (this *TripController) GetFollowState() {
 // @Success 200 {code: int, msg: string} add follow success
 // @Failure 403 {code: int, msg: string} add follow fail
 // @router /wxmp/follow/add [get]
-func (this *TripController) AddFollow() {
+func (this *UserController) AddFollow() {
 	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -155,7 +155,7 @@ func (this *TripController) AddFollow() {
 // @Success 200 {code: int, msg: string} remove follow success
 // @Failure 403 {code: int, msg: string} remove follow fail
 // @router /wxmp/follow/remove [get]
-func (this *TripController) RemoveFollow() {
+func (this *UserController) RemoveFollow() {
 	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -210,7 +210,7 @@ func (this *TripController) RemoveFollow() {
 // @Success 200 {code: int, msg: string} get all follower success
 // @Failure 403 {code: int, msg: string} get all follower fail
 // @router /wxmp/follow/follower [get]
-func (this *TripController) GetAllFollower() {
+func (this *UserController) GetAllFollower() {
 	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -270,7 +270,7 @@ func (this *TripController) GetAllFollower() {
 // @Success 200 {code: int, msg: string} get all following success
 // @Failure 403 {code: int, msg: string} get all following fail
 // @router /wxmp/follow/following [get]
-func (this *TripController) GetAllFollowing() {
+func (this *UserController) GetAllFollowing() {
 	token := this.Ctx.Input.Header("auth-token")
 	if token == "" {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
@@ -320,6 +320,30 @@ func (this *TripController) GetAllFollowing() {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "获取所有已关注请求成功", "following": followingsMap}
+	}
+	this.ServeJSON()
+}
+
+// @Title CheckLoginToken
+// @Description check login token
+// @Param	Headers{"auth-token"} 	query 	string	true 	"The user login token"
+// @Success 200 {code: int, msg: string} login token is effective
+// @Failure 403 {code: int, msg: string} login token is not effective
+// @router /wxmp/check [get]
+func (this *UserController) CheckLoginToken() {
+	token := this.Ctx.Input.Header("auth-token")
+	if token == "" {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "token is nil."}
+		this.ServeJSON()
+		return
+	}
+
+	_, err := models.GetUserWithToken(token, 1)
+
+	if err != nil {
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "Token有效"}
 	}
 	this.ServeJSON()
 }

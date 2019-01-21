@@ -174,7 +174,7 @@ func GetUserWithToken(token string, platform int) (u *userTB, err error) {
 	err = dbw.Db.QueryRow(`SELECT user_id FROM user_online_state WHERE client_token = ? AND platform = ?`, token, platform).Scan(&userid)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, errors.New("Token无效")
 		} else {
 			return nil, err
 		}

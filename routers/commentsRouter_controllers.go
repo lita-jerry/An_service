@@ -72,51 +72,6 @@ func init() {
 
     beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
         beego.ControllerComments{
-            Method: "AddFollow",
-            Router: `/wxmp/follow/add`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
-        beego.ControllerComments{
-            Method: "GetAllFollower",
-            Router: `/wxmp/follow/follower`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
-        beego.ControllerComments{
-            Method: "GetAllFollowing",
-            Router: `/wxmp/follow/following`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
-        beego.ControllerComments{
-            Method: "RemoveFollow",
-            Router: `/wxmp/follow/remove`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
-        beego.ControllerComments{
-            Method: "GetFollowState",
-            Router: `/wxmp/follow/state`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["An_service/controllers:TripController"] = append(beego.GlobalControllerRouter["An_service/controllers:TripController"],
-        beego.ControllerComments{
             Method: "Info",
             Router: `/wxmp/info`,
             AllowHTTPMethods: []string{"get"},
@@ -164,6 +119,60 @@ func init() {
         beego.ControllerComments{
             Method: "UpdateCurrentLocation",
             Router: `/wxmp/update`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "CheckLoginToken",
+            Router: `/wxmp/check`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "AddFollow",
+            Router: `/wxmp/follow/add`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "GetAllFollower",
+            Router: `/wxmp/follow/follower`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "GetAllFollowing",
+            Router: `/wxmp/follow/following`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "RemoveFollow",
+            Router: `/wxmp/follow/remove`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["An_service/controllers:UserController"] = append(beego.GlobalControllerRouter["An_service/controllers:UserController"],
+        beego.ControllerComments{
+            Method: "GetFollowState",
+            Router: `/wxmp/follow/state`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
