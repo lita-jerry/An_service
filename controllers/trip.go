@@ -169,7 +169,7 @@ func (this *TripController) Info() {
 	if err == nil {
 		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}}
 	} else {
-		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": nil}
 	}
 	this.ServeJSON()
 }

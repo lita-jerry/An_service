@@ -18,7 +18,7 @@ func init() {
 }
 
 func GetUnfinishedTrip(userid int) (ordernumber string, err error) {
-	err = dbw.Db.QueryRow(`SELECT order_number FROM trip WHERE user_id = ? AND state = 1`, userid).Scan(&ordernumber)
+	err = dbw.Db.QueryRow(`SELECT order_number FROM trip WHERE user_id = ? AND (state = 1 OR state=3)`, userid).Scan(&ordernumber)
 	if err == sql.ErrNoRows {
 		return "", nil
 	}
