@@ -150,7 +150,7 @@ func (this *TripController) Info() {
 		return
 	}
 
-	_, err := models.GetUserWithToken(token, 1)
+	user, err := models.GetUserWithToken(token, 1)
 	if err != nil {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 		this.ServeJSON()
@@ -166,10 +166,12 @@ func (this *TripController) Info() {
 
 	location, err := models.GetTripLastUpdatedLocation(ordernumber)
 
+	isCreator := user.Id == trip.UserId
+
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}, "iscreator": isCreator}
 	} else {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": nil}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": nil, "iscreator": isCreator}
 	}
 	this.ServeJSON()
 }
