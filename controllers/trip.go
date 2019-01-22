@@ -169,9 +169,9 @@ func (this *TripController) Info() {
 	isCreator := user.Id == trip.UserId
 
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}, "iscreator": isCreator}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": map[string]interface{}{"time": location.CreatedTime, "longitude": location.Longitude, "latitude": location.Latitude}, "iscreator": isCreator, "creatorid": trip.UserId}
 	} else {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": nil, "iscreator": isCreator}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "get trip info success.", "state": trip.State, "ctime": trip.CreatedTime, "lastlocation": nil, "iscreator": isCreator, "creatorid": trip.UserId}
 	}
 	this.ServeJSON()
 }
