@@ -228,7 +228,7 @@ func (this *UserController) GetAllFollower() {
 	followers, err := models.GetAllFollower(user.Id)
 
 	if len(followers) == 0 {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "没有任何人关注您", "followers": []}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "没有任何人关注您", "followers": []map[string]interface{}{}}
 		this.ServeJSON()
 		return
 	}
@@ -300,7 +300,7 @@ func (this *UserController) GetAllFollowing() {
 	}
 
 	if len(followings) == 0 {
-		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "还没有关注任何人", "following": []}
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "还没有关注任何人", "following": []map[string]interface{}{}}
 		this.ServeJSON()
 		return
 	}
