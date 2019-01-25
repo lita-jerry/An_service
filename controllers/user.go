@@ -227,6 +227,12 @@ func (this *UserController) GetAllFollower() {
 
 	followers, err := models.GetAllFollower(user.Id)
 
+	if len(followers) == 0 {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "没有任何人关注您", "followers": []}
+		this.ServeJSON()
+		return
+	}
+
 	if err != nil {
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error()}
 		this.ServeJSON()
@@ -292,6 +298,13 @@ func (this *UserController) GetAllFollowing() {
 		this.ServeJSON()
 		return
 	}
+
+	if len(followings) == 0 {
+		this.Data["json"] = map[string]interface{}{"code": 200, "msg": "还没有关注任何人", "following": []}
+		this.ServeJSON()
+		return
+	}
+
 	userIdList := []int{}
 	for _, following := range followings {
 		userIdList = append(userIdList, following.ToUserId)
